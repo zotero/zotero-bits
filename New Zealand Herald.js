@@ -37,91 +37,87 @@ function scrape(doc, url){
 	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.url = doc.location.href;
 
-	Zotero.Utilities.HTTP.doGet(newItem.url, function(text) {
-		newItem.title = "No Title Found";
-		newItem.publicationTitle = "New Zealand Herald";
-		newItem.ISSN = "1170-0777";
+	newItem.title = "No Title Found";
+	newItem.publicationTitle = "New Zealand Herald";
+	newItem.ISSN = "1170-0777";
 
-		//Get title of the news via xpath
-		var myXPath = '//h1';
-		var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var headers;
-		var items = new Object();
-		var authorsTemp;
-		var blankCell;
-		var contents;
-		var authorArray = new Array();
+	//Get title of the news via xpath
+	var myXPath = '//h1';
+	var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var headers;
+	var items = new Object();
+	var authorsTemp;
+	var blankCell;
+	var contents;
+	var authorArray = new Array();
 
-		/*
-			//Get authors of the article
-			Remove "By " then replace "and " with ", "
-			Put the string into an array then split the array and loop all authors then push author to Zotero.  Possible with more than 1 author on an article.
-		*/
-		var authorXPath = '//span[@class="credits"]';
-		var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		Zotero.debug("HHH " + authorXPathObject);
-		if (authorXPathObject) {
-			var authorString = authorXPathObject.textContent.replace(/\bBy\W+/g, '');
-			if (authorString.match(/\W\band\W+/g)){
-				authorTemp = authorString.replace(/\W\band\W+/g, ', ');
-				authorArray = authorTemp.split(", ");
-			} else if (!authorString.match(/\W\band\W+/g)){
-				authorArray = authorString;
+	/*
+	 Get authors of the article
+	 Remove "By " then replace "and " with ", "
+
+	 Put the string into an array then split the array and loop all
+     authors then push author to Zotero.  Possible with more than 1 author
+     on an article.
+	*/
+	var authorXPath = '//span[@class="credits"]';
+	var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+
+	if (authorXPathObject) {
+		var authorString = authorXPathObject.textContent.replace(/\bBy\W+/g, '');
+		if (authorString.match(/\W\band\W+/g)){
+			authorTemp = authorString.replace(/\W\band\W+/g, ', ');
+			authorArray = authorTemp.split(", ");
+		} else if (!authorString.match(/\W\band\W+/g)){
+			authorArray = authorString;
+		}
+		if( authorArray instanceof Array ) {
+			for (var i in authorArray){
+				var author;
+				author = authorArray[i];
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 			}
-			if( authorArray instanceof Array ) {
-				for (var i in authorArray){
-					var author;
-					author = authorArray[i];
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-				}
-			} else {
-				if (authorString.match(/\W\bof\W+/g)){
-					authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
-					authorArray = authorTemp;
+		} else {
+			if (authorString.match(/\W\bof\W+/g)){
+				authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
+				authorArray = authorTemp;
 
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(authorTemp, "author"));
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorTemp, "author"));
 
-				}  else {
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(authorArray, "author"));
-				}
+			}  else {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorArray, "author"));
 			}
 		}
+	}
+	//date-Year
+	var dateXPath = '//div[@class="tools"]/span';
+	var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 
-		//date-Year
+	//If the original Xpath1 is equal to Updated then go to XPath2
+	if ((dateXPathObject =="Updated")|| (dateXPathObject =="New")){
+		var dateXPath = '//div[@class="tools"]/span[2]';
+		var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
+		newItem.date = dateXPathObject ;
+	} else { //great found the date just push it to Zotero.
 		var dateXPath = '//div[@class="tools"]/span';
 		var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
+		newItem.date = dateXPathObject ;
+	}
 
-		//If the original Xpath1 is equal to Updated then go to XPath2
-		if ((dateXPathObject =="Updated")|| (dateXPathObject =="New")){
-			var dateXPath = '//div[@class="tools"]/span[2]';
-			var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
-			newItem.date = dateXPathObject ;
-		}
-		else{ //great found the date just push it to Zotero.
-			var dateXPath = '//div[@class="tools"]/span';
-			var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
+	//Get Section of the news
+	var sectionXPath = '//div[@class="sectionHeader"]/span/a[1]';
+	var sectionXPathObject = doc.evaluate(sectionXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	newItem.section = sectionXPathObject;
 
-			newItem.date = dateXPathObject ;
-		}
+	//Get news title
+	headers =myXPathObject;
+	newItem.title = headers;
 
-		//Get Section of the news
-		var sectionXPath = '//div[@class="sectionHeader"]/span/a[1]';
-		var sectionXPathObject = doc.evaluate(sectionXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		newItem.section = sectionXPathObject;
+	newItem.language= articleLanguage;
 
-		//Get news title
-		headers =myXPathObject;
-		newItem.title = headers;
-
-		newItem.language= articleLanguage;
-
-		//grab abstract from meta data
-		var a= "//meta[@name='description']";
-		newItem.abstractNote = doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
-		newItem.complete();
-		Zotero.done();
-
-	}, function() {});
+	//grab abstract from meta data
+	var a= "//meta[@name='description']";
+	newItem.abstractNote = doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	newItem.complete();
 
 	/* These doing nothing but leaving it here just in case
 	associateData (newItem, items, "Language:", "language");
