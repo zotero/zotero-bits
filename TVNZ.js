@@ -1,15 +1,5 @@
-{
-	"translatorID" : "649c2836-a94d-4bbe-8e28-6771f283702f",
-	"label" : "TVNZ",
-	"creator" : "Sopheak Hean (University of Waikato, Faculty of Education, New Zealand)",
-	"target" : "tvnz.co.nz",
-	"minVersion" : "1.0",
-	"maxVersion" : "x.x",
-	"priority" : 100,
-	"inRepository" : "1",
-	"translatorType" : 4,
-	"lastUpdated":"2010-08-03 10:30:20"
-}
+{"translatorID":"649c2836-a94d-4bbe-8e28-6771f283702f","label":"TVNZ","creator":"Sopheak Hean (University of Waikato, Faculty of Education, New Zealand)","target":"tvnz.co.nz","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-04 09:45:22"}
+
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -57,39 +47,50 @@ function scrape(doc, url){
 			newItem.language = "English";
 			
 			var titleXPath = '//h1';
-			var titleXPathObject = doc.evaluate(titleXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			newItem.title = titleXPathObject;
-			newItem.shortTitle = titleXPathObject;
+			var titleXPathObject = doc.evaluate(titleXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (titleXPathObject){
+				var titleXPathString = titleXPathObject.textContent;
+				newItem.title = titleXPathString ;
+				newItem.shortTitle = titleXPathString;
+			}
 			
 			var dateXPath = '//p[@class="time"]';
-			var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\W\bPublished:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
-			newItem.date = dateXPathObject.replace(/^\s*|\s*$/g, '');
-		
+			var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(dateXPathObject){
+				var dateXPathString = dateXPathObject.textContent.replace(/\W\bPublished:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
+				newItem.date = dateXPathString.replace(/^\s*|\s*$/g, '');
+			}
 			//get Author from the article
 			var authorXPath = '//p[@class="source"]';
-			var authorXPathObject = doc.evaluate(authorXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\W\bSource:\W+/g, '');
+			var authorXPathObject = doc.evaluate(authorXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (authorXPathObject){
+				var authorXPathString = authorXPathObject.textContent.replace(/\W\bSource:\W+/g, '');
 			
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject.replace(/\W+/g, '-'), "author"));
-			
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathString.replace(/\W+/g, '-'), "author"));
+			}
 			
 			//get Section of the article
 			var sectionXPath = '//li[@class="selectedLi"]/a/span';
-			var sectionXPathObject = doc.evaluate(sectionXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^s/g, '');
-			var sectionArray = new Array("Rugby", "All Blacks", "Cricket", "League",  "Football", "Netball", "Basketball", "Tennis", "Motor", "Golf", "Other", "Tipping");
-			
-			//loop through the Array and check for condition for section category
-			//var count =0;
-			for (var i=0; i <sectionArray.length; i++){
-				//count = 1;
-				//if there is a match in the loop then replacing the section found with SPORT
-				if(sectionXPathObject == sectionArray[i]){
-					sectionXPathObject = "Sport";
-					newItem.section = sectionXPathObject;
-				} 
-				//if not found then take the value from XPath
-				newItem.section = sectionXPathObject;
-				//count++;
+			var sectionXPathObject = doc.evaluate(sectionXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (sectionXPathObject){
 				
+				var sectionXPathString = sectionXPathObject.textContent.replace(/^s/g, '');
+				var sectionArray = new Array("Rugby", "All Blacks", "Cricket", "League",  "Football", "Netball", "Basketball", "Tennis", "Motor", "Golf", "Other", "Tipping");
+				
+				//loop through the Array and check for condition for section category
+				//var count =0;
+				for (var i=0; i <sectionArray.length; i++){
+					//count = 1;
+					//if there is a match in the loop then replacing the section found with SPORT
+					if(sectionXPathString == sectionArray[i]){
+						sectionXPathString = "Sport";
+						newItem.section = sectionXPathString;
+					} 
+					//if not found then take the value from XPath
+					newItem.section = sectionXPathString;
+					//count++;
+					
+				}
 			}
 			//Also see related news
 			
@@ -102,8 +103,12 @@ function scrape(doc, url){
 			
 			//get Abstract
 			var a= "//meta[@name='description']";
-			var abs= doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
-			newItem.abstractNote = abs;
+			var abs= doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (abs){
+				
+				var abstractString = abs.content;
+				newItem.abstractNote = abstractString;
+			}
 			
 			//closed up NewItem
 			newItem.complete();
@@ -117,44 +122,71 @@ function scrape(doc, url){
 		newItem.language = "English";
 		
 		
-		Zotero.Utilities.HTTP.doGet(newItem.url, function(text) {
+	
 	
 			/* get Title and Running time for video clip */
 			//if meta title exist
-			var metaTitle = /<meta name=\"title\" content=\"([^&]*)/;
+
 			
-			if (text.match(metaTitle)){   //if the array is true then do this
-				var dateXPath = '//p[@class="added"]';
-				var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\W\bAdded:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
-				newItem.date = dateXPathObject.replace(/^\s*|\s*$/g, '');
-				//newItem.date = checkDate;
+		//if the array is true then do this
+		
+			var dateXPath = '//p[@class="added"]';
+			var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			
+			if (dateXPathObject){
+				var dateString = dateXPathObject.textContent.replace(/\W\bAdded:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
+				newItem.date = dateString.replace(/^\s*|\s*$/g, '');
 				
-				var myTitlePath = "//meta[@name='title']";
-				var myTitlePathObject= doc.evaluate(myTitlePath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content.replace(/\b[)]+/g, '');
-				var TitleResult =myTitlePathObject.split(" (");
-				newItem.title = TitleResult[0];
-				var runTime = TitleResult[1];
-				newItem.runningTime = runTime;
-			
-			} 
-			else {
-				//else do this.
+			} else {
+				
 			
 				var dateXPath = '//p[@class="time"]';
 				var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\W\bPublished:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
 				newItem.date = dateXPathObject.replace(/^\s*|\s*$/g, '');
-				//newItem.date = checkDate;
+			
 				
+			}
+			
+			
+			var myTitlePath ='//meta[@name="title"]';
+			var myTitlePathObject= doc.evaluate(myTitlePath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (myTitlePathObject){
+				
+	
+				var titleString= myTitlePathObject.content.replace(/\b[)]+/g, '');
+				var TitleResult= titleString.split(" (");
+				newItem.title = TitleResult[0];
+				var runTime = TitleResult[1];
+				if(TitleResult[1] == undefined) {
+					newItem.runningTime ="";	
+				} else {
+					newItem.runningTime = runTime;
+				}
+			}else{
 				var myPath = '//head/title';
 				var myPathObject = doc.evaluate(myPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(" | ");
 				newItem.title= myPathObject[0];	
 			}
 			
-			//get Author from the article
+			
+			
+				//get Author from the article
 			var authorXPath = '//p[@class="source"]';
-			var authorXPathObject = doc.evaluate(authorXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\W\bSource:\W+/g, '');
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject.replace(/\W+/g, '-'), "author"));
-				
+			var authorXPathObject = doc.evaluate(authorXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (authorXPathObject){
+				var authorString = authorXPathObject.textContent.replace(/\W\bSource:\W+/g, '');
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorString.replace(/\W+/g, '-'), "author"));
+			
+			} else {
+				var keywordsPath = '//meta[@name="keywords"]';
+				var keywordsObject = doc.evaluate(keywordsPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content.replace(/\s+/g, '-').split(",");
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(keywordsObject[0], "author"));
+			}
+			
+			
+			
+			
+		
 			//get Abstract
 			var a= "//meta[@name='description']";
 			var abs= doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
@@ -167,9 +199,9 @@ function scrape(doc, url){
 			//newItem.archiveLocation = sectionPathObject;
 			
 			newItem.complete();
-		}, function() {});
-	}
 	
+	
+	}
 }
 
 
@@ -188,7 +220,6 @@ function doWeb(doc, url){
 	if (detectWeb(doc, url) == "multiple"){
 		var titleXPath = '//div[@class="readItem"]/h4/a';
 		var titles = doc.evaluate(titleXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		//var titles = doc.evaluate('//div[@class="readItem"]/h4/a', doc, nsResolver, XpathResult.ANY_TYPE, null);
 		while (nextTitle = titles.iterateNext()){
 			items[nextTitle.href] = nextTitle.textContent;
 		}
