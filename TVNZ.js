@@ -1,5 +1,15 @@
-{"translatorID":"649c2836-a94d-4bbe-8e28-6771f283702f","label":"TVNZ","creator":"Sopheak Hean (University of Waikato, Faculty of Education, New Zealand)","target":"tvnz.co.nz","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-04 09:45:22"}
-
+{
+	"translatorID" : "649c2836-a94d-4bbe-8e28-6771f283702f",
+	"label" : "TVNZ",
+	"creator" : "Sopheak Hean",
+	"target" : "http://tvnz\\.co\\.nz",
+	"minVersion" : "1.0",
+	"maxVersion" : "",
+	"priority" : 100,
+	"inRepository" : yes,
+	"translatorType" : 4,
+	"lastUpdated":"2010-08-03 10:30:20"
+}
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -29,10 +39,7 @@ function detectWeb(doc, url) {
 		return "webpage";
 		//changed from newspaperArticle to webpage because of the type of broadcasting
 	} 
-
-	
 }
-
 
 function scrape(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
@@ -51,7 +58,6 @@ function scrape(doc, url){
 			if (titleXPathObject){
 				var titleXPathString = titleXPathObject.textContent;
 				newItem.title = titleXPathString ;
-				newItem.shortTitle = titleXPathString;
 			}
 			
 			var dateXPath = '//p[@class="time"]';
@@ -65,7 +71,6 @@ function scrape(doc, url){
 			var authorXPathObject = doc.evaluate(authorXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (authorXPathObject){
 				var authorXPathString = authorXPathObject.textContent.replace(/\W\bSource:\W+/g, '');
-			
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathString.replace(/\W+/g, '-'), "author"));
 			}
 			
@@ -92,20 +97,11 @@ function scrape(doc, url){
 					
 				}
 			}
-			//Also see related news
-			
-			//not sure how to push related links
-			
-			var relatedXpath = "//div[@class='content']/ul";
-			var relatedXpathObject = doc.evaluate(relatedXpath ,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s/g, '');
-			//newItem.seeAlso= relatedXpathObject;
-			//pane.item.related  = relatedXpathObject;
 			
 			//get Abstract
 			var a= "//meta[@name='description']";
 			var abs= doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (abs){
-				
+			if (abs){				
 				var abstractString = abs.content;
 				newItem.abstractNote = abstractString;
 			}
@@ -117,12 +113,8 @@ function scrape(doc, url){
 		var newItem = new Zotero.Item("tvBroadcast");
 		newItem.url = doc.location.href;
 		
-		newItem.title = "No Title Found";
 		newItem.publicationTitle = "TVNZ";
 		newItem.language = "English";
-		
-		
-	
 	
 			/* get Title and Running time for video clip */
 			//if meta title exist
@@ -136,23 +128,16 @@ function scrape(doc, url){
 			if (dateXPathObject){
 				var dateString = dateXPathObject.textContent.replace(/\W\bAdded:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
 				newItem.date = dateString.replace(/^\s*|\s*$/g, '');
-				
 			} else {
-				
-			
 				var dateXPath = '//p[@class="time"]';
 				var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\W\bPublished:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, '');
 				newItem.date = dateXPathObject.replace(/^\s*|\s*$/g, '');
-			
 				
 			}
-			
-			
+
 			var myTitlePath ='//meta[@name="title"]';
 			var myTitlePathObject= doc.evaluate(myTitlePath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (myTitlePathObject){
-				
-	
 				var titleString= myTitlePathObject.content.replace(/\b[)]+/g, '');
 				var TitleResult= titleString.split(" (");
 				newItem.title = TitleResult[0];
@@ -168,9 +153,7 @@ function scrape(doc, url){
 				newItem.title= myPathObject[0];	
 			}
 			
-			
-			
-				//get Author from the article
+			//get Author from the article
 			var authorXPath = '//p[@class="source"]';
 			var authorXPathObject = doc.evaluate(authorXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (authorXPathObject){
@@ -182,10 +165,6 @@ function scrape(doc, url){
 				var keywordsObject = doc.evaluate(keywordsPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content.replace(/\s+/g, '-').split(",");
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(keywordsObject[0], "author"));
 			}
-			
-			
-			
-			
 		
 			//get Abstract
 			var a= "//meta[@name='description']";
@@ -199,12 +178,8 @@ function scrape(doc, url){
 			//newItem.archiveLocation = sectionPathObject;
 			
 			newItem.complete();
-	
-	
 	}
 }
-
-
 
 function doWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
@@ -229,19 +204,14 @@ function doWeb(doc, url){
 		}
 	} else if (detectWeb(doc,url) =="webpage"){
 	articles = [url];
-		
 	}
 	 else if (detectWeb(doc,url) =="tvBroadcast"){
 	articles = [url];
-		
 	}
 	
 	Zotero.debug(articles);
 	//Zotero.Util only works when scrape function is declared	
 	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
 	
-	
-	Zotero.wait();
-	
+	Zotero.wait();	
 }
-
