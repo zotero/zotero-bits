@@ -1,4 +1,15 @@
-{"translatorID":"207f4aad-b604-43ef-a7f5-3e6229aade9f","label":"New Zealand  Herald","creator":"Sopheak Hean (University of Waikato, Faculty of Education, New Zealand)","target":"www.nzherald.co.nz","minVersion":"1.0","maxVersion":"","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-03 10:49:18"}
+{
+	"translatorID" : "207f4aad-b604-43ef-a7f5-3e6229aade9f",
+	"label" : "New Zealand Herald",
+	"creator" : "Sopheak Hean (University of Waikato, Faculty of Education, New Zealand)",
+	"target" : "^http://www\\.nzherald\\.co\\.nz",
+	"minVersion" : "1.0",
+	"maxVersion" : "",
+	"priority" : 100,
+	"inRepository" : "1",
+	"translatorType":4,
+	"lastUpdated":"2010-08-03 10:49:18"
+}
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -6,15 +17,13 @@ function detectWeb(doc, url) {
 	if (prefix == "x" ) return namespace; else return null;
 	} : null;
 
-/* If the address bar has /news in it then it's a newspapers article*/
+/* If the address bar has /news in it then its a newspaper article*/
 
 	if (doc.location.href.indexOf("/search/results.cfm") !=-1){
 		return "multiple";
 	} else if (doc.location.href.indexOf("/news/article.cfm") !=-1){
 		return "newspaperArticle";
 	}
-
-
 }
 
 function associateData (newItem, items, field, zoteroField) {
@@ -22,8 +31,6 @@ function associateData (newItem, items, field, zoteroField) {
 		newItem[zoteroField] = items[field];
 	}
 }
-
-
 
 function scrape(doc, url){
 	var authorTemp;
@@ -37,7 +44,6 @@ function scrape(doc, url){
 	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.url = doc.location.href;
 
-	newItem.title = "No Title Found";
 	newItem.publicationTitle = "New Zealand Herald";
 	newItem.ISSN = "1170-0777";
 
@@ -80,7 +86,6 @@ function scrape(doc, url){
 			if (authorString.match(/\W\bof\W+/g)){
 				authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
 				authorArray = authorTemp;
-
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorTemp, "author"));
 
 			}  else {
@@ -118,13 +123,6 @@ function scrape(doc, url){
 	var a= "//meta[@name='description']";
 	newItem.abstractNote = doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
 	newItem.complete();
-
-	/* These doing nothing but leaving it here just in case
-	associateData (newItem, items, "Language:", "language");
-	associateData (newItem, items, "Section:", "section");
-	associateData (newItem, items, "Abstract:", "abstract");
-	associateData (newItem, items, "Author:", "author");
-	*/
 }
 
 function doWeb(doc, url){
@@ -150,14 +148,7 @@ function doWeb(doc, url){
 	} else {
 		articles = [url];
 	}
-	Zotero.Utilities.HTTP.doPost(articles, "", function(text) {
-		for (var i = 0 ; i < articles.length ; i++) {
-			scrape(articles[i]);
-		}
-	});
-
-	//Zotero.Util only works when scrape function is declared
+	
 	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
-
 	Zotero.wait();
 }
