@@ -2,11 +2,11 @@
 	"translatorID" : "649c2836-a94d-4bbe-8e28-6771f283702f",
 	"label" : "TVNZ",
 	"creator" : "Sopheak Hean",
-	"target" : "http://tvnz\\.co\\.nz",
+	"target" : "^http://tvnz\\.co\\.nz",
 	"minVersion" : "1.0",
 	"maxVersion" : "",
 	"priority" : 100,
-	"inRepository" : yes,
+	"inRepository" : true,
 	"translatorType" : 4,
 	"lastUpdated":"2010-08-03 10:30:20"
 }
@@ -36,8 +36,7 @@ function detectWeb(doc, url) {
 		return "tvBroadcast";
 	} 
 	else if ((doc.location.href.indexOf("news/") !=-1) || (doc.location.href.indexOf("all-blacks/") !=-1) || (doc.location.href.indexOf("up/")!=-1)){
-		return "webpage";
-		//changed from newspaperArticle to webpage because of the type of broadcasting
+		return "newspaperArticle";
 	} 
 }
 
@@ -46,10 +45,9 @@ function scrape(doc, url){
 	var nsResolver = namespace ? function(prefix) {
 	if (prefix == "x" ) return namespace; else return null;
 	} : null;
-		if (detectWeb(doc, url) == "webpage") {
-			var newItem = new Zotero.Item('webpage');
+		if (detectWeb(doc, url) == "newspaperArticle") {
+			var newItem = new Zotero.Item('newspaperArticle');
 			newItem.url = doc.location.href;
-			newItem.title = "No Title Found";
 			newItem.publicationTitle = "TVNZ";
 			newItem.language = "English";
 			
@@ -113,7 +111,7 @@ function scrape(doc, url){
 		var newItem = new Zotero.Item("tvBroadcast");
 		newItem.url = doc.location.href;
 		
-		newItem.publicationTitle = "TVNZ";
+		newItem.network = "TVNZ";
 		newItem.language = "English";
 	
 			/* get Title and Running time for video clip */
