@@ -34,8 +34,6 @@ function doWeb(doc, url) {
 			|| doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
-			throw ("Multiple-item saving from ScienceDirect temporarily disabled due to a site update -- an updated Zotero translator will be available soon");
-			
 			//search page
 			var items = new Object();
 			var xpath;
