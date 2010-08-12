@@ -1,3 +1,16 @@
+{
+        "translatorID":"d210c5a1-73e1-41ad-a3c9-331d5a3ead48",
+        "label":"IGN",
+        "creator":"odie5533",
+        "target":"^http://[^/]*\\.?ign\\.com/",
+        "minVersion":"1.0",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-08-12 16:16:53"
+}
+
 /*
     IGN Translator - Parses IGN articles and creates Zotero-based metadata
     Copyright (C) 2010 odie5533
@@ -16,8 +29,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-{"translatorID":"d210c5a1-73e1-41ad-a3c9-331d5a3ead48","label":"IGN","creator":"odie5533","target":"^http://.*\\.ign\\.com/","minVersion":"1.0","maxVersion":"","priority":100,"inRepository":"0","translatorType":4,"lastUpdated":"2010-08-03 23:40:40"}
-
 function detectWeb(doc, url) {
     if (url.match(/articles/)) {
         return "newspaperArticle";
@@ -29,9 +40,6 @@ function scrape(doc, url) {
 	newItem.publicationTitle = "IGN";
 	newItem.url = doc.location.href;
 	newItem.title = doc.title.replace(/ - [^-]+ at IGN/, "");
-	
-	// attach html
-	newItem.attachments.push({title:"IGN Article Snapshot", mimeType:"text/html", url:doc.location.href, snapshot:true});
 	
 	// pages
 	var pages = doc.evaluate('//div[@class="ui-page-list clear"]/ul/li[last()-1]', doc, null, XPathResult.ANY_TYPE, null);
@@ -48,6 +56,9 @@ function scrape(doc, url) {
 	for each(var a in authors) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
 	}
+	
+	// attach html
+	newItem.attachments.push({title:"IGN Article Snapshot", mimeType:"text/html", url:doc.location.href, snapshot:true});
 	
 	newItem.complete();
 }
