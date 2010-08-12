@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Google Scholar",
 	"creator":"Simon Kornblith, Frank Bennett",
-	"target":"^http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+	"target":"http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
@@ -23,7 +23,7 @@
 //   smith
 //   view of the cathedral
 //
-// "How cited" pages should NOT yield a page or folder icon.  These
+// "How cited" pages should NOT yield a page or folder icon.  The
 // Urls to these currently look like this:
 //
 //   http://scholar.google.co.jp/scholar_case?about=1101424605047973909&q=kelo&hl=en&as_sdt=2002
@@ -35,8 +35,6 @@
 
 // Translator-global var, used by scrapeListing()
 var haveBibTexLinks;
-
-
 
 var detectWeb = function (doc, url) {
 	// Am I a case, a search listing, or something else?
@@ -100,6 +98,13 @@ ItemFactory.prototype.getDate = function () {
 	return this.v.date;
 };
 
+ItemFactory.prototype.hasInitials = function () {
+	if (this.hyphenSplit.length && this.hyphenSplit[0].match(/[A-Z] /)) {
+		return true;
+	}
+	return false;
+}
+
 ItemFactory.prototype.hasUsefulData = function () {
 	if (this.getDate()) {
 		return true;
@@ -107,11 +112,16 @@ ItemFactory.prototype.hasUsefulData = function () {
 	// If no year found in the citelet, this could
 	// be a citation that provides BibTeX without any
 	// useful hints in the citelet (looking at you,
-	// Harvard Law Review). So in this case we have to check
-	// the BibTeX entry for a live title before we can
-	// conclude it will be in some way useful.
-	var res = this.getBibtexData();
-	if (res) {
+	// Harvard Law Review).
+	//
+	// We could check the BibTeX entry directly, but
+	// raising traffic on the GS server can trigger
+	// a lockout of the user.  As a second-best
+	// alternative, we check the first hyphen split
+	// of the citelet for all-caps strings (author
+	// initials), which suggest a non-case, and drop
+	// only items for which none are found.
+	if (this.hasInitials()) {
 		return true;
 	}
 	return false;
@@ -144,8 +154,8 @@ ItemFactory.prototype.getAttachments = function () {
 
 ItemFactory.prototype.getCourt = function () {
 	var s, m;
-	s = this.hyphenSplit.pop().replace(/,\s*/, "").replace(/\u2026\s*$/, "Court");
-	m = s.match(/(?:([a-zA-Z]+):\s*)(.*)/);
+	s = this.hyphenSplit.pop().replace(/,\s*$/, "").replace(/\u2026\s*$/, "Court");
+	m = s.match(/(?:([a-zA-Z]+):\s*)*(.*)/);
 	if (m) {
 		this.v.court = m[2].replace("_", " ", "g");
 		if (m[1]) {
@@ -189,20 +199,6 @@ ItemFactory.prototype.getTitle = function () {
 ItemFactory.prototype.setTitle = function (title) {
 	this.v.title = title;
 }
-
-ItemFactory.prototype.parseCaseCitelet = function () {
-	// citelet looks kind of like this
-	// Powell v. McCormack, 395 US 486 - Supreme Court 1969
-	this.getDate();
-	this.getCourt();
-	this.getVolRepPag();
-	this.getTitle();
-};
-
-ItemFactory.prototype.parseListingCitelet = function () {
-	this.getCourt();
-	this.getVolRepPag();
-};
 
 ItemFactory.prototype.hasReporter = function () {
 	if (this.v.volRepPag.length > 0) {
@@ -261,6 +257,21 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 		}
 	}
 };
+
+ItemFactory.prototype.parseCaseCitelet = function () {
+	// citelet looks kind of like this
+	// Powell v. McCormack, 395 US 486 - Supreme Court 1969
+	this.getDate();
+	this.getCourt();
+	this.getVolRepPag();
+	this.getTitle();
+};
+
+ItemFactory.prototype.parseListingCitelet = function () {
+	this.getCourt();
+	this.getVolRepPag();
+};
+
 
 // Cases are cross-referenced. Need to be able to fetch some kind of
 // metadata out of target pages to take advantage of linked
