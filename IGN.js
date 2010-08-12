@@ -2,7 +2,7 @@
         "translatorID":"d210c5a1-73e1-41ad-a3c9-331d5a3ead48",
         "label":"IGN",
         "creator":"odie5533",
-        "target":"^http://[^/]*\\.?ign\\.com/",
+        "target":"^http://[^/]*\\.ign\\.com/",
         "minVersion":"1.0",
         "maxVersion":"",
         "priority":100,
@@ -31,12 +31,12 @@
 
 function detectWeb(doc, url) {
     if (url.match(/articles/)) {
-        return "newspaperArticle";
+        return "webpage";
     }
 }
 
 function scrape(doc, url) {
-	var newItem = new Zotero.Item("newspaperArticle");
+	var newItem = new Zotero.Item("webpage");
 	newItem.publicationTitle = "IGN";
 	newItem.url = doc.location.href;
 	newItem.title = doc.title.replace(/ - [^-]+ at IGN/, "");
