@@ -1,4 +1,4 @@
-{"translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44","label":"Stuff.co.nz","creator":"Sopheak Hean (University of Waikato, Faculty of Education)","target":"^http://(www.)?stuff.co.nz/","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-12 15:49:58"}
+{"translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44","label":"Stuff.co.nz","creator":"Sopheak Hean (University of Waikato, Faculty of Education)","target":"^http://(www.)?stuff.co.nz/","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-18 12:47:43"}
 
 /* Stuff.co.nz does not have an ISSN because it is not a newspaper publisher. Stuff.co.nz is a collection of newspaper articles from around the country*/
 
@@ -7,58 +7,26 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 	if (prefix == "x" ) return namespace; else return null;
 	} : null;
-
-if ((url.match (/\/national\/blogs\/\bon-the-house\/\d+\/\w+/) ) 
-	 || (url.match (/\/technology\/blogs\/\bgame-junkie\/\d+\/\w+/)) 
-	 || (url.match (/\/technology\/blogs\/[a-zA-Z1-9]+\/\d+/))
-	
-	 || (url.match (/\/sport\/[a-z]+-[a-z]+-[a-z]*\/[a-z]+-[a-z]+\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z]*-[a-zA-Z]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/life-style\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/life-style\/[a-zA-Z0-9]*\/\are-we-there-yet\/\d+\/\w+/))
-	 || (url.match (/\/life-style\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	  ) {
+	var definePath = '//div[@class="blog_content"]';
+	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+if  (XpathObject){
 		return "blogPost";
 	}
 
-	else if ((url.match(/\/national\/\d+\//) ) 
-	|| (url.match(/\/life-style\/[a-zA-Z0-9]*\/\d+\/\w+/g)) 
-	|| (url.match(/\/oddstuff\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*/g))
-	|| (url. match(/\/travel\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*/g))
-	|| (url.match(/\/life-style\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*\/\w+/g))
-	|| (url.match(/\/life-style\/[a-zA-Z0-9]*\/\w+/g)) 
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match(/\/travel\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*/))
-	|| (url.match (/\/national\/crime\/\d+\/\w+/)) 
-	|| (url.match (/\.co.nz\/business\/\d+\/\w+/)) 
-	|| (url.match (/\/national\/education\/\d+\/\w+/)) 
-	|| (url.match (/\/national\/health\/\d+\/\w+/))
-	|| (url.match (/\/national\/politics\/\d+\/\w+/)) 
-	|| (url.match (/\.co.nz\/technology\/\bdigital-living\/\d+\/\w+/))
-	|| (url.match (/\.co.nz\/technology\/\w+\/\d+\/\w+/))
-	|| (url.match (/\.co.nz\/technology\/\d+\/\w+/))
-	|| (url.match (/\.co.nz\/world\/\w+\/\d+\/\w+/)) 
-	|| (url.match (/\/world\/[a-z]+-[a-z]*\/\d+/))
-	|| (url.match (/\/sport\/[a-z]*\/\d+\/[a-zA-Z]*/g))
-	|| (url.match (/\/sport\/[a-z]*\/[a-z]+\/\d+\/[a-zA-Z]*/g)) 
-	|| (url.match (/\/sport\/[a-z]*\/[a-z]+-[a-z]*\/\d+\/[a-zA-Z]*/g))
-	|| (url.match (/\/sport\/[a-z]*\/[a-z]+-[a-z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/sport\/[a-z]*\/[a-zA-Z0-9]*\/[a-zA-Z]*\/\d+\/\w+/g))
-	|| (url.match (/\/business\/[a-z]*\/\d+\/\w+/g))
-	|| (url.match (/\/business\/[a-zA-Z]*-[a-zA-Z]*\/\d+\/\w+/g))
-	|| (url.match(/\/sport\/(([a-zA-Z0-9]*\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*)|([a-zA-Z0-9]*-[a-zA-Z0-9]*)|([a-zA-Z0-9]*))\/(([a-z0-9A-Z]*)|([a-zA-Z0-9]*-[a-zA-Z0-9]*)|([a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*))\/[a-zA-Z0-9]*/g))
-	){
+	else {
+	var definePath = '//div[@class="story_landing"]';
+	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if  (XpathObject){
 		return "newspaperArticle";
 		}
+	}
 
 }
+
+function myUpperCaseFunction(input){
+		/*Will define one later*/
+}
+
 
 function scrape(doc, url) {
 
@@ -67,20 +35,13 @@ function scrape(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	var url = doc.location.href;
-	
+		var splitIntoArray;
+		var fullName="";
+		var emptyString =" ";
+		var firstName; var lastName;
 	/*==========================Blog Post===========================*/
 	
-	if ((url.match (/\/national\/blogs\/\bon-the-house\/\d+\/\w+/) ) 
-	 || (url.match (/\/technology\/blogs\/\bgame-junkie\/\d+\/\w+/)) 
-	 || (url.match (/\/technology\/blogs\/[a-zA-Z1-9]+\/\d+/))
-	 || (url.match (/\/sport\/[a-z]+-[a-z]+-[a-z]*\/[a-z]+-[a-z]+\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z]*-[a-zA-Z]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	 || (url.match (/\/blogs\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	  ) {
-		 
+	if (detectWeb(doc, url) =="blogPost"){
 	
 		var newItem = new Zotero.Item('blogPost');
 		newItem.url = doc.location.href;
@@ -89,25 +50,41 @@ function scrape(doc, url) {
 		newItem.language = "English";
 
 		//Get Author
-		try {
-		var blogAuthor = "//div[@id='left_col']/span";
-		var blogAuthorObject = doc.evaluate(blogAuthor, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (blogAuthorObject) {
-				
-				if (blogAuthorObject.textContent.replace(/\s*/g,'') ==""){
-				newItem.creators =blogAuthorObject.textContent.replace(/\s*/g,'');
-				}
-				
-				else{
-					blogAuthorObject = blogAuthorObject.textContent;
-					if(blogAuthorObject.match(/[\s\n\r\t]+-[\s\n\r\t]+[a-zA-Z\s\n\r\t]*/g)){
-						blogAuthorObject = blogAuthorObject.replace(/([\s\n\r\t]+-[\s\n\r\t]+[a-zA-Z\s\n\r\t]*)/g, '').replace(/\bBy \b/g,'');
-						newItem.creators.push(Zotero.Utilities.cleanAuthor(UCWords(blogAuthorObject), "author"));
+		try { /*Try and Catch if encounter erro */
+		
+			var blogAuthor = "//div[@id='left_col']/span";
+			var blogAuthorObject = doc.evaluate(blogAuthor, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (blogAuthorObject) {
+					
+					if (blogAuthorObject.textContent.replace(/\s*/g,'') ==""){
+					newItem.creators =blogAuthorObject.textContent.replace(/\s*/g,'');
 					}
-			
-				 else { newItem.creators.push(Zotero.Utilities.cleanAuthor(UCWords(blogAuthorObject.replace(/\bBy \b/g,'')), "author"));   }
+					
+					else{
+						blogAuthorObject = blogAuthorObject.textContent;
+						if(blogAuthorObject.match(/[\s\n\r\t]+-[\s\n\r\t]+[a-zA-Z\s\n\r\t]*/g)){
+							blogAuthorObject = blogAuthorObject.replace(/([\s\n\r\t]+-[\s\n\r\t]+[a-zA-Z\s\n\r\t]*)/g, '').replace(/\bBy \b/g,'');
+							splitIntoArray = blogAuthorObject.split (" ");
+							for (var i = 0; i < splitIntoArray.length; i++){
+								firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+								lastName = splitIntoArray[i].substring(1).toLowerCase();
+								fullName += firstName + lastName + emptyString;
+										
+							}
+							newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName , "author"));
+						}
+				
+					 else { 
+						splitIntoArray = blogAuthorObject.replace(/\bBy \b/g,'').split (" ");
+						for (var i = 0; i < splitIntoArray.length; i++){
+							firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+							lastName = splitIntoArray[i].substring(1).toLowerCase();
+							fullName += firstName + lastName + emptyString;
+										
+						}
+					 	newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName , "author"));   }
+					}
 				}
-			}
 		} catch (err) {
 			newItem.creators ="error";
 	
@@ -129,45 +106,9 @@ function scrape(doc, url) {
 	
 	
 	
-	
 	/* ======================Newspaper Article========================*/
 	
-	
-	
-	
-	
-	else  if ((url.match(/\/national\/\d+\//) ) 
-	|| (url.match(/\/life-style\/[a-zA-Z0-9]*\/\d+\/\w+/g)) 
-	|| (url.match(/\/oddstuff\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*/g))
-	|| (url. match(/\/travel\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*/g))
-	|| (url.match(/\/life-style\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*\/\w+/g))
-	|| (url.match(/\/life-style\/[a-zA-Z0-9]*\/\w+/g)) 
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/entertainment\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/travel\/[a-zA-Z0-9]*-[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*/g))
-	|| (url.match (/\/national\/crime\/\d+\/\w+/)) 
-	|| (url.match (/\.co.nz\/business\/\d+\/\w+/)) 
-	|| (url.match (/\/national\/education\/\d+\/\w+/)) 
-	|| (url.match (/\/national\/health\/\d+\/\w+/))
-	|| (url.match (/\/national\/politics\/\d+\/\w+/)) 
-	|| (url.match (/\.co.nz\/technology\/\bdigital-living\/\d+\/\w+/))
-	|| (url.match (/\.co.nz\/technology\/\w+\/\d+\/\w+/))
-	|| (url.match (/\.co.nz\/technology\/\d+\/\w+/))
-	|| (url.match (/\.co.nz\/world\/\w+\/\d+\/\w+/)) 
-	|| (url.match (/\/world\/[a-z]+-[a-z]*\/\d+/))
-	|| (url.match (/\/sport\/[a-z]*\/\d+\/[a-zA-Z]*/g))
-	|| (url.match (/\/sport\/[a-z]*\/[a-z]+\/\d+\/[a-zA-Z]*/g)) 
-	|| (url.match (/\/sport\/[a-z]*\/[a-z]+-[a-z]*\/\d+\/[a-zA-Z]*/g))
-	|| (url.match (/\/sport\/[a-z]*\/[a-z]+-[a-z0-9]*\/\d+\/\w+/g))
-	|| (url.match (/\/sport\/[a-z]*\/[a-zA-Z0-9]*\/[a-zA-Z]*\/\d+\/\w+/g))
-	|| (url.match (/\/business\/[a-z]*\/\d+\/\w+/g))
-	|| (url.match (/\/business\/[a-zA-Z]*-[a-zA-Z]*\/\d+\/\w+/g))
-	|| (url.match(/\/sport\/(([a-zA-Z0-9]*\/[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*)|([a-zA-Z0-9]*-[a-zA-Z0-9]*)|([a-zA-Z0-9]*))\/(([a-z0-9A-Z]*)|([a-zA-Z0-9]*-[a-zA-Z0-9]*)|([a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*))\/[a-zA-Z0-9]*/g))
-	){
+	else  if (detectWeb(doc, url) =="newspaperArticle"){
 	
 		var newItem = new Zotero.Item('newspaperArticle');
 		newItem.url = doc.location.href;
@@ -177,7 +118,7 @@ function scrape(doc, url) {
 		
 		//Short Title
 		newItem.shortTitle = doShortTitle(doc,url);
-		
+	
 		
 		//get Abstract
 		newItem.abstractNote = doAbstract(doc, url);
@@ -200,20 +141,45 @@ function scrape(doc, url) {
 								authorArray = authorString.toLowerCase();
 							}
 						if( authorArray instanceof Array ) {
-							for (var i in authorArray){
-								var author;
-								author = authorArray[i];
+							for (var i in authorArray){			
+							splitIntoArray = authorArray[i].split (" ");
+								for (var i = 0; i < splitIntoArray.length; i++){
+									firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+									lastName = splitIntoArray[i].substring(1).toLowerCase();
+									fullName += firstChar + lastChar + emptyString;
 										
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(UCWords(author), "author"));
+								
 								}
+							newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
+							
+							}
+							
 						} else {
+							
+					
 							if (authorString.match(/\W\bof\W+/g)){
 								authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
-								authorArray = authorTemp;
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(UCWords(authorTemp), "author"));
+								splitIntoArray = authorTemp.split (" ");
+								for (var i = 0; i < splitIntoArray.length; i++){
+											firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+											lastName = splitIntoArray[i].substring(1).toLowerCase();
+											fullName += firstChar + lastChar + emptyString;
+									
+									}
+								newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
+							
 		
 							} else {
-							newItem.creators.push(Zotero.Utilities.cleanAuthor(UCWords(authorArray), "author"));
+								
+								splitIntoArray = authorArray.split (" ");
+								for (var i = 0; i < splitIntoArray.length; i++){	
+									firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+									lastName = splitIntoArray[i].substring(1).toLowerCase();
+									fullName += firstName+ lastName + emptyString;
+										
+									
+								}
+								newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName, "author"));
 							}
 										
 						}
@@ -331,26 +297,6 @@ function scrape(doc, url) {
 		newItem.complete();
 	}
 	
-}
-
-/* 
-This handy UCWords function is taken from 
-http://wiki.eclipse.org/Global_Functions_-_Useful_JavaScript_Functions_%28BIRT%29
-*/
-
-function UCWords(str){
-  var arrStr = str.split(" ");
-  var strOut = "";
-  var i = 0;
-  while (i < arrStr.length) {
-	     firstChar  = arrStr[i].substring(0,1);
-	     remainChar = arrStr[i].substring(1);
-	     firstChar  = firstChar.toUpperCase(); 
-	     remainChar = remainChar.toLowerCase();
-	     strOut += firstChar + remainChar + ' ';
-	     i++;
-  }
-  return strOut.substr(0,strOut.length - 1);
 }
 
 
