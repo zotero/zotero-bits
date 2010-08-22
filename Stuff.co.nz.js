@@ -1,4 +1,22 @@
-{"translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44","label":"Stuff.co.nz","creator":"Sopheak Hean (University of Waikato, Faculty of Education)","target":"^http://(www.)?stuff.co.nz/","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-18 12:47:43"}
+{"translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44","label":"Stuff.co.nz","creator":"Sopheak Hean (University of Waikato, Faculty of Education)","target":"^http://(www.)?stuff.co.nz/","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-23 10:14:40"}
+
+/*
+    Stuff.co.nz Translator- Parses Stuff.co.nz articles and creates Zotero-based metadata
+   Copyright (C) 2010 Sopheak Hean, University of Waikato, Faculty of Education
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /* Stuff.co.nz does not have an ISSN because it is not a newspaper publisher. Stuff.co.nz is a collection of newspaper articles from around the country*/
 
@@ -45,8 +63,8 @@ function scrape(doc, url) {
 	
 		var newItem = new Zotero.Item('blogPost');
 		newItem.url = doc.location.href;
-		newItem.title = "No Title Found";
-		//newItem.publicationTitle = "Stuff.co.nz";
+		//newItem.title = "No Title Found";
+		newItem.publicationTitle = "Stuff.co.nz";
 		newItem.language = "English";
 
 		//Get Author
@@ -101,6 +119,7 @@ function scrape(doc, url) {
 		newItem.date = doDate(doc, url);
 		newItem.abstractNote = doAbstract(doc, url);
 		newItem.websiteType = "Newspaper";
+		newItem.attachments.push({url:url, title:"Stuff.co.nz Snapshot", mimeType:"text/html"});
 		newItem.complete();
 	} 
 	
@@ -112,8 +131,25 @@ function scrape(doc, url) {
 	
 		var newItem = new Zotero.Item('newspaperArticle');
 		newItem.url = doc.location.href;
-		newItem.title = "No Title Found";
-		newItem.publicationTitle = "Stuff.co.nz";
+		//newItem.title = "No Title Found";
+		
+		//Get extended publisher if there is any then replace with stuff.co.nz
+		var myPublisher = '//span[@class="storycredit"]';
+	
+		var myPublisherObject = doc.evaluate(myPublisher , doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (myPublisherObject) {
+			var realPublisher = myPublisherObject.textContent;
+			if (realPublisher.match(/\bBy[\s\n\r\t]+[a-zA-Z\s\r\t\n]*-[\s\n\r\t]*/g)){
+				realPublisher = realPublisher.replace (/\bBy[\s\n\r\t]+[a-zA-Z\s\r\t\n]*-[\s\n\r\t]*/g, '').replace(/^\s*|\s*$/g, '');
+				newItem.publicationTitle = realPublisher;
+			} else {
+				newItem.publicationTitle = "Stuff.co.nz";
+			}
+			
+		} else {
+				newItem.publicationTitle = "Stuff.co.nz";
+		}
+	
 		newItem.language = "English";
 		
 		//Short Title
@@ -123,6 +159,7 @@ function scrape(doc, url) {
 		//get Abstract
 		newItem.abstractNote = doAbstract(doc, url);
 		var authorXPath = '//span[@class="storycredit"]';
+		
 		var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (authorXPathObject){
 			var authorArray = new Array("NZPA", "The Press", "The Dominion Post");
@@ -197,8 +234,7 @@ function scrape(doc, url) {
 		} else{
 			newItem.creators ="";
 		}
-		//newItem.creators = authorXPathObject.textContent.replace(/[\s\n\r\t]+-[\s\n\r\t]+\b[a-zA-Z\s\n\r\t]*/g, '');
-		
+			
 		//Title of the Article
 		newItem.title= doTitle(doc, url);
 		
@@ -292,9 +328,14 @@ function scrape(doc, url) {
 				
 			}
 		}
+		//Snapshot of  the web page.
+		newItem.attachments.push({url:url, title:"Stuff.co.nz Snapshot",
+	 	                          mimeType:"text/html"});
+	 	                          
 		//Call Do date function to make it cleaner in scape. This way things are easier to follow.
 		newItem.date = doDate(doc,url);
 		newItem.complete();
+		
 	}
 	
 }
