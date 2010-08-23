@@ -86,6 +86,7 @@ function doWeb(doc, url)	{
 				items[id.id]=Zotero.Utilities.cleanTags(Zotero.Utilities.cleanString(titlerows.iterateNext().textContent));
 		}
 		items=Zotero.selectItems(items);
+		if (!items) return false;
 		var string="http://eric.ed.gov/ERICWebPortal/MyERIC/clipboard/performExport.jsp?";
 		for(var ids in items)
 			string+="accno="+ids+"&";
