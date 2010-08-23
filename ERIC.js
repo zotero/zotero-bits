@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-08-23 07:15:20"
+        "lastUpdated":"2010-08-23 07:23:41"
 }
 
 function detectWeb(doc, url)	{
@@ -22,6 +22,9 @@ function detectWeb(doc, url)	{
 		return "multiple";
 	// Clipboard
 	if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/))
+		return "multiple";	
+	// folder
+	if(url.match(/ERICWebPortal\/MyERIC\/clipboard\/viewFolder\.jsp\?folderIndex/))
 		return "multiple";	
 	// Individual record
 	var singpath='//div[@id="titleBarBlue"]';
@@ -60,8 +63,9 @@ function doWeb(doc, url)	{
 	if(detectWeb(doc, url) == "multiple")	{
 		var string="http://eric.ed.gov/ERICWebPortal/custom/portlets/clipboard/performExport.jsp";
 		var items=new Array();
-		if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/)) {
-			// We have a clipboard page
+		if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/)
+			|| url.match(/ERICWebPortal\/MyERIC\/clipboard\/viewFolder\.jsp\?folderIndex/)) {
+			// We have a clipboard or folder page; structure is the same
 			var rowpath='//table[@class="tblDataTable"]/tbody/tr[td]';
 			var rows = doc.evaluate(rowpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var row, id, title;
