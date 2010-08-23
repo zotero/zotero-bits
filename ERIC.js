@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-08-22 23:40:45"
+        "lastUpdated":"2010-08-23 07:15:20"
 }
 
 function detectWeb(doc, url)	{
@@ -16,9 +16,14 @@ function detectWeb(doc, url)	{
 	var nsResolver=namespace?function(prefix)	{
 		return (prefix=="x")?namespace:null;
 	}:null;
+	// Search results
 	var searchpath='//div[@id="searchFaceted"]//td[@class="resultHeader"]';
 	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
 		return "multiple";
+	// Clipboard
+	if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/))
+		return "multiple";	
+	// Individual record
 	var singpath='//div[@id="titleBarBlue"]';
 	var res = doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(res && res.textContent=="Record Details")	{
@@ -54,14 +59,28 @@ function doWeb(doc, url)	{
 	}:null;
 	if(detectWeb(doc, url) == "multiple")	{
 		var string="http://eric.ed.gov/ERICWebPortal/custom/portlets/clipboard/performExport.jsp";
-		var idpath='//a[img[@width="64"]]';
-		var ids=doc.evaluate(idpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items=new Array();
-		var titlpath='//table[@class="tblSearchResult"]//td[@class="resultHeader"][1]/p/a';
-		var titlerows=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var id;
-		while(id=ids.iterateNext())
-			items[id.id]=Zotero.Utilities.cleanTags(Zotero.Utilities.cleanString(titlerows.iterateNext().textContent));
+		if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/)) {
+			// We have a clipboard page
+			var rowpath='//table[@class="tblDataTable"]/tbody/tr[td]';
+			var rows = doc.evaluate(rowpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var row, id, title;
+			while(row = rows.iterateNext()) {
+				title = doc.evaluate('./td[2]/a', row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				id = doc.evaluate('./td[6]', row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				Zotero.debug(title + id);
+				items[id] = Zotero.Utilities.cleanTags(Zotero.Utilities.cleanString(title));
+			}
+		} else {
+			// We have normal search results
+			var idpath='//a[img[@width="64"]]';
+			var ids=doc.evaluate(idpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titlpath='//table[@class="tblSearchResult"]//td[@class="resultHeader"][1]/p/a';
+			var titlerows=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var id;
+			while(id=ids.iterateNext())
+				items[id.id]=Zotero.Utilities.cleanTags(Zotero.Utilities.cleanString(titlerows.iterateNext().textContent));
+		}
 		items=Zotero.selectItems(items);
 		var string="http://eric.ed.gov/ERICWebPortal/MyERIC/clipboard/performExport.jsp?";
 		for(var ids in items)
