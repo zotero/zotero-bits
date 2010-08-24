@@ -1,7 +1,7 @@
 {
         "translatorID":"e4660e05-a935-43ec-8eec-df0347362e4c",
         "label":"ERIC",
-        "creator":"Ramesh Srigiriraju",
+        "creator":"Ramesh Srigiriraju, Avram Lyon",
         "target":"^http://(?:www\\.)?eric\\.ed\\.gov/",
         "minVersion":"1.0.0b4.r1",
         "maxVersion":"",
