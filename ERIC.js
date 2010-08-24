@@ -29,7 +29,7 @@ function detectWeb(doc, url)	{
 	// Individual record
 	var singpath='//div[@id="titleBarBlue"]';
 	var res = doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if(res && res.textContent=="Record Details")	{
+	if(res && res.textContent.indexOf("Record Details") !== -1)	{
 		var typepath='//tr[td/span/a/strong/text()="Pub Types:"]/td[2]/text()';
 		var typestr=doc.evaluate(typepath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 		var typereg=new RegExp("([^;/\-]+)");
