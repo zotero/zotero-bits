@@ -2,13 +2,13 @@
         "translatorID":"4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
         "label":"Library Catalog (InnoPAC)",
         "creator":"Simon Kornblith and Michael Berkowitz",
-        "target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+~?S?[0-9]?|/search/q\\?)",
+        "target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
         "minVersion":"1.0.0b3.r1",
         "maxVersion":"",
         "priority":200,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-08-24 23:04:19"
+        "lastUpdated":"2010-09-23 21:44:33"
 }
 
 function detectWeb(doc, url) {
@@ -56,15 +56,21 @@ function detectWeb(doc, url) {
 		}
 	}
 	// Next, look for the MARC button	
-	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+	xpath = '//a[img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
 	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
 	}
+	xpath = '//a[span/img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+    	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+    	if(elmt) {
+        	return "book";
+    	}
 	// Also, check for links to an item display page
 	var tags = doc.getElementsByTagName("a");
 	for(var i=0; i<tags.length; i++) {
 		if(matchRegexp.test(tags[i].href) || tags[i].href.match(/^https?:\/\/([^/]+\/(?:search\??\/|record=?|search%7e\/)|frameset&FF=)/)) {
+			Zotero.debug(tags[i].href);
 			return "multiple";
 		}
 	}
@@ -172,8 +178,14 @@ function doWeb(doc, url) {
 		if (m) {
 			newUri = uri.replace(/frameset/, "marc");
 		} else {
-			var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");;
+			xpath = '//a[img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(!newUri) {
+				xpath = '//a[span/img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+            	        	newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			}
+			newUri = newUri.href.replace(/frameset/, "marc");
+			Zotero.debug(newUri);
 		}
 		pageByPage(marc, [newUri]);
 	} else {	// Search results page
