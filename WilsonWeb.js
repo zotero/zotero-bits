@@ -1,23 +1,43 @@
 {
-"translatorID":"ae649eda-99de-4679-811e-12e19bf5e0b8",
-"label":"WilsonWeb",
-"creator":"Brinda Shah",
-"target":"http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05).hwwilsonweb.com/hww/results/",
-"minVersion":"1.0",
-"maxVersion":"",
-"priority":100,
-"inRepository":"1",
-"translatorType":4,
-"lastUpdated":"2010-08-20 11:37:02"
+        "translatorID":"ae649eda-99de-4679-811e-12e19bf5e0b8",
+        "label":"WilsonWeb",
+        "creator":"Brinda Shah",
+        "target":"http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05).hwwilsonweb.com/hww/results/",
+        "minVersion":"1.0",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-09-22 15:33:01"
 }
+/*
+ *	WilsonWeb Translator
+ *  Copyright (C) 2009 - 2010 Brinda Shah, bshah@hwwilson.com.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  ERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 var dispType='brief';
 var titleObj= new Object();
-var resultType = 'journalArticle';
+var resultType = '';
 var articles = new Array();	
 var pgSize;
 
+
 function detectWeb(doc, url) {
+
+	var tClassObj;
 	var namespace = doc.documentElement.namespaceURI; var nsResolver = namespace ? 
 	function(prefix) {
 	if (prefix == "x" )
@@ -33,17 +53,22 @@ function detectWeb(doc, url) {
 			dispType=dispEle.value;					
 		}	
 		
-		var cxpath = getXPath(dispType, 'cxpath');
-		var tClass = doc.evaluate(cxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var cxpath = getXPath(dispType, 'cxpath');		
+		tClassObj = doc.evaluate(cxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					
+		if (!tClassObj) {					
+			cxpath = getXPath(dispType, 'cxpath1');			
+			tClassObj = doc.evaluate(cxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		}
+		var tClass = tClassObj.textContent;
 		
 		if(tClass.match("BIBL"))
-			resultType = "journalArticle";
+			resultType = "journalArticle";		
 		else if(tClass.match("BOOK"))
 			resultType = "book";
 		else if(tClass.match("ART"))
-			resultType = "artwork";
-		
-									
+			resultType = "artwork";		
+							
 		var xpath = '//input[@name="pageSize"]';
 		var eleObj = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var ele;
@@ -52,7 +77,7 @@ function detectWeb(doc, url) {
 				pgSize= ele.value;
 				
 				if(pgSize > 1) {
-					if(resultType == 'journalArticle')
+					//if(resultType == 'journalArticle')
 						return "multiple";
 				}				
 				else 			
@@ -78,26 +103,33 @@ function doWeb(doc, url) {
 	
 	if (detectWeb(doc, url) == "multiple") {	
 
-		if(resultType == "journalArticle"){
 			var nextTitle;
 			var c = 0;
-	
+			
 			var titles = doc.evaluate(getXPath(dispType,'ti'), doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while (nextTitle= titles.iterateNext()) {	
 				c++;
+				//Zotero.debug(nextTitle.textContent);
 				titleObj[c] = nextTitle.textContent;					
 			}		
 			titleObj = Zotero.selectItems(titleObj);
 		
 			for (var t in titleObj ) {				
 				articles.push(t);			
-				var newArticle = new Zotero.Item('journalArticle');				
+				var newArticle = new Zotero.Item(resultType);				
 				newArticle.url = doc.location.href;
-				newArticle.title = titleObj[t];				
-				associateBIBLData(doc,newArticle,t);
+				newArticle.title = titleObj[t];	
+				switch(resultType) {
+					case 'journalArticle' : associateBIBLData(doc,newArticle,t);	
+										break;
+					case 'book': associateBookData(doc, newArticle, t);
+								break;
+					case 'artwork' : associateArtData(doc, newArticle,t);
+									break;
+				}				
+							
 				newArticle.complete();
-			}
-		}	
+			}		
 	}
 	else {
 		//saves single page items
@@ -111,6 +143,7 @@ function doWeb(doc, url) {
 }
 
 function associateBIBLData(doc,newArticle,t) {	
+		
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? 
 	function(prefix) {
@@ -120,11 +153,11 @@ function associateBIBLData(doc,newArticle,t) {
 	 	return null;
 	} : null;
 	
+	var host = doc.location.host;
 	
 	//author
-	var authorPath = getXPath(dispType,'au',t);	
-	var authorObj = doc.evaluate(authorPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
-	
+	var authorPath = getXPath(dispType,'au',t);		
+	var authorObj = doc.evaluate(authorPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();	
 	if(authorObj) {
 		associateAuthorData(newArticle, authorObj);
 	}		
@@ -136,7 +169,8 @@ function associateBIBLData(doc,newArticle,t) {
 		associateFieldData(newArticle, journalObj, 'journalAbbreviation');			
 	}
 	
-	//source
+	
+	//source	
 	var sourcePath = getXPath(dispType,'so',t);
 	if(sourcePath != '') {
 		var sourceObj = doc.evaluate(sourcePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -144,21 +178,24 @@ function associateBIBLData(doc,newArticle,t) {
 			associateSourceData(newArticle, sourceObj);
 	}
 	
-	//subject
+	//subject	
 	var tagsContent = new Array();
-	var suPath = getXPath(dispType, 'su', t);
+	var suPath = getXPath(dispType, 'su', t);	
 	if(suPath != '') {
-		var subject;	
-		var suObj = doc.evaluate(suPath, doc, nsResolver, XPathResult.ANY_TYPE, null);		
-		while(subject = suObj.iterateNext()) {			
-			tagsContent.push(subject.textContent);
-		}
-		for (var i = 0; i < tagsContent.length; i++) {
-			newArticle.tags[i] = tagsContent[i];
+		var suObj = doc.evaluate(suPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
+		if(suObj) {
+			var subjects = suObj.textContent.split(';');
+			for (var i in subjects) {		
+				//Zotero.debug(subjects[i]);			
+				tagsContent.push(subjects[i]);
+			}
+			for (var i = 0; i < tagsContent.length; i++) {
+				newArticle.tags[i] = tagsContent[i];
+			}
 		}
 	}
 	
-	//issn
+	//issn	
 	var issnPath = getXPath(dispType, 'issn', t);
 	if(issnPath != '') {
 		var issnObj = doc.evaluate(issnPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
@@ -167,7 +204,7 @@ function associateBIBLData(doc,newArticle,t) {
 		}
 	}	
 	
-	//la
+	//la	
 	var laPath = getXPath(dispType, 'la', t);
 	if(laPath != '') {
 		var laObj = doc.evaluate(laPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
@@ -220,14 +257,305 @@ function associateBIBLData(doc,newArticle,t) {
 			associateFieldData(newArticle, ntObj, 'notes');				
 		}
 	}
+	
+	//date entered
+	var dtPath = getXPath(dispType, 'der', t);
+	Zotero.debug(dtPath);
+	if(dtPath != '') {
+		var dtObj = doc.evaluate(dtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
+		if(dtObj) {
+			associateFieldData(newArticle, dtObj, 'dateAdded');
+		}
+	}
+	
+	//date updated
+	var udtPath = getXPath(dispType, 'ud', t);
+	Zotero.debug(udtPath);
+	if(dtPath != '') {
+		var udtObj = doc.evaluate(udtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
+		if(udtObj) {
+			associateFieldData(newArticle, udtObj, 'dateModified');
+		}
+	}
+	
+	var pdfURL;
+	var pdfLink = getXPath(dispType,'pdfLink',t);
+	if(pdfLink != '') {
+		var pdfObj = doc.evaluate(pdfLink, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(pdfObj ) {
+			var pdf = pdfObj.textContent;
+			Zotero.debug("pdf : " + pdf);
+			pdfURL =pdf.match(/https?:[/]+([-\w\.]+)+(:\d+)?([/]([\w/_\.]*(\?\S+)?)?)?/);
+			//Zotero.debug("pdfURL :" + pdfURL[0]);			
+		}
+	}
+	
+	var snapShotURL;
+	var recid = getXPath(dispType,'recid',t);
+	if(recid != '') {
+		var recObj= doc.evaluate(recid, doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if(recObj) {
+			
+			var rec =  recObj.value;				
+			snapShotURL =  'http://' + host + '/hww/jumpstart.jhtml?recid=' + rec + '&fmt=S&DT=full';
+			//Zotero.debug("snapShotURL :" + snapShotURL );		
+					
+		}
+	}
+	
+	if(pdfURL != null || snapShotURL != null) {
+		newArticle.attachments = [
+			{url:snapShotURL, title:"WilsonWeb Snapshot", mimeType:"text/html"},
+			{url:pdfURL[0], title:"WilsonWeb Full Text PDF", mimeType:"application/pdf"}
+			];	
+	}
+}
+
+function associateBookData( doc, newArticle, t) {	
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? 
+	function(prefix) {
+	if (prefix == 'x') 
+		return namespace;
+	 else 
+	 	return null;
+	} : null;
+	
+	var host = doc.location.host;
+	
+	//author
+	var authorPath = getXPath(dispType,'au',t);	
+	var authorObj = doc.evaluate(authorPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+	
+	if(authorObj) {
+		associateAuthorData(newArticle, authorObj);
+	}	
+	
+	//publisher	
+	var pbPath = getXPath(dispType, 'pb', t);
+	if(pbPath != '') {
+		var pbObj = doc.evaluate(pbPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(pbObj) {
+			associateFieldData(newArticle, pbObj, 'publisher');				
+		}
+	}
+	
+	//pages
+	var pgPath = getXPath(dispType, 'pa', t);	
+	if(pgPath != '') {
+		var pgObj = doc.evaluate(pgPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(pgObj) {
+			associateFieldData(newArticle, pgObj, 'numPages');				
+		}
+	}
+	
+	//la	
+	var laPath = getXPath(dispType, 'la', t);
+	if(laPath != '') {
+		var laObj = doc.evaluate(laPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(laObj) {
+			associateFieldData(newArticle, laObj, 'language');				
+		}
+	}	
+	
+	//isbn	
+	var isbnPath = getXPath(dispType, 'isbn', t);
+	if(isbnPath != '') {
+		var isbnObj = doc.evaluate(isbnPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(isbnObj) {
+			associateFieldData(newArticle, isbnObj, 'ISBN');				
+		}
+	}
+	
+	//abstract
+	var absPath = getXPath(dispType, 'abs', t);
+	if(absPath != '') {
+		var absObj = doc.evaluate(absPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(absObj) {
+			associateFieldData(newArticle, absObj, 'abstractNote');				
+		}
+	}	
+	
+	//subject	
+	var tagsContent = new Array();
+	var suPath = getXPath(dispType, 'su', t);	
+	if(suPath != '') {
+		var suObj = doc.evaluate(suPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
+		if(suObj) {
+			var subjects = suObj.textContent.split(';');
+			for (var i in subjects) {		
+				Zotero.debug(subjects[i]);			
+				tagsContent.push(subjects[i]);
+			}
+			for (var i = 0; i < tagsContent.length; i++) {
+				newArticle.tags[i] = tagsContent[i];
+			}
+		}
+	}
+	
+	//note	
+	var ntPath = getXPath(dispType, 'nt', t);	
+	Zotero.debug(ntPath);
+	if(ntPath != '') {
+		var ntObj = doc.evaluate(ntPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(ntObj) {
+			//associateFieldData(newArticle, ntObj, 'notes');	
+			newArticle.notes[0] = ntObj.textContent;	
+		}
+	}
+	
+	//date entered
+	var dtPath = getXPath(dispType, 'der', t);
+	Zotero.debug(dtPath);
+	if(dtPath != '') {
+		var dtObj = doc.evaluate(dtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
+		if(dtObj) {
+			associateFieldData(newArticle, dtObj, 'dateAdded');
+		}
+	}
+	
+	//date updated
+	var udtPath = getXPath(dispType, 'ud', t);
+	Zotero.debug(udtPath);
+	if(dtPath != '') {
+		var udtObj = doc.evaluate(udtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
+		if(udtObj) {
+			associateFieldData(newArticle, udtObj, 'dateModified');
+		}
+	}
+	
+	//series
+	var seriesPath = getXPath(dispType, 'TSN', t);
+	Zotero.debug(seriesPath );
+	if(seriesPath != '') {
+		var seriesObj = doc.evaluate(seriesPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
+		if(seriesObj) {
+			associateFieldData(newArticle, seriesObj, 'series');
+		}
+	}
+	
+	var fullTextURL;
+	var fullTextLink = getXPath(dispType,'fullTextLink',t);
+	if(fullTextLink != '') {
+		var fullTextObj = doc.evaluate(fullTextLink, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(fullTextObj ) {
+			var fullText = fullTextObj.textContent;			
+			fullTextURL=fullText.match(/https?:[/]+([-\w\.]+)+(:\d+)?([/]([\w/_\.]*(\?\S+)?)?)?/);
+			//Zotero.debug("fullTextURL:" + fullTextURL[0]);			
+		}
+	}
+	
+	if(fullTextURL != null ) {
+		newArticle.attachments = [
+			{url:fullTextURL[0], title:"Book Full Text", mimeType:"text/html"}
+		];	
+	}
+	
+	var pdfURL;
+	var pdfLink = getXPath(dispType,'pdfLink',t);
+	if(pdfLink != '') {
+		var pdfObj = doc.evaluate(pdfLink, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(pdfObj ) {
+			var pdf = pdfObj.textContent;//			
+			pdfURL =pdf.match(/https?:[/]+([-\w\.]+)+(:\d+)?([/]([\w/_\.]*(\?\S+)?)?)?/);
+			//Zotero.debug("pdfURL :" + pdfURL[0]);			
+		}
+	}
+	
+	if(pdfURL != null ) {
+		newArticle.attachments = [
+			{url:pdfURL[0], title:"WilsonWeb Full Text PDF", mimeType:"application/pdf"}
+		];	
+	}
+
+	
+}
+
+function associateArtData(doc, newArticle,t) {
+	Zotero.debug("associateData...");
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? 
+	function(prefix) {
+	if (prefix == 'x') 
+		return namespace;
+	 else 
+	 	return null;
+	} : null;
+	
+	var host = doc.location.host;
+	
+	//artist
+	var artist;
+	var authorPath = getXPath(dispType,'ar',t);    
+        var authorObj = doc.evaluate(authorPath, doc, nsResolver, XPathResult.ANY_TYPE, null);            
+    
+        while(artist = authorObj.iterateNext()) {
+             newArticle.creators.push(Zotero.Utilities.cleanAuthor(artist.textContent, "artist"));
+        }    
+        
+        //subject
+   
+    var tagsContent = new Array();
+    var suPath = getXPath(dispType, 'su', t);
+    if(suPath != '') {
+        var suObj = doc.evaluate(suPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();        
+        if(suObj) {
+            var subjects = suObj.textContent.split(';');
+            for (var i in subjects) {     
+            	tagsContent.push(subjects[i]);
+            }
+            for (var i = 0; i < tagsContent.length; i++) {
+                newArticle.tags[i] = tagsContent[i];
+            }
+        }
+    }
+	
+	//artworksize
+	var sizePath = getXPath(dispType,'siz',t);    
+	if(sizePath != '') {
+	        var sizeObj = doc.evaluate(sizePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();            
+	        if(sizeObj) {
+		        associateFieldData(newArticle, sizeObj, 'artworkSize');	
+	        }
+	 }
+        
+        //artworkmedium
+   	var mediumPath = getXPath(dispType,'mt',t);    
+   	if(mediumPath != '') {
+	        var mediumObj = doc.evaluate(mediumPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();            
+	        if(mediumObj ) {
+	            associateFieldData(newArticle, mediumObj, 'artworkMedium');    
+	        }
+        }
+        
+         //location
+       var locPath = getXPath(dispType,'own',t);    
+       if(locPath != '') {
+	        var locObj = doc.evaluate(locPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();            
+	        if(locObj) {
+	            associateFieldData(newArticle, locObj, 'place');    
+	        }
+        }
+        
+        //abstract
+    	var absPath = getXPath(dispType, 'abs', t);
+   	if(absPath != '') {
+        	var absObj = doc.evaluate(absPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();            
+        	if(absObj) {
+            		associateFieldData(newArticle, absObj, 'abstractNote');                
+        	}
+    	}    
 }
 
 function associateAuthorData(zoteroItem, zoteroObj) {
-	
+	var fTitle;
 	var author = zoteroObj.textContent;	
+	//Zotero.debug("Author : " + author);
 	if (author.match("; ")) {
 		var authors = author.split(";");
 		for (var i in authors) {
+			//Zotero.debug("authors["+i+"] - " + authors[i]); 		
 			zoteroItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author",true));
 		}
 	} else {
@@ -245,9 +573,9 @@ function associateSourceData(zoteroItem, zoteroObj) {
 		zoteroItem["volume"] =  vol[0].match(/\d+/);
 		
 	//issue
-	var issue = source.match(/[no]..\s*\d+[/]*\d+/);
+	var issue = source.match(/[no]..\s*\d+[/]*[\d+]*/);
 	if(issue)
-		zoteroItem["issue"] = issue[0].match(/\d+[/]*\d+/);
+		zoteroItem["issue"] = issue[0].match(/\d+[/]*[\d+]*/);
 	
 	//date
 	var date = source.match(/\b\w+\s*\d*\s*\d{4}\b/);	
@@ -264,6 +592,7 @@ function associateSourceData(zoteroItem, zoteroObj) {
 function associateFieldData(zoteroItem, zoteroObj, zoteroField) {
 	var fieldValue = zoteroObj.textContent;	
 	zoteroItem[zoteroField] = fieldValue;
+	//Zotero.debug(zoteroField + " - " + fieldValue);
 }
 
 
@@ -277,46 +606,69 @@ function getXPath(dispType,field,p) {
 	if(dispType == 'brief') {
 		
 		switch(field){
-			
+						
+			case 'cxpath1' : xPath = '//div[@id="results"]//table[2]//table/@class';
+						break;
 			case 'cxpath' : xPath = '//div[@id="results"]/table[1]/tbody/tr[1]/td[2]/table/tbody/tr/td/p/@class';
 						break;
 			case 'chk' : xPath = '//input[@name="checkbox"][@type="checkbox"]';
 						break;
 			case 'ti': 	xPath = "//span[contains(@class,'ti')][1]";
 					break;
-			case 'au': xPath =  '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[contains(@class,"au")]';
+			case 'au': xPath =  '//table[@class="rectable"]'+ pos +'//span[contains(@class,"au")]';
 					break;
 			case 'jn': xPath =  '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[@class="so"]/span[contains(@class,"jn")]';
 					break;
-			case 'voliss' : xPath =  '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[@class="so"]/span[contains(@class,"ji")]';
-						break;
-			case 'ppg' : xPath =  '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[@class="so"]/span[contains(@class,"ppg")]';
-						break;
-			case 'date' : xPath = '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[@class="so"]/span[contains(@class,"ji")][2]';
-						break;
 			case 'so' : xPath = '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[contains(@class,"so")]';
 						break;
+			case 'pdfLink' : xPath = '//table[@class="rectable"]' + pos + '//span[@id="pdf"]/a/@onclick';
+						break;
+			case 'fullTextLink' : xPath = '//div[@id="results"]/table' + pos + '//span[@id="fullText"]/a/@onclick';
+							break;
+			case 'recid' : xPath = '//table[@class="rectable"]' + pos + '//input[@name="recid"]';
+						break;
+			case 'pb' : xPath = '//table[@class="rectable"]' + pos + '//span[contains(@class,"pb")]';
+						break;
+			case 'pa' : xPath = '//table[@class="rectable"]' + pos + '//span[contains(@class,"pa")]';
+						break;
+			case 'ar' : xPath =  '//table[@class="rectable"]' + pos + '//span[contains(@class,"ar")]';
+						break;
+			
 		}
 		
-	}		
+	}	
+	else if (dispType == "details") {		
+		
+		switch(field){		
+			
+			case 'cxpath' : xPath = '//div[@id="results"]/table/tbody/tr[2]/td/table/@class';
+                       				break;	
+			case 'ti': 	xPath = "//span[contains(@id,'ti')]";
+					break;
+			case 'ar':  xPath = '//table[@id="recData"]//td[@class="bioartmid"]//span[contains(@id,"namdir")]';
+                        		break;                      
+			case 'siz' : xPath = "//span[contains(@id,'siz')]";
+					break;
+			case 'mt' : xPath = "//span[contains(@id,'mt')]";
+                    			break;
+			case 'abs' :
+			case 'su' : 
+			case 'own' : xPath='//div[@id="results"]//table[@id="recData"]/tbody/tr/td[2]//span[contains(@id,"' + field + '")]';
+                                break;
+			
+		}
+	}	
 	else {
 		
 		switch(field) {
 			
 			case 'cxpath' : xPath = '//div[@id="results"]/table/tbody/tr[2]/td/table/@class';
 						break;
-			case 'ti': if(pgSize > 1)
-						xPath = '//table[@id="recData"]/tbody/tr/td[@id="ti"]/a[contains(@class,"tilink")]';
-					else
-						xPath = '//table[@id="recData"]/tbody/tr/td[@id="ti"]/span[contains(@class,"recTitle")]';
+			case 'ti': xPath = '//div[@id="results"]//td[contains(@id, "ti")]';
 					break;
-			case 'au' : xPath = '//table[@class="rectable"]' + pos + '/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/a[contains(@class,"aulink")]';
-					break;
-			case 'jn': xPath =  '//table[@class="rectable"]' + pos + '/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/a[contains(@class,"jilink")]';
-					break;
-			
-			case 'su' : xPath = '//table[@class="rectable"]' + pos + '/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/a[contains(@class,"sulink")]';
-					break;
+			case 'au' : 
+			case 'jn':
+			case 'su' : 
 			case 'so' : 
 			case 'issn' :
 			case 'la' : 
@@ -324,7 +676,24 @@ function getXPath(dispType,field,p) {
 			case 'doi' : 
 			case 'inst' : 
 			case 'pb' : 
-			case 'nt' :	xPath = '//table[@class="rectable"]' + pos + '/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td[contains(@id, "' + field + '")]';
+			case 'pa' :
+			case 'isbn' :
+			case 'der' :
+			case 'ud' :
+			case 'TSN' :
+			case 'orb' :	
+			case 'siz' :		
+			case 'mt' :
+			case 'own' :
+			case 'nt' :	xPath = '//div[@id="results"]/table[@class="rectable"]' + pos + '//table[@id="recData"]//td[contains(@id, "' + field + '")]';
+						break;
+			case 'pdfLink' : xPath = '//div[@id="results"]/table' + pos + '//table[@id="recData"]//span[@id="pdf"]/a/@onclick';
+						break;
+			case 'fullTextLink' : xPath = '//div[@id="results"]/table' + pos + '//span[@id="fullText"]/a/@onclick';
+							break;
+			case 'recid' : xPath = '//div[@id="results"]/table' + pos + '//input[@name="recid"]';
+						break;
+			case 'ar': 	xPath = '//div[@id="results"]/table[@class="rectable"]' + pos + '//table[@id="recData"]//td[contains(@id, "ar")]/span[contains(@id,"namdir")]';
 						break;
 		}
 		
@@ -348,7 +717,15 @@ function scrape(doc, url) {
 	var titleObj = doc.evaluate(getXPath(dispType,'ti'), doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	newItem.title = titleObj.textContent;
 	
-	associateBIBLData(doc, newItem, 1);
+	switch(resultType) {
+		case 'journalArticle' : associateBIBLData(doc, newItem, 1);
+							break;
+		case 'book' : associateBookData(doc, newItem, 1);
+							break;
+		case 'artwork' : associateArtData(doc, newItem, 1);
+                           break;                           
+               
+	}
 
 	newItem.complete();
 	
