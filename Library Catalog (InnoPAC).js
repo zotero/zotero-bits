@@ -8,7 +8,7 @@
         "priority":200,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-09-23 21:44:33"
+        "lastUpdated":"2010-09-30 00:54:31"
 }
 
 function detectWeb(doc, url) {
@@ -27,6 +27,7 @@ function detectWeb(doc, url) {
 // n page results
 // http://bearcat.baylor.edu/search~S7?/ttest/ttest/1837%2C1838%2C2040%2CB/browse/indexsort=-
 // http://innopac.cooley.edu/search~S0?/Xtest&SORT=DZ/Xtest&SORT=DZ&SUBKEY=test/1%2C960%2C960%2CB/browse
+// http://wncln.wncln.org/search/?searchtype=X&SORT=D&searcharg=tatar&searchscope=1
 // Individual item from search
 // http://bearcat.baylor.edu/search~S7?/ttest/ttest/1837%2C1838%2C2040%2CB/frameset&FF=ttestteori+english&1%2C1%2C/indexsort=-
 // http://innopac.cooley.edu/search~S0?/Xtest&SORT=DZ/Xtest&SORT=DZ&SUBKEY=test/1%2C960%2C960%2CB/frameset&FF=Xtest&SORT=DZ&1%2C1%2C
@@ -56,21 +57,15 @@ function detectWeb(doc, url) {
 		}
 	}
 	// Next, look for the MARC button	
-	xpath = '//a[img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
 	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
 	}
-	xpath = '//a[span/img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-    	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-    	if(elmt) {
-        	return "book";
-    	}
 	// Also, check for links to an item display page
 	var tags = doc.getElementsByTagName("a");
 	for(var i=0; i<tags.length; i++) {
 		if(matchRegexp.test(tags[i].href) || tags[i].href.match(/^https?:\/\/([^/]+\/(?:search\??\/|record=?|search%7e\/)|frameset&FF=)/)) {
-			Zotero.debug(tags[i].href);
 			return "multiple";
 		}
 	}
@@ -178,14 +173,8 @@ function doWeb(doc, url) {
 		if (m) {
 			newUri = uri.replace(/frameset/, "marc");
 		} else {
-			xpath = '//a[img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(!newUri) {
-				xpath = '//a[span/img[@src="/screens/marc_display.gif" or  @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-            	        	newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			}
-			newUri = newUri.href.replace(/frameset/, "marc");
-			Zotero.debug(newUri);
+			var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");;
 		}
 		pageByPage(marc, [newUri]);
 	} else {	// Search results page
@@ -197,16 +186,17 @@ function doWeb(doc, url) {
 		var availableItems = new Array();
 		var firstURL = false;
 		
-		var tableRows = doc.evaluate('//table[@class="browseScreen"]//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow")]]',
+		var tableRows = doc.evaluate('//table[@class="browseScreen"]//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td/div[@class="briefcitRow"] or td[contains(@class,"briefCitRow")]]',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		// Go through table rows
 		var i = 0;
 		while(tableRow = tableRows.iterateNext()) {
 			// get link
-			var links = doc.evaluate('.//span[@class="briefcitTitle"]/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+			Zotero.debug(i);
+			var links = doc.evaluate('.//*[@class="briefcitTitle"]/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 			var link = links.iterateNext();
 			if(!link) {
-				var links = doc.evaluate(".//a", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+				links = doc.evaluate(".//a", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				link = links.iterateNext();
 			}
 			
