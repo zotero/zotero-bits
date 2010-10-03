@@ -63,8 +63,8 @@ function scrape(doc, url) {
        }
        if (newItem.abstractNote) newItem.abstractNote = Zotero.Utilities.trimInternal(newItem.abstractNote);
        //get date and extra stuff
-       if (doc.evaluate('//div[@class="col-left"]/p[@class="info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-               newItem.date = doc.evaluate('//div[@class="col-left"]/p[@class="info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(0,13);
+   if (doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+               newItem.date = Zotero.Utilities.trim(doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split("|")[0]);
        }
 	
 	var url = doc.location.href;
