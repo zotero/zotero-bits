@@ -1,8 +1,8 @@
 Following a suggestion by Avram, I had a deeper look into Marc.js and
-the possibilities of enhancing MARC support in Zotero. This concerns UNIMARC in particular, but I am trying to
-address Marc-21, too. There is nothing to be gained and much to be lost by
-hurrying things in such a central place as the MARC engine is—this is
-just meant as a starting point.
+the possibilities of enhancing MARC support in Zotero. This concerns UNIMARC 
+in particular, but I am trying to address Marc-21, too. There is nothing 
+to be gained and much to be lost by hurrying things in such a central place 
+as the MARC engine is—this is just meant as a starting point.
 
 Project contents:
 - an importer Marc2.js, capable of importing binary Unimarc- and
