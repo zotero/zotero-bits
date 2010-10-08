@@ -1,0 +1,29 @@
+Following a suggestion by Avram, I had a deeper look into Marc.js and
+the possibilities of enhancing MARC support in Zotero. This concerns UNIMARC in particular, but I am trying to
+address Marc-21, too. There is nothing to be gained and much to be lost by
+hurrying things in such a central place as the MARC engine is—this is
+just meant as a starting point.
+
+Project contents:
+- an importer Marc2.js, capable of importing binary Unimarc- and
+Marc-21 files. My import tests have been very limited, though.
+Marc2.js also exposes a "Marc" namespace which is the entry point for
+translators using the module. This namespace attempts to model MARC
+records with leaders, field and subfields, exposes a number of handy
+constants and helper classes that clients can use to convert between
+Zotero items, MARC records and external MARC representations (textual
+or binary).
+- the JSDoc-generated docs for Marc2.js (obviously insufficient)
+- an example translator Library Catalog (Dynix)2.js using Marc2.js. I
+tested it against http://www.babord.univ-bordeaux.fr. The example
+intends to demonstrate how Marc translators could become a little
+cleaner and maybe easier to maintain.
+
+There is nothing revolutionary in this, and the current MARC support
+works fine, thanks to all the guys who contributed to it. I just
+thought we might be able to exploit the richness and granularity of
+MARC information a little further, and to ease the creation of new
+MARC based site translators. Let me know about your views on the
+subject. 
+
+Thanks to Avram and Sylvain for their kind assistance.
