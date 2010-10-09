@@ -1,4 +1,15 @@
-{"translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44","label":"Stuff.co.nz","creator":"Sopheak Hean (University of Waikato, Faculty of Education)","target":"^http://(www.)?stuff.co.nz/","minVersion":"1.0","maxVersion":"x.x","priority":100,"inRepository":"1","translatorType":4,"lastUpdated":"2010-08-23 10:14:40"}
+{
+        "translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44",
+        "label":"Stuff.co.nz",
+        "creator":"Sopheak Hean (University of Waikato, Faculty of Education)",
+        "target":"^http://(www\\.)?stuff\\.co\\.nz/",
+        "minVersion":"1.0",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-08-23 00:34:34"
+}
 
 /*
     Stuff.co.nz Translator- Parses Stuff.co.nz articles and creates Zotero-based metadata

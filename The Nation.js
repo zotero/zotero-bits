@@ -1,4 +1,18 @@
-﻿/*
+﻿{
+    "translatorID":"0d6f8450-72e8-4d8f-bdc2-b7fa03e6f2c5",
+    "label":"The Nation",
+    "creator":"odie5533",
+    "target":"^http://www\\.thenation\\.com",
+    "minVersion":"1.0",
+    "maxVersion":"",
+    "priority":100,
+    "inRepository":"0",
+    "translatorType":4,
+    "creator":"odie5533",
+    "lastUpdated":"2010-08-08 01:01:01"
+}
+
+/*
     The Nation - translator for Zotero
     Copyright (C) 2010 odie5533
 
@@ -16,18 +30,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-{
-    "translatorID":"0d6f8450-72e8-4d8f-bdc2-b7fa03e6f2c5",
-    "label":"The Nation",
-    "creator":"odie5533",
-    "target":"^http://www\\.thenation\\.com",
-    "minVersion":"1.0",
-    "maxVersion":"",
-    "priority":100,
-    "inRepository":"0",
-    "translatorType":4,
-    "lastUpdated":"2010-08-08 01:01:01"
-}
 
 PUB_TITLE = "The Nation";
 PUB_ISSN = "0027-8378";
@@ -48,7 +50,7 @@ function detectWeb(doc, url) {
     if (!xpath_string(doc, doc, XPATH_TITLE))
         return;
     if (url.match(RE_ARTICLE_URL))
-        return "newspaperArticle";
+        return "magazineArticle";
     else
         return "multiple";
 }
@@ -66,7 +68,7 @@ function xpre(doc, node, xpath, reg) {
 }
 
 function scrapeSingle(doc, url) {
-	var newItem = new Zotero.Item("newspaperArticle");
+	var newItem = new Zotero.Item("magazineArticle");
 	if (PUB_TITLE) newItem.publicationTitle = PUB_TITLE;
     if (PUB_ISSN) newItem.ISSN = PUB_ISSN;
     newItem.url = url;

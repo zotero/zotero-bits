@@ -1,4 +1,17 @@
-﻿/*
+﻿{
+    "translatorID":"180a62bf-efdd-4d38-8d85-8971af04dd85",
+    "label":"TV by the Numbers",
+    "creator":"odie5533",
+    "target":"^http://tvbythenumbers\\.com",
+    "minVersion":"1.0",
+    "maxVersion":"",
+    "priority":100,
+    "inRepository":"0",
+    "translatorType":4,
+    "lastUpdated":"2010-08-04 03:31:19"
+}
+
+/*
     TV by the Numbers - translator for Zotero
     Copyright (C) 2010 odie5533
 
@@ -22,18 +35,6 @@
     not save a snapshot when multiple citations are to be saved.
 */
 
-{
-    "translatorID":"180a62bf-efdd-4d38-8d85-8971af04dd85",
-    "label":"TV by the Numbers",
-    "creator":"odie5533",
-    "target":"^http://tvbythenumbers\\.com",
-    "minVersion":"1.0",
-    "maxVersion":"",
-    "priority":100,
-    "inRepository":"0",
-    "translatorType":4,
-    "lastUpdated":"2010-08-04 03:31:19"
-}
 
 PUB_TITLE = "TV by the Numbers";
 XPATH_TITLE = "//title";
@@ -50,7 +51,7 @@ function detectWeb(doc, url) {
     var posts = doc.evaluate("count(//div[@class='post-alt blog'])", doc, null,
         XPathResult.NUMBER_TYPE, null).numberValue;
     if (posts  == 1)
-        return "newspaperArticle";
+        return "webpage";
     else if (posts > 1)
         return "multiple";
 }
@@ -75,7 +76,7 @@ function scrape(doc, url) {
     var post_count = 0;
 
     while (post = posts.iterateNext()) {
-        var newItem = new Zotero.Item("newspaperArticle");
+        var newItem = new Zotero.Item("webpage");
         newItem.publicationTitle = PUB_TITLE;
         
         var link = post.getElementsByTagName("a")[0];

@@ -109,6 +109,8 @@ function doWeb(doc, url) {
 				var byline = Zotero.Utilities.cleanString(article.byline.text().toString().replace(/By/i, ""));
 				var authors = byline.split(/ (?:\&|and) /i);
 				for each(var author in authors) {
+					// This may not be the right way to do this, but byline capitalisation is erratic
+					author = Zotero.Utilities.capitalizeTitle(author, "force");
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 				}
 			}
@@ -125,7 +127,16 @@ function doWeb(doc, url) {
 			
 			var m = article.volume.text().toString().match(/ISSN[:\s]*([\-0-9]{8,9})/i);
 			if(m) newItem.ISSN = m[1];
-			
+			// Collate the article body and create a child note containing it
+			var articleText = "";
+			for (var para in article.leadParagraph.paragraph) {
+				articleText += "<p>"+article.leadParagraph.paragraph[para]+"</p>";
+			}
+			for (var para in article.tailParagraphs.paragraph) {
+				articleText += "<p>"+article.tailParagraphs.paragraph[para]+"</p>";
+			}
+			newItem.notes.push({note: articleText});
+
 			newItem.complete();
 		}
 		

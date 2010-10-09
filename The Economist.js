@@ -2,19 +2,21 @@
         "translatorID":"6ec8008d-b206-4a4c-8d0a-8ef33807703b",
         "label":"The Economist",
         "creator":"Michael Berkowitz",
-        "target":"^http://(www.)?economist.com/",
+        "target":"^http://(www\\.)?economist\\.com/",
         "minVersion":"1.0.0b4.r5",
         "maxVersion":"",
         "priority":100,
-        "inRepository":"1",
+        "inRepository":true,
         "translatorType":4,
         "lastUpdated":"2010-10-03 13:27:34"
 }
 
 function detectWeb(doc, url) {
        if (doc.location.href.indexOf("search") != -1) {
-               return "multiple";
-       } else if (doc.location.href.toLowerCase().indexOf("node") != -1 || doc.location.href.indexOf("cityPage") != -1) {
+		/* Multiple article download disabled-- broken.
+		TODO Fix multiple article download. */
+               //return "multiple";
+       } else if (doc.location.href.toLowerCase().indexOf("node") != -1) {
                return "magazineArticle";
        }
 }
