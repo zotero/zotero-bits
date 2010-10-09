@@ -607,6 +607,8 @@ Marc.Unimarc = {
 		"bookAuthor" : "070"		//author
 	},
 	
+	
+	
 	/**
 	 *  Return the best Unimarc relator code match for a Zotero creatorType.
 	 *  @param {String} creatorType a Zotero creatorType
@@ -704,7 +706,36 @@ Marc.Unimarc = {
 		}
 	},
 	
+	/** Match an UNIMARC script code to IANA. 
+	 * @param {String} code A UNIMARC script code
+	 * @returns {String}
+	 * @see <a href="http://archive.ifla.org/VI/3/p1996-1/uni1.htm#100">UNIMARC Manual</a> 
+	 * @see <a href="http://www.iana.org/assignments/language-subtag-registry">IANA list</a> 
+	 */
+	Scripts : {
+		ba: "Latn",			//Latin
+		ca: "Cyrl",			//Cyrillic
+		da: "Jpan",			//Japanese - script unspecified
+		db: "Hani", 		//Japanese - kanji
+		dc: "Kana",			//Japanese - kana
+		ea: "Hans",			//Chinese
+		fa: "Arab",			//Arab
+		ga: "Grek",			//Greek
+		ha: "Hebr",			//Hebrew
+		ia: "Thai",			//Thai
+		ja: "Deva",			//Devanagari
+		ka: "Kore",			//Korean
+		la: "Taml",			//Tamil
+		ma: "Geor",			//Georgian
+		mb: "Armn",			//Armenian
+//		zz: Other
+	}
+	
 };
+
+
+
+
 
 /**
  * @namespace Mapping of human-readable names to Unimarc tags. The type of each property
@@ -966,8 +997,16 @@ Marc.Record.prototype = {
 	_buildFieldsPattern : function(tag) {
 		var pattern;
 		if(tag) {
-			if(tag.length && "string" != typeof tag) {
-				Zotero.debug(tag);
+			if(tag instanceof RegExp) {
+				pattern = tag;
+			}
+			else if(tag instanceof Marc.Tag) {
+				pattern = new RegExp(tag.tag);
+			}
+			else if("string" == typeof tag) {
+				pattern = new RegExp(tag);
+			}
+			else if(tag.length) {
 				var expr = new Array();
 				for(var j in tag) {
 					if(tag[j].tag) {
@@ -978,15 +1017,6 @@ Marc.Record.prototype = {
 					}
 				}
 				pattern = new RegExp(expr.join("|"));
-			}
-			else if(tag.tag) {
-				pattern = new RegExp(tag.tag);
-			}
-			else if("string" == typeof tag) {
-				pattern = new RegExp(tag);
-			}
-			else if(tag instanceof RegExp) {
-				pattern = tag;
 			}
 		}
 		return pattern;
@@ -1455,7 +1485,7 @@ Marc.Record.Field.prototype = {
 
 	/**
 	 * @returns {String} a suitable string for console debugging. Do not
-	 * cass Zotero.debug() on a field instance (inifinite loop).
+	 * call Zotero.debug() on a field instance (inifinite loop).
 	 */
 	debugString : function() {
 		var str = this.getTag();
@@ -1848,11 +1878,11 @@ Marc.ImportConverter = function() {
 Marc.ImportConverter.prototype.convert = function(record) {
 	var item = new Zotero.Item();
 	this._getItemType(record, item);
+	this._getLanguage(record, item);
 	this._getISBN(record, item);
 	this._getISSN(record, item);
 	this._getCreators(record, item);
 	this._getTitle(record, item);
-	this._getLanguage(record, item);
 	this._getAbstract(record, item);
 	this._getEdition(record, item);
 	this._getMaterialDescription(record, item);
@@ -1897,7 +1927,20 @@ Marc.ImportConverter.prototype._addExtra = function(noteText, extra) {
 }
 
 
-
+/** Set a multi field. */
+Marc.ImportConverter.prototype._setMultiField = function(item, fieldName, val, lang) {
+	//Base value?
+	if(!lang || !item[fieldName]) {
+		item[fieldName] = val;
+	}
+	else {
+		item.multi.push({
+			fieldName: fieldName,
+			val: val,
+			lang: lang
+		});
+	}
+};
 
 /** 
  * Get item type from a record. the default implementation will evaluate the
@@ -2296,7 +2339,6 @@ Marc.UnimarcImportConverter.prototype._getCreators = function(record, item) {
 		for (var j in authorFields) {
 			var authorField = authorFields[j];
 			var type = Marc.Unimarc.getCreatorType(authorField.getValue("4"));
-			Zotero.debug("getCreatorType " + authorField.getValue("4") + ": " + type);
 			if(type) {
 				var authorText = authorField.getValue("a");
 				item.creators.push({
@@ -2595,9 +2637,76 @@ Marc.UnimarcImportConverter.prototype._getNotes = function(record, item) {
 	}
 };
 
+
+/**
+ * Constructs a multilingual Unimarc import converter.
+ * @class ImportConverter implementation for records in Unimarc format.
+ * Makes use of Zotero's multilingual features wherever possible.
+ * @augments Marc.ImportConverter 
+ * */
+Marc.UnimarcMultilingualImportConverter = function() {
+};
+Marc.UnimarcMultilingualImportConverter.prototype = new Marc.UnimarcImportConverter;
+Marc.UnimarcMultilingualImportConverter.prototype.constructor = Marc.UnimarcMultilingualImportConverter;
+
+Marc.UnimarcMultilingualImportConverter.prototype._getTitle = function(record, item) {
+	Zotero.debug("Marc.UnimarcMultilingualImportConverter.prototype._getTitle");
+	var value = false, lang, script;
+	var defLang = item.language.split(" ")[0];
+	//Commit and reset
+	var commit = function() {
+		if(value) {
+			if(script) {
+				lang = (lang ? lang : defLang) + "-" + script;
+			}
+			Zotero.debug("Committing multilingual title: " + value
+					+ "/ lang: " + lang);
+			this._setMultiField(item, "title", value, lang);
+		}
+		value = false;
+		lang = false;
+	};
+	var titleFields = record.getFields([
+	       Marc.Unimarc.Tags.TITLE_AND_STATEMENT_OF_RESPONSIBILITY,
+	       Marc.Unimarc.Tags.PARALLEL_TITLE_PROPER
+	]);
+	//BnF has multiple 200 entries for different scripts (http://www.bnf.fr/documents/UNIMARC%28B%29_conversion.pdf)
+	titleFields.forEach(function(titleField) {
+		var subfields = titleField.getSubfields("adez"); //Main, parallel, subtitle, parallel lang
+		script = Marc.Unimarc.Scripts[titleField.getValue("7")];
+		for(var j in subfields) {
+			var subfield = subfields[j];
+			var content = subfield.getContent();
+			switch(subfield.getTag()) {
+			case "a":
+				value = content;			//Initialize new title
+				break;
+			case "e":	
+				value += " : " + content;	//add to title
+				break;
+			case "d":						//Start parallel title
+				commit.call(this);
+				value = content;
+				break;
+			case "z":
+				lang = content;
+				break;
+			}
+		}
+		commit.call(this);
+	}, this);
+};
+
+
 /**
  * @namespace Import/ExportConverters utilities. */
 Marc.Converters = {
+	/** Check whether this Zotero environment is multilingual.
+	 * @returns {Boolean"
+	 * */
+	_isMultilingual : function() {
+		return "undefined" != typeof new Zotero.Item().multi;
+	},
 	/** Get an appropriate ExpoortConverter for a given Marc type.
 	 * @returns {Marc.ExportConverter}
 	 * @param {String} type the Marc type ("unimarc" or "marc21")
@@ -2622,17 +2731,22 @@ Marc.Converters = {
 	getImportConverter : function(recordOrType) {
 		var type = "marc21";
 		if(recordOrType instanceof Marc.Record) {
-			Zotero.debug("Marc.Converters.getImportConverter, sniffing record");
 			if(Marc.Unimarc.isUnimarc(recordOrType)) {
-				Zotero.debug("Marc.Converters.getImportConverter, sniffing record detected unimarc");
 				type = "unimarc";
 			}
 		}
-		Zotero.debug("Marc.Converters.getImportConverter, type= " + type);
+		
+		var multilingual = this._isMultilingual();
+		Zotero.debug("getImportConverter, type=" + type + ", multilingual=" + multilingual);
 
 		switch(type) {
 		case "unimarc":
-			return new Marc.UnimarcImportConverter();
+			if(multilingual) {
+				return new Marc.UnimarcMultilingualImportConverter();
+			}
+			else {
+				return new Marc.UnimarcImportConverter();
+			}
 		case "marc21":
 			return new Marc.Marc21ImportConverter();
 		default:
@@ -2819,7 +2933,7 @@ Marc.Config.setTypeOptions();
 //Public API
 
 //Debugging
-Marc.IO.setMaxImportRecords(100);
+Marc.IO.setMaxImportRecords(5);
 
 /**
  * Detect binary record leader.
@@ -2890,7 +3004,6 @@ function doExport() {
 	if(!marcType) {
 		throw "Choose a single export format";
 	}
-	Zotero.debug("Marc type: " + marcType);
 	
 	//Get converter (item -> record)
 	var converter = Marc.Converters.get(marcType);
