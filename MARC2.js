@@ -1081,7 +1081,7 @@ Marc.Record.prototype = {
 	 */
 	getLeader : function() {
 		if(!this._leader) {
-			this._createLeader();
+			this._leader = this._createLeader();
 		}
 		return this._leader;
 	},
@@ -2309,7 +2309,6 @@ Marc.UnimarcImportConverter.prototype._getCreators = function(record, item) {
 };
 
 Marc.UnimarcImportConverter.prototype._getTitle = function(record, item) {
-	Zotero.debug("UnimarcImportConverter._getTitle");
 	var value = record.getValue(Marc.Unimarc.Tags.TITLE_AND_STATEMENT_OF_RESPONSIBILITY, "ae",
 		{
 			subfieldJoin: " : ", 
@@ -2769,7 +2768,15 @@ Marc.Importer.prototype = {
 				record.setLeader(field.value);
 			}
 			else {
-				record.addField(field.tag).parse(field.value);
+				if(/\d{3}/.test(field.tag)) {
+					//Replace common subfield delimiters
+					var value = field.value.replace(/[\xa4\$]([a-z0-9])/g, 
+							Marc.Delimiters.SUBFIELD_DELIMITER + "$1");
+					record.addField(field.tag).parse(value);
+				}
+				else {
+					Zotero.debug("Skipping invalid tag \"" + field.tag + "\"");
+				}
 			}
 		}, this);
 		return record;
