@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-13 17:21:46"
+        "lastUpdated":"2010-10-13 19:30:02"
 }
 
 /*
@@ -66,18 +66,28 @@ function doWeb(doc, url){
 	}
 	
 	Zotero.Utilities.processDocuments(articles, function(doc) {
-		item = new Zotero.Item("journalArticle");
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var type = doc.evaluate('./table[3]//table[2]//tr[5]/td[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		switch (type) {
+			case "научная статья":
+			default:
+				type = "journalArticle";
+				break;
+		}
+		
+		item = new Zotero.Item(type);
 
-		item.title = Zotero.Utilities.trimInternal(
+		/*
+		var title = Zotero.Utilities.trimInternal(
 			doc.evaluate('./table[1]//td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
 		);
-		Zotero.debug(item.title);
+		item.title = (title.toUpperCase() == title) ? title[0]+title.substr(1).toLowerCase() : title;
+		*/
+		item.title = doc.title.match(/eLIBRARY.RU - (.*)/)[1];
 		var author = doc.evaluate('./table[2]//td[2]/font/a', datablock, ns, XPathResult.ANY_TYPE, null);
 
 		if ((author = author.iterateNext()) !== null) {
 			author = author.textContent;
-			Zotero.debug(author);
 			var cleaned = Zotero.Utilities.cleanAuthor(author, "author");
 			// If we have only one name, set the author to one-name mode
 			if (cleaned.firstName == "") {
@@ -101,8 +111,9 @@ function doWeb(doc, url){
 		item.issue = doc.evaluate('./table[3]//table[2]//tr[3]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.pages = doc.evaluate('./table[3]//table[2]//tr[4]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.language = doc.evaluate('./table[3]//table[2]//tr[5]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-
-		//item.attachments.push({url:url, title: (item.publicationTitle + " Snapshot"), mimeType:"text/html"});
+		var abstractNode = doc.evaluate('./table[4]/tbody/tr/td[2]/table/tbody/tr/td/font', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		// /html/body/table/tbody/tr/td/table/tbody/tr/td[2]/table/tbody/tr[3]/td/table[4]/tbody/tr/td[2]/table/tbody/tr/td/font
+		if (abstractNode) item.abstractNote = abstractNode.textContent;
 
 		item.complete();
 	}, function() {Zotero.done();});
