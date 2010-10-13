@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-13 19:30:02"
+        "lastUpdated":"2010-10-13 21:41:03"
 }
 
 /*
@@ -31,10 +31,8 @@
 
 function detectWeb(doc, url){
 	if (url.match(/\/item.asp/)) {
-		// The translator uses this type because RFE/RL generally has a place of publication
-		// and a Section; both are specific to newspaperArticle.
 		return "journalArticle";
-	} else if (url.match(/\/query_results\.asp/)){
+	} else if (url.match(/\/query_results\.asp/) || url.match(/\/contents\.asp/)){
 		return "multiple";
 	}
 }
@@ -67,7 +65,22 @@ function doWeb(doc, url){
 	
 	Zotero.Utilities.processDocuments(articles, function(doc) {
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		var type = doc.evaluate('./table[3]//table[2]//tr[5]/td[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		
+		// Some pages have no author information, so our count of tables will be incorrect
+		var tableCount = doc.evaluate('count(./table)', datablock, ns, XPathResult.ANY_TYPE, null).numberValue;
+		var authorMissing = (tableCount < 3);		
+		var titleBlock =  (authorMissing) ? 
+           	 	doc.evaluate('./table[1]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
+           	 	: doc.evaluate('./table[1]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var metaBlock =  (authorMissing) ? 
+           	 	doc.evaluate('./table[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
+           	 	: doc.evaluate('./table[3]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var abstractBlock =  (authorMissing) ? 
+           	 	doc.evaluate('./table[3]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
+           	 	: doc.evaluate('./table[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		
+		var type = doc.evaluate('.//table[2]//tr[5]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		
 		switch (type) {
 			case "научная статья":
 			default:
@@ -77,12 +90,6 @@ function doWeb(doc, url){
 		
 		item = new Zotero.Item(type);
 
-		/*
-		var title = Zotero.Utilities.trimInternal(
-			doc.evaluate('./table[1]//td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
-		);
-		item.title = (title.toUpperCase() == title) ? title[0]+title.substr(1).toLowerCase() : title;
-		*/
 		item.title = doc.title.match(/eLIBRARY.RU - (.*)/)[1];
 		var author = doc.evaluate('./table[2]//td[2]/font/a', datablock, ns, XPathResult.ANY_TYPE, null);
 
@@ -103,18 +110,17 @@ function doWeb(doc, url){
 			item.creators.push(cleaned);
 		}
 
-		item.publicationTitle = doc.evaluate('./table[3]//table[1]//tr[1]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.publisher = doc.evaluate('./table[3]//table[1]//tr[2]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.date = doc.evaluate('./table[3]//table[2]//tr[1]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.ISSN = doc.evaluate('./table[3]//table[2]//tr[1]/td[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.volume = doc.evaluate('./table[3]//table[2]//tr[2]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.issue = doc.evaluate('./table[3]//table[2]//tr[3]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.pages = doc.evaluate('./table[3]//table[2]//tr[4]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.language = doc.evaluate('./table[3]//table[2]//tr[5]/td[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var abstractNode = doc.evaluate('./table[4]/tbody/tr/td[2]/table/tbody/tr/td/font', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		// /html/body/table/tbody/tr/td/table/tbody/tr/td[2]/table/tbody/tr[3]/td/table[4]/tbody/tr/td[2]/table/tbody/tr/td/font
-		if (abstractNode) item.abstractNote = abstractNode.textContent;
-
+		item.publicationTitle = doc.evaluate('.//table[1]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.publisher = doc.evaluate('.//table[1]//tr[2]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.date = doc.evaluate('.//table[2]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.ISSN = doc.evaluate('.//table[2]//tr[1]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.volume = doc.evaluate('.//table[2]//tr[2]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.issue = doc.evaluate('.//table[2]//tr[3]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.pages = doc.evaluate('.//table[2]//tr[4]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.language = doc.evaluate('.//table[2]//tr[5]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (abstractBlock)
+			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
