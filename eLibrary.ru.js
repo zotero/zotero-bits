@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-15 18:17:07"
+        "lastUpdated":"2010-10-15 20:11:52"
 }
 
 /*
@@ -73,7 +73,7 @@ function doWeb(doc, url){
 		while ((label =  tableLabels.iterateNext()) !== null) {
 			t++;
 			label = label.textContent;
-			Zotero.debug(label + " => " + './table['+t+']');
+
 			switch (label) {
 				case "Названиепубликации":
 					titleBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
@@ -110,6 +110,10 @@ function doWeb(doc, url){
 			case "научная статья":
 			        type = "journalArticle";
 			        break;
+			case "учебное пособие":
+			case "монография":
+			        type = "book";
+			        break;
 			default:
 		                Zotero.debug("Unknown type: "+type+". Using 'journalArticle'");
 				type = "journalArticle";
@@ -124,6 +128,7 @@ function doWeb(doc, url){
 		var authorNode = doc.evaluate('.//td[2]/font/a', authorBlock, ns, XPathResult.ANY_TYPE, null);
 		Zotero.debug("Have authors");
 		while ((author = authorNode.iterateNext()) !== null) {
+			if (!author.href.match(/org_about\.asp/)) { // Remove organizations
 			author = author.textContent;
 			var authors = author.split(",");
 			for (var i = 0; i < authors.length; i++) {
@@ -141,6 +146,7 @@ function doWeb(doc, url){
 				}
 				item.creators.push(cleaned);
 			}
+			} else { Zotero.debug("Skipping presumed affiliation: " + author.textContent) ; } 
 		}
 		}
 
