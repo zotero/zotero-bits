@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-15 20:11:52"
+        "lastUpdated":"2010-10-15 22:08:29"
 }
 
 /*
@@ -92,20 +92,21 @@ function doWeb(doc, url){
 					break;
 				case "Аннотация":
 					abstractBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
 				case "Коды":
 					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
 					break;
-				case " ":
-					referencesBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+				case "Списоклитературы":
+					referenceBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
 					break;
+				case "Переводнаяверсия":
 				default:
-					Zotero.debug("Unknown block: "+ label);
+					Zotero.debug("Unknown/unsupported block: "+ label);
 					break;
 			}
 		}
 		var type = doc.evaluate('.//table[2]//tr[5]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		//var type = doc.evaluate('./table[4]//table[2]//tr[5]/td[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		Zotero.debug("Pass");
+		
 		switch (type) {
 			case "научная статья":
 			        type = "journalArticle";
@@ -126,26 +127,25 @@ function doWeb(doc, url){
 		
 		if (authorBlock) {
 		var authorNode = doc.evaluate('.//td[2]/font/a', authorBlock, ns, XPathResult.ANY_TYPE, null);
-		Zotero.debug("Have authors");
 		while ((author = authorNode.iterateNext()) !== null) {
 			if (!author.href.match(/org_about\.asp/)) { // Remove organizations
-			author = author.textContent;
-			var authors = author.split(",");
-			for (var i = 0; i < authors.length; i++) {
-				var cleaned = Zotero.Utilities.cleanAuthor(authors[i], "author");
-				// If we have only one name, set the author to one-name mode
-				if (cleaned.firstName == "") {
-					cleaned["fieldMode"] = true;
-				} else {
-					// We can check for all lower-case and capitalize if necessary
-					// All-uppercase is handled by cleanAuthor
-					cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
-						Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
-					cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
-						Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
+				author = author.textContent;
+				var authors = author.split(",");
+				for (var i = 0; i < authors.length; i++) {
+					var cleaned = Zotero.Utilities.cleanAuthor(authors[i], "author");
+					// If we have only one name, set the author to one-name mode
+					if (cleaned.firstName == "") {
+						cleaned["fieldMode"] = true;
+					} else {
+						// We can check for all lower-case and capitalize if necessary
+						// All-uppercase is handled by cleanAuthor
+						cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
+							Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
+						cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
+							Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
+					}
+					item.creators.push(cleaned);
 				}
-				item.creators.push(cleaned);
-			}
 			} else { Zotero.debug("Skipping presumed affiliation: " + author.textContent) ; } 
 		}
 		}
@@ -160,7 +160,24 @@ function doWeb(doc, url){
 		item.language = doc.evaluate('.//table[2]//tr[5]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (abstractBlock)
 			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		/*if (referenceBlock) {
+			var note = Zotero.Utilities.cleanString(
+							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, ns, XPathResult.ANY_TYPE, null)
+							.iterateNext().textContent);
+			Zotero.debug(note);
+			item.notes.push(note);
+		}*/
+		if (codeBlock) {
+			item.extra = doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+ 			var doi = item.extra.match(/DOI: (10\..+?) /);
+ 			if (doi) item.DOI = doi[1];
+ 		}
 		
+		if (keywordBlock) {
+			var tag, tagNode = doc.evaluate('.//td[2]/a', keywordBlock, ns, XPathResult.ANY_TYPE, null);
+			while ((tag = tagNode.iterateNext()) != null)
+					item.tags.push(tag.textContent);
+		}
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
