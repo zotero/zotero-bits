@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-13 21:41:03"
+        "lastUpdated":"2010-10-15 18:17:07"
 }
 
 /*
@@ -66,24 +66,52 @@ function doWeb(doc, url){
 	Zotero.Utilities.processDocuments(articles, function(doc) {
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		
-		// Some pages have no author information, so our count of tables will be incorrect
-		var tableCount = doc.evaluate('count(./table)', datablock, ns, XPathResult.ANY_TYPE, null).numberValue;
-		var authorMissing = (tableCount < 3);		
-		var titleBlock =  (authorMissing) ? 
-           	 	doc.evaluate('./table[1]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
-           	 	: doc.evaluate('./table[1]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		var metaBlock =  (authorMissing) ? 
-           	 	doc.evaluate('./table[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
-           	 	: doc.evaluate('./table[3]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		var abstractBlock =  (authorMissing) ? 
-           	 	doc.evaluate('./table[3]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
-           	 	: doc.evaluate('./table[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		
+		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, ns, XPathResult.ANY_TYPE, null);
+
+		var titleBlock, authorBlock, publicationBlock, metaBlock, codeBlock, keywordBlock,  abstractBlock, referenceBlock;
+		var t = 0,  label;	// Table number and label
+		while ((label =  tableLabels.iterateNext()) !== null) {
+			t++;
+			label = label.textContent;
+			Zotero.debug(label + " => " + './table['+t+']');
+			switch (label) {
+				case "Названиепубликации":
+					titleBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Авторы":
+					authorBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Журнал":
+					metaBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Коды":
+					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Ключевыеслова":
+					keywordBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Аннотация":
+					abstractBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+				case "Коды":
+					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case " ":
+					referencesBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				default:
+					Zotero.debug("Unknown block: "+ label);
+					break;
+			}
+		}
 		var type = doc.evaluate('.//table[2]//tr[5]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		
+		//var type = doc.evaluate('./table[4]//table[2]//tr[5]/td[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		Zotero.debug("Pass");
 		switch (type) {
 			case "научная статья":
+			        type = "journalArticle";
+			        break;
 			default:
+		                Zotero.debug("Unknown type: "+type+". Using 'journalArticle'");
 				type = "journalArticle";
 				break;
 		}
@@ -91,23 +119,29 @@ function doWeb(doc, url){
 		item = new Zotero.Item(type);
 
 		item.title = doc.title.match(/eLIBRARY.RU - (.*)/)[1];
-		var author = doc.evaluate('./table[2]//td[2]/font/a', datablock, ns, XPathResult.ANY_TYPE, null);
-
-		if ((author = author.iterateNext()) !== null) {
+		
+		if (authorBlock) {
+		var authorNode = doc.evaluate('.//td[2]/font/a', authorBlock, ns, XPathResult.ANY_TYPE, null);
+		Zotero.debug("Have authors");
+		while ((author = authorNode.iterateNext()) !== null) {
 			author = author.textContent;
-			var cleaned = Zotero.Utilities.cleanAuthor(author, "author");
-			// If we have only one name, set the author to one-name mode
-			if (cleaned.firstName == "") {
-				cleaned["fieldMode"] = true;
-			} else {
-				// We can check for all lower-case and capitalize if necessary
-				// All-uppercase is handled by cleanAuthor
-				cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
-					Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
-				cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
-					Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
+			var authors = author.split(",");
+			for (var i = 0; i < authors.length; i++) {
+				var cleaned = Zotero.Utilities.cleanAuthor(authors[i], "author");
+				// If we have only one name, set the author to one-name mode
+				if (cleaned.firstName == "") {
+					cleaned["fieldMode"] = true;
+				} else {
+					// We can check for all lower-case and capitalize if necessary
+					// All-uppercase is handled by cleanAuthor
+					cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
+						Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
+					cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
+						Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
+				}
+				item.creators.push(cleaned);
 			}
-			item.creators.push(cleaned);
+		}
 		}
 
 		item.publicationTitle = doc.evaluate('.//table[1]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
