@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-18 10:01:42"
+        "lastUpdated":"2010-10-18 21:37:24"
 }
 
 /*
@@ -59,12 +59,15 @@ function doWeb(doc, url){
 		for (var i in items) {
 			articles.push(i);
 		}
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	} else {
-		articles = [url];
+		scrape(doc);
 	}
 	
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+	Zotero.wait();
+}
 
+function scrape (doc) {
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		
 		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, ns, XPathResult.ANY_TYPE, null);
@@ -202,6 +205,3 @@ function doWeb(doc, url){
 		item.attachments = attachments.shift();
 		
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}
