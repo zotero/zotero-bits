@@ -1,4 +1,4 @@
-load("isbn.js");
+load("identifiers.js");
 
 var test = 0;
 
