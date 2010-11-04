@@ -116,7 +116,8 @@ function downloadFunction(text) {
 				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
 			}
 			if (text.match("DO")) {
-				item.DOI = text.match(/DO\s+\-\s*(.*)/)[1];
+				var DOI = text.match(/DO\s+\-\s*(.*)/);
+				if (DOI) item.DOI = DOI[1];
 			}
 			if (text.match("T1")) {
 				item.title = text.match(/T1\s+-\s*(.*)/)[1];
