@@ -106,7 +106,7 @@ function downloadFunction(text) {
 		// load translator for RIS
 		var test = text.match(/UR\s+\-(.*)/g);
 		if (text.match(/AB\s\s\-/)) text = text.replace(/AB\s\s\-/, "N2  -");
-		//if (!text.match(/TY\s\s-/)) text = text+"\nTY  - JOUR\n"; 
+		if (!text.match(/TY\s\s-/)) text = text+"\nTY  - JOUR\n"; 
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -122,7 +122,7 @@ function downloadFunction(text) {
 			if (text.match("T1")) {
 				item.title = text.match(/T1\s+-\s*(.*)/)[1];
 			}
-			item.itemType = "journalArticle";
+			//item.itemType = "journalArticle";
 			item.url = false;
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
