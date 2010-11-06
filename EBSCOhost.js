@@ -112,14 +112,14 @@ function downloadFunction(text) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-			if (text.match(/L3\s+\-\s*(.*)/)) {
-				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
+			if (text.match(/^L3\s+-\s*(.*)/m)) {
+				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
 			}
-			if (text.match(/DO\s+\-\s*(.*)/)) {
-				item.DOI = text.match(/DO\s+\-\s*(.*)/)[1];
+			if (text.match(/^DO\s+-\s*(.*)/m)) {
+				item.DOI = text.match(/^DO\s+-\s*(.*)/m)[1];
 			}
-			if (text.match("T1")) {
-				item.title = text.match(/T1\s+-\s*(.*)/)[1];
+			if (text.match(/^T1\s+-/m)) {
+				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
 			//item.itemType = "journalArticle";
 			item.url = false;
