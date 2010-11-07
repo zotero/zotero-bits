@@ -16,9 +16,6 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
-	
-	
 		// The Scientific American Archive breaks this translator, disabling 
 		try {
 			var databases = doc.evaluate("//span[@class = 'selected-databases']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -50,10 +47,6 @@ function detectWeb(doc, url) {
 		+' or starts-with(text(), "Bu kayda sürekli bağlantı")'
 		+' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]';
 */
-
-
-	
-
 	var xpath = '//input[@id="ctl00_ctl00_Column2_Column2_topDeliveryControl_deliveryButtonControl_lnkExport"]';
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(persistentLink) {
