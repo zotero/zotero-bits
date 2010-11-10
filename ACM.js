@@ -8,13 +8,18 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-11-10 22:10:09"
+        "lastUpdated":"2010-11-10 23:55:19"
 }
 
 /**
  * The XPath for all the search result <a> elements
  */
 var searchResultX = '//td[@colspan="3"]/a[@class="medium-text" and @target="_self"]';
+/**
+ * The XPath for all the journal TOC <a> elements
+ */
+var tocResultX = '//td[@colspan="1"]/span[@style]/a[contains(@href,"citation.cfm")]';
+
 /**
  * The XPath for the tag elements in a justified format tags list
  */
@@ -35,6 +40,12 @@ var moreTagX = '//a/span[@class="small-text"]';
  * the XPath for the title heading element - not strictly necessary, more helpful for debugging
  */
 var titleX = '//div[@class="large-text"]/h1[@class="mediumb-text"]/strong';
+/**
+ * XPath for Table of Contents headline for journal issue
+ */
+var tocX = "//div[@id='citationdetails']//h5[@class='medium-text' and contains(.,'Table of Contents')]";
+
+
 
 /**
  * Scan to see what type of page this is
@@ -76,55 +87,67 @@ function doWeb(doc, url) {
 	if (getArticleType(doc, url) == "multiple") {
 		//If this is a search results page
 		if (url.indexOf("results.cfm") != -1) 
-			scrapeSearch(doc, url, nsResolver);		
+			scrapeMulti(doc, url, nsResolver, "search");
+		else if(getText(tocX, doc, nsResolver) =="Table of Contents")
+			scrapeMulti(doc, url, nsResolver, "toc");
+		Zotero.wait();		
 	} //If this is a single page
 	else 
 		scrape(doc, url, nsResolver);
 }
 
 /**
- * Scrape search results
+ * Scrape search results and journal tables of contents
  * @param doc The XML document describing the page
  * @param url The URL of the page being scanned
  * @param nsResolver the namespace resolver function
+ * @param type Type of result-- "search" or "toc"
  */
-function scrapeSearch(doc, url, nsResolver) {
-	Zotero.debug("Scraping search");
-	var searchResultPath= doc.evaluate(searchResultX, doc, null, XPathResult.ANY_TYPE, null);
-	
-	/* While scraping all the pages of results is ambitious, it will quickly
-	get Zotero banned from the ACM Digital Library. Only use the current page.
-	//Count how mange pages have been scraped
-	var i = 1;
-	var searchNode;
-	//Iterate through all the search results
-	while(searchNode= searchResultPath.iterateNext()) {
-		var tmpURL = searchNode.href;
-		Zotero.debug("\nScraping page " + i++ + ": " + tmpURL );
-		
-		//Load in the xml document from the current search result url
-		var tmpDoc = Zotero.Utilities.retrieveDocument(tmpURL);
-		scrape(tmpDoc, tmpURL, nsResolver);
+function scrapeMulti(doc, url, nsResolver, type) {
+	switch(type) {
+		case "toc":
+			Zotero.debug("Scraping journal TOC");
+			var resultPath= doc.evaluate(tocResultX, doc, null, XPathResult.ANY_TYPE, null);
+			break;
+		case "search":
+			Zotero.debug("Scraping search");
+		default:
+			var resultPath= doc.evaluate(searchResultX, doc, null, XPathResult.ANY_TYPE, null);
 	}
-	*/
-      scrape(doc, url, nsResolver);
+	Zotero.debug("hi"+resultPath.iterateNext().textContent);
+
+	//Count how mange pages have been scraped
+	var node;
+	var urls = {};
+	//Iterate through all the results
+	while(node= resultPath.iterateNext()) {
+		urls[node.href] = node.textContent;
+	}
+	
+	var items = Zotero.selectItems(urls);
+	if(!items) return true;
+	
+	var i;
+	urls = [];
+	for (i in items) urls.push(i);
+	
+	Zotero.Utilities.processDocuments(urls, scrape, function(){Zotero.done()});
 }
 
 /**
  * Scrape a single page
  * @param doc The XML document describing the page
- * @param url The URL of the page being scanned
- * @param nsResolver the namespace resolver function
  */
-function scrape(doc, url, nsResolver) {
-	Zotero.debug("Scraping " + url);
+function scrape(doc) {
+	var url = doc.location.href;
+	var nsResolver = getNsResolver(doc, url);
 			
 	//Get all the details not scraped from the bibtex file
 	var tags = scrapeKeywords(doc);
 	var attachments = scrapeAttachments(doc, url);
-	var abstract = scrapeAbstract(doc);
-	var type = getArticleType(doc, url);
-		
+	var abs = scrapeAbstract(doc);
+	var type = getArticleType(doc, url, nsResolver);
+	var journal = getText("//meta[@name='citation_journal_title']/@content",doc, nsResolver);	
 	//Get the bibtex reference for this document as a string
 	var bibtex = scrapeBibtex(url, nsResolver);
 	
@@ -138,11 +161,19 @@ function scrape(doc, url, nsResolver) {
 	//Set the function to run when the bibtex string has been parsed
 	translator.setHandler("itemDone", function(obj, newItem) {
 		//Store all details not parsed from the bibtex
-		if(abstract) newItem.abstractNote = abstract;
+		if(abs) newItem.abstractNote = abs;
 		newItem.tags = tags;
 		newItem.attachments = attachments;
-		newItem.url = url;
 		newItem.itemType= type;
+		if (journal && journal != newItem.publicationTitle) {
+			newItem.journalAbbreviation = newItem.publicationTitle;
+			newItem.publicationTitle = journal;
+		}
+		// If the URL is just a DOI, clear it.
+		if (newItem.url.match(/^http:\/\/doi\.acm\.org\//)) newItem.url = "";
+		newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
+		var acmid = bibtex.match(/acmid = {(\d+)}/);
+		if(acmid) newItem.extra = "ACM ID: "+ acmid[1];
 		//Complete the parsing of the page
 		newItem.complete();
 	});
@@ -324,7 +355,8 @@ function getId(url, journal) {
  * @return a string with either "multiple", "journalArticle" or "conferencePaper" in it, depending on the type of document
  */
 function getArticleType(doc, url, nsResolver) {
-	if (url.indexOf("results.cfm") != -1) {	
+	var toc = doc.evaluate(tocX, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (url.indexOf("results.cfm") != -1 || toc) {	
 		Zotero.debug("Type: multiple");
 		return "multiple";
 	}
