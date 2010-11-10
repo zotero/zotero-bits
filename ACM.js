@@ -1,14 +1,14 @@
 {
-        "translatorID":"f965f45d-552f-457e-9621-22068bbf3db0",
-        "label":"ACM",
-        "creator":"Simon Kornblith and Michael Berkowitz and John McCaffery",
-        "target":"https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
-        "minVersion":"1.0.0b3.r1",
+        "translatorID":"f3f092bf-ae09-4be6-8855-a22ddd817925",
+        "label":"ACM Digital Library",
+        "creator":"Simon Kornblith, Michael Berkowitz and John McCaffery",
+        "target":"^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
+        "minVersion":"1.0",
         "maxVersion":"",
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-11-10 16:52:15"
+        "lastUpdated":"2010-11-10 22:10:09"
 }
 
 /**
@@ -91,7 +91,9 @@ function doWeb(doc, url) {
 function scrapeSearch(doc, url, nsResolver) {
 	Zotero.debug("Scraping search");
 	var searchResultPath= doc.evaluate(searchResultX, doc, null, XPathResult.ANY_TYPE, null);
-			
+	
+	/* While scraping all the pages of results is ambitious, it will quickly
+	get Zotero banned from the ACM Digital Library. Only use the current page.
 	//Count how mange pages have been scraped
 	var i = 1;
 	var searchNode;
@@ -104,6 +106,8 @@ function scrapeSearch(doc, url, nsResolver) {
 		var tmpDoc = Zotero.Utilities.retrieveDocument(tmpURL);
 		scrape(tmpDoc, tmpURL, nsResolver);
 	}
+	*/
+      scrape(doc, url, nsResolver);
 }
 
 /**
@@ -272,7 +276,7 @@ function scrapeBibtex(url, nsResolver) {
 	//Find the node with the bibtex text in it
 	var path = texDoc.evaluate('//pre', texDoc, nsResolver, XPathResult.ANY_TYPE, null);	
 	var node = path.iterateNext();
-	
+
 	if (node != null && node.textContent != null) {
 		var ref =  node.textContent;
 		Zotero.debug("\nref : " + (ref == null ? "null":ref));
@@ -349,9 +353,11 @@ function getText(pathString, doc, nsResolver) {
 	var path  = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);	
 	var node = path.iterateNext();		
 	
-	if (node == null || node.textContent == undefined || node.textContent == null)
-		return "Unable to scrape text";
-			
+	if (node == null || node.textContent == undefined || node.textContent == null) {
+		Zotero.debug("Unable to retrieve text for XPath: "+pathString);
+		return "";
+	}
+				
 	return node.textContent;
 }
 
