@@ -1,16 +1,15 @@
 {
-	"translatorID":"57a00950-f0d1-4b41-b6ba-44ff0fc30289",
-	"translatorType":4,
-	"label":"Google Scholar",
-	"creator":"Simon Kornblith, Frank Bennett",
-	"target":"http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-08-17 15:55:00"
+        "translatorID":"57a00950-f0d1-4b41-b6ba-44ff0fc30289",
+        "label":"Google Scholar",
+        "creator":"Simon Kornblith, Frank Bennett",
+        "target":"http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+        "minVersion":"1.0.0b3.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-17 23:08:45"
 }
-
 
 /*
  * Test pages
@@ -68,8 +67,8 @@ function doWeb(doc, url) {
 		haveBibTexLinks = doc.evaluate('//a[contains(@href, "scholar.bib")]',
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(!haveBibTexLinks) {
-			url = url.replace (/hl\=[^&]*&?/, "");
-			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
+			//url = url.replace (/hl\=[^&]*&?/, "");
+			//url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
 			haveBibTexLinks = true;
 			doc = Zotero.Utilities.retrieveDocument(url);
 		}
@@ -89,7 +88,7 @@ var scrapeListing = function (doc) {
 	// XML fragment lists
 	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var citeletFrags = doc.evaluate('//span[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib")]',
+	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib") or contains(@href, "scholar.ris") or contains(@href, "scholar.enw")]',
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 	var labels = [];
@@ -100,6 +99,7 @@ var scrapeListing = function (doc) {
 		if (!titleFrag) {
 			break;
 		}
+		Zotero.debug(titleFrag.textContent);
 		// initialize argument values
 		var titleString = titleFrag.textContent;
 		var citeletString = citeletFrags.iterateNext().textContent;
@@ -120,6 +120,7 @@ var scrapeListing = function (doc) {
 		}
 		// (Feed the array used in the selection list)
 		if (factory.hyphenSplit.length) {
+			Zotero.debug(titleString);
 			labels.push(titleString + " (" + factory.trailingInfo + ")");
 		} else {
 			labels.push(titleString);
@@ -378,6 +379,9 @@ ItemFactory.prototype.pushAttachments = function (doctype) {
 ItemFactory.prototype.getBibtexData = function () {
 	if (!this.bibtexData) {
 		if (this.bibtexData !== false) {
+			this.bibtexLink = this.bibtexLink.replace(/scholar\.(ris|enw)\?/, "scholar.bib?");
+			this.bibtexLink = this.bibtexLink.replace(/:scholar\.google\.com\/&.*$/, ":scholar.google.com/&output=citation&hl=en&as_sdt=2000&ct=citation&cd=0");
+			Zotero.debug(this.bibtexLink);
 			var bibtexData = Zotero.Utilities.retrieveSource(this.bibtexLink);
 			if (!bibtexData.match(/title={{}}/)) {
 				this.bibtexData = bibtexData;
