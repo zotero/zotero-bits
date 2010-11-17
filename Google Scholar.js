@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-11-17 23:08:45"
+        "lastUpdated":"2010-11-18 00:17:10"
 }
 
 /*
@@ -67,10 +67,16 @@ function doWeb(doc, url) {
 		haveBibTexLinks = doc.evaluate('//a[contains(@href, "scholar.bib")]',
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(!haveBibTexLinks) {
-			//url = url.replace (/hl\=[^&]*&?/, "");
-			//url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
-			haveBibTexLinks = true;
+			url = url.replace (/hl\=[^&]*&?/, "");
+			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
+			Zotero.debug(url);
+			var scisigDoc = Zotero.Utilities.retrieveDocument(url);
+			var scisig = scisigDoc.evaluate('//input[@name="scisig"]',
+				scisigDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			url = url + "&scisig="+scisig.value;
 			doc = Zotero.Utilities.retrieveDocument(url);
+			haveBibTexLinks = true;
+			Zotero.debug(url);
 		}
 		scrapeListing(doc);
 	}
@@ -384,6 +390,7 @@ ItemFactory.prototype.getBibtexData = function () {
 			Zotero.debug(this.bibtexLink);
 			var bibtexData = Zotero.Utilities.retrieveSource(this.bibtexLink);
 			if (!bibtexData.match(/title={{}}/)) {
+				Zotero.debug(bibtexData);
 				this.bibtexData = bibtexData;
 			} else {
 				this.bibtexData = false;
