@@ -147,7 +147,12 @@ function pnxToItem(text) {
 		
 		var language = xmldoc.display.language.toString();
 		// We really hope that Primo always uses ISO 639-2
-		if (language) item.language = iso6392(language);
+		// This looks odd, but it just means that we're using the verbatim
+		// content if it isn't in our ISO 639-2 hash.
+		if (language)
+			if(!(item.language = iso6392(language)))
+				item.language = language;
+
 		
 		var pages = xmldoc.display.format.toString().match(/(\d+)\sp\./);
 		if (pages) item.pages = pages[1];
@@ -310,6 +315,7 @@ idCheck = function(isbn) {
 	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8};
 }
 
+// This function should be replaced by a lookup from the multilingual machinery in multilingual builds of Zotero
 // Gives name for three-letter code
 function iso6392(code) {
 MAP_ISO6391_ISO6392 = {'aar' : 'Afar',
