@@ -464,7 +464,11 @@ function doExport() {
 				risTag = "A2";
 			}
 
-			addTag(risTag, item.creators[j].lastName+","+item.creators[j].firstName);
+			var names = [];
+			if (item.creators[j].lastName) names.push(item.creators[j].lastName);
+			if (item.creators[j].firstName) names.push(item.creators[j].firstName);
+
+			addTag(risTag, names.join(","));
 		}
 		
 		// assignee (patent)
