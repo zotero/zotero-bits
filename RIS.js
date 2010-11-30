@@ -40,6 +40,16 @@ var fieldMap = {
 	M3:"DOI"
 };
 
+var bookSectionFieldMap = {
+	ID:"itemID",
+	T1:"title",
+	T3:"series",
+	T2:"bookTitle",
+	CY:"place",
+	JA:"journalAbbreviation",
+	M3:"DOI"
+};
+
 var inputFieldMap = {
 	TI:"title",
 	CT:"title",
@@ -447,8 +457,14 @@ function doExport() {
 		addTag("TY", typeMap[item.itemType] ? typeMap[item.itemType] : "GEN");
 
 		// use field map
-		for(var j in fieldMap) {
-			if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
+		if (item.itemType == "bookSection") {
+			for(var j in bookSectionFieldMap) {
+				if(item[bookSectionFieldMap[j]]) addTag(j, item[bookSectionFieldMap[j]]);
+			}
+		} else {
+			for(var j in fieldMap) {
+				if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
+			}
 		}
 
 		// creators
