@@ -457,7 +457,7 @@ function doExport() {
 		addTag("TY", typeMap[item.itemType] ? typeMap[item.itemType] : "GEN");
 
 		// use field map
-		if (item.itemType == "bookSection") {
+		if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 			for(var j in bookSectionFieldMap) {
 				if(item[bookSectionFieldMap[j]]) addTag(j, item[bookSectionFieldMap[j]]);
 			}
