@@ -103,8 +103,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
 		var id, match, newurl, pdfurl, get;
 		/* Here, we have to use three phrasings because they all occur, depending on
-		   the journal.*/
-		match = text.match(/=([^=]+)\">\s*Download citation/);
+		   the journal.
+                TODO We should rewrite this to not use regex! */
+		match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
 		if (!match || match.length < 1) {
 			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
 			if (!match || match.length < 1) {
