@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-11-17 23:22:50"
+        "lastUpdated":"2010-11-18 06:10:00"
 }
 
 function detectWeb(doc, url) { 
@@ -128,6 +128,7 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.HTTP.doGet(uris, function(text) {
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
+		Zotero.debug("Amazon API response: " + text);
 		var texts = text.split("<Items>");
 		texts = texts[1].split("</ItemLookupResponse>");
 		text = "<Items>" + texts[0];
