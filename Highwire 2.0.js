@@ -2,7 +2,7 @@
         "translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
         "label":"Highwire 2.0",
         "creator":"Matt Burton",
-        "target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+        "target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
         "minVersion":"1.0.0b4.r5",
         "maxVersion":"",
         "priority":100,
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 			url.match("content/firstcite") 
 		) {
 			return "multiple";
-		} else if (url.match("content/[0-9]+")) {
+		} else if (url.match("content/(early/)?[0-9]+")) {
 			return "journalArticle";
 		}
 	}
@@ -103,8 +103,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
 		var id, match, newurl, pdfurl, get;
 		/* Here, we have to use three phrasings because they all occur, depending on
-		   the journal.*/
-		match = text.match(/=([^=]+)\">\s*Download citation/);
+		   the journal.
+                TODO We should rewrite this to not use regex! */
+		match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
 		if (!match || match.length < 1) {
 			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
 			if (!match || match.length < 1) {
