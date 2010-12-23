@@ -119,7 +119,8 @@ function doWeb(doc, url) {
 			pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
 		} else {
 			// This is not ideal...todo: brew a regex that grabs the correct URL
-			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
+			// The extra replace(..) call is for URLs like ../1.full.pdf+html
+			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")).replace(/\.full/,"") + ".full.pdf";
 		}
 		get = host + 'citmgr?type=refman&gca=' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
