@@ -3,7 +3,7 @@
 	"translatorType":8,
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
-	"target":"^http://partneraccess\\.oclc\\.org/",
+	"target":"http://partneraccess.oclc.org/",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":90,
@@ -46,7 +46,7 @@ function processCrossRef(xmlOutput) {
 		// Fall back to older namespace
 		default xml namespace = "http://www.crossref.org/xschema/1.0";
 		if(!xml.doi_record.length()) {
-			return false;
+			default xml namespace = "";
 		}
 	}
 	// ensure this isn't an error
@@ -60,25 +60,13 @@ function processCrossRef(xmlOutput) {
 		var refXML = itemXML.journal_article;
 		var metadataXML = itemXML.journal_metadata;
 		
-		item.ISSN = itemXML.journal_metadata.issn.toString();
+		item.ISSN = itemXML.journal_metadata.issn[0].toString();
 		item.publicationTitle = itemXML.journal_metadata.full_title.toString();
 		if (itemXML.journal_metadata.abbrev_title.length()) {
 			item.journalAbbreviation = itemXML.journal_metadata.abbrev_title[0].toString();
 		}
 		item.volume = itemXML.journal_issue.journal_volume.volume.toString();
 		item.issue = itemXML.journal_issue.issue.toString();
-	} else if(xml.doi_record[0].crossref["report-paper"]length()) {
-		// Report Paper
-		// Example: doi: 10.4271/2010-01-0907
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/10.4271/2010-01-0907&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=article&noredirect=true&format=unixref
-		var itemXML = xml.doi_record[0].crossref["report-paper"];
-		var refXML = itemXML["report-paper_metadata"];
-		var metadataXML = itemXML["report-paper_metadata"];
-		var item = new Zotero.Item("report");
-		if (metadataXML.publisher_item.item_number.toString())
-			item.reportNumber = metadataXML.publisher_item.item_number.toString();
-		item.institution = metadataXML.publisher.publisher_name.toString();
-		item.place = metadataXML.publisher.publisher_place.toString();
 	} else if(xml.doi_record[0].crossref.book.length()) {
 		// Book chapter
 		if(xml.doi_record[0].crossref.book.@book_type.length()
@@ -90,7 +78,7 @@ function processCrossRef(xmlOutput) {
 			item.publicationTitle = metadataXML.series_metadata.titles.title[0].toString();
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
-		// http://www.crossref.org/openurl/?pid=zter:zter123&url_ver=Z39.88-2004&req_dat=usr:pwd&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
+		// http://www.crossref.org/openurl/?url_ver=Z39.88-2004&req_dat=usr:pwd&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
 		} else if(xml.doi_record[0].crossref.book.@book_type.length()
 				&& xml.doi_record[0].crossref.book.@book_type == 'reference'
 				&& xml.doi_record[0].crossref.book.content_item.@component_type == 'reference_entry') {
@@ -188,7 +176,6 @@ function processCrossRef(xmlOutput) {
 			item.date = pubDateNode[0].month.toString()+"/"+item.date;
 		}
 	}
-
 	
 	if(refXML.pages.length()) {
 		item.pages = refXML.pages.first_page.toString();
