@@ -76,6 +76,13 @@ function doWeb(doc, url) {
 	var jid = RegExp.$1;
 	Zotero.debug("JID found 1 " + jid);
 	}
+	// Sometimes JSTOR uses DOIs as JID
+	else if (/(?:pss|stable)\/(10\.\d+\/.+)/.test(url)) {
+	Zotero.debug("URL " + url);
+	jid = RegExp.$1;
+	allJids.push(jid);
+	Zotero.debug("JID found 2 " + jid);
+	} 
 	else if (/(?:pss|stable)\/(\d+)/.test(url)) {
 	Zotero.debug("URL " + url);
 	jid = RegExp.$1;
@@ -144,11 +151,6 @@ function doWeb(doc, url) {
 					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
-
-				var matches;
-				if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
-					item.ISSN = matches[1] + '-' + matches[2];
-				} 
 				
 				set.item = item;
 				
