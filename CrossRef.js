@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2010-01-06 09:25:00"
+	"lastUpdated":"2011-01-09 18:20:00"
 }
 
 function detectSearch(item) {
@@ -186,7 +186,7 @@ function processCrossRef(xmlOutput) {
 	
 	item.DOI = refXML.doi_data.doi.toString();
 	item.url = refXML.doi_data.resource.toString();
-	item.title = refXML.titles[0].title.toString();
+	item.title = refXML.titles[0].title.toString().replace(/^<title>/, "").replace(/<\/title>$/,"");
 	
 	item.complete();
 	return true;
