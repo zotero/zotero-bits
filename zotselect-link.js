@@ -8,11 +8,10 @@
 "maxVersion":"",
 "priority":200,
 "inRepository":false,
+	"configOptions":{"dataMode":"block"},
+	"displayOptions":{"exportCharset":"UTF-8"},
 "lastUpdated":"2010-03-12 10:51:00"
 }
-
-Zotero.configure("dataMode", "block");
-Zotero.addOption("exportCharset", "UTF-8");
 
 function doExport() {
 	var item;
