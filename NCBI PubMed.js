@@ -63,10 +63,8 @@ function detectSearch(item) {
 
 function lookupPMIDs(ids, doc) {
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
-	Zotero.Utilities.HTTP.doGet(newUri, function(responseText) {
-		doImportFromText(responseText);
-		Zotero.done()
-	});
+	Zotero.debug(newUri);
+	Zotero.Utilities.HTTP.doGet(newUri, doImportFromText, function () {Zotero.done()});
 	Zotero.wait();
 }
 
@@ -75,7 +73,6 @@ function doImport() {
 	var line;
 	while((line = Zotero.read(4096)) !== false) {
 		text += line;
-		Zotero.debug("XXX Appended line: "+line);
 	}
 	return doImportFromText(text);
 }
@@ -204,7 +201,6 @@ function doImportFromText(text) {
 		newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 		newItem.complete();
 	}
-	return true;
 }
 
 function doWeb(doc, url) {
