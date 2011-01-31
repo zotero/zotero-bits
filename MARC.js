@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-06-13 02:00:00"
+	"lastUpdated":"2010-02-04 02:00:00"
 }
 
 function detectImport() {
@@ -194,6 +194,10 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
 					if(!returnFields[i][subfieldIndex]) {
 						returnFields[i][subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
+					} else {
+						// Duplicate subfield
+						Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
+						returnFields[i][subfieldIndex] = returnFields[i][subfieldIndex] + subfields[j].substr(this.subfieldCodeLength-1);
 					}
 				}
 			}
@@ -445,14 +449,14 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "260", "c", "date", pullNumber);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
-		// Extract series and series number
-		// The current preference is 490
-		this._associateDBField(item, "490", "a", "series");
-		this._associateDBField(item, "490", "v", "seriesNumber");
-		// 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
+                // Extract series and series number
+                // The current preference is 490
+                this._associateDBField(item, "490", "a", "series");
+                this._associateDBField(item, "490", "v", "seriesNumber");
+                // 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
 		this._associateDBField(item, "440", "a", "series");
 		this._associateDBField(item, "440", "v", "seriesNumber");
-		// Extract call number
+		
 		this._associateDBField(item, "084", "ab", "callNumber");
 		this._associateDBField(item, "082", "a", "callNumber");
 		this._associateDBField(item, "080", "ab", "callNumber");
