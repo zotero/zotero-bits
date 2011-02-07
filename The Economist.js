@@ -6,9 +6,9 @@
         "minVersion":"1.0.0b4.r5",
         "maxVersion":"",
         "priority":100,
-        "inRepository":true,
+        "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-03 13:27:34"
+        "lastUpdated":"2011-02-05 18:26:24"
 }
 
 function detectWeb(doc, url) {
@@ -31,42 +31,17 @@ function scrape(doc, url) {
        newItem.ISSN = "0013-0613";
        newItem.url = doc.location.href;
        newItem.publicationTitle = "The Economist";
+newItem.ns = namespace;
+Zotero.debug("Item url is:" + newItem.url);
+	var flyTitle = doc.evaluate('//h2[@class="fly-title"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
+	var headline = doc.evaluate('/html/body/div[2]/div[3]/div/div/div/div', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
+      newItem.title= flyTitle + ': ' + headline;
 
-
-       //get headline
-       var title = new Array();
-       if (doc.title && doc.title != "" && doc.title != "Economist.com") {
-               title = doc.title.split(" | ");
-       } else {
-		title.push(doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/font/b', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-       }
-
-
-       if (title.length == 1) {
-               title.push = title;
-       } else {
-               title = title.slice(0, title.length - 1);
-               title = title.join(": ");
-       }
-       newItem.title = title;
-
-       if (doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-right"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-               newItem.extra =  "(Subscription only)";
-       }
-
-	if (newItem.extra == "(Subscription only)"){ newItem.complete(); return;}
-       //get abstract
-       if (doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-               newItem.abstractNote = doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-       } else if (doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-               newItem.abstractNote = doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-       } else if (doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/p[3]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-       		newItem.abstractNote = doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/p[3]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-       }
+      
        if (newItem.abstractNote) newItem.abstractNote = Zotero.Utilities.trimInternal(newItem.abstractNote);
        //get date and extra stuff
    if (doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-               newItem.date = Zotero.Utilities.trim(doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split("|")[0]);
+               newItem.date = Zotero.Utilities.trim(doc.evaluate('/html/body/div[2]/div[3]/div/div/div/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split("|")[0]);
        }
 	
 	var url = doc.location.href;
