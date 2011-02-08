@@ -34,9 +34,7 @@
   * "Netscape Bookmark Format".
   * See http://msdn.microsoft.com/en-us/library/aa753582%28VS.85%29.aspx
   * This code draws from the CSL style for bookmark export, by Rintze Zelle
-  * 	http://www.zotero.org/styles/bookmark-export
-  * With some effort, we might be able to preserve things like bookmark folders by
-  * making collections, but need to explore cross-browser implementations first.
+  * http://www.zotero.org/styles/bookmark-export
   * Input looks like:
 <!DOCTYPE NETSCAPE-Bookmark-file-1>
 <!-- This is an automatically generated file.
@@ -51,14 +49,6 @@
 </DL>
   */
 
-function doImport() {
-	var text = "";
-	var line;
-	while((line = Zotero.read()) !== false) {
-		text += line;
-	}
-	return doImportFromText(text);
-}
 
 function detectImport() {
 	var text = "";
@@ -76,26 +66,39 @@ function detectImport() {
 	return false;	
 }
 
-
-// TODO Rework to allow for import progress
-// XXX Do we want to save snapshots? Not worth trying?
-function doImportFromText(text) {
-	var match;
-	var re = /<DT>\s*<A[^>]*HREF="([^"]+)"[^>]*>([^<\n]+)/gi;
-	/* The next line would be for saving the description, saved in <DD>. Firefox
-           puts the contents of its "Description" field here. We'll ignore it for now */ 
-	//var re = /<DT>\s*<A[^>]*HREF="([^"]+)"[^>]*>([^<\n]+)(?:<\/DT>)?[^<]*(<DD>[^<\n]+)?/gi;
-	while (match = re.exec(text)) {
-		if(match && match[1] && match[2]) {
-			var item = new Zotero.Item("webpage");
-			item.title = match[2];
-			item.url = match[1];
-			Zotero.debug("Made item with title: "+item.title);
-			//if (match[3]) item.abstractNote = match[3].subst(/<\/DD>/,"");
-			item.complete();
+function doImport() {
+	var line;
+	var hits;
+	var item = false;
+	var itemIncomplete = false;
+	var re = /([A-Za-z_]+)="([^"]+)"/g; 
+	while((line = Zotero.read()) !== false) {
+		if (line.indexOf("<DT>") !== -1) {
+			if (itemIncomplete) item.complete();
+			itemIncomplete = true;
+			item = new Zotero.Item("webpage");
+			item.title = line.match(/>([^<]*)<\/A>/)[1];
+			Zotero.debug(item.title);
+			while(hits = re.exec(line)) {
+				if (!hits) { Zotero.debug("RE no match in "+line);
+				}
+				switch (hits[1]) {
+					case "HREF": item.url = hits[2]; break;
+					case "TAGS": item.tags = hits[2].split(','); break;
+					default: item.extra = item.extra ? 	item.extra + "; "+ [hits[1], hits[2]].join("=") :
+										[hits[1], hits[2]].join("=");
+				}
+			}
+		} else if (line.substr(0,4) == "<DD>") {
+			if (itemIncomplete) item.abstractNote = item.abstractNote ? item.abstractNote + " " + line.substr(4) : line.substr(4);
+			else Zotero.debug("Discarding description line without item: " + line);
+		} else {
+			Zotero.debug("Discarding line: " + line);
 		}
 	}
-};
+	if (item && itemIncomplete) item.complete();
+}
+
 
 function doExport() {
 	var item;
@@ -109,10 +112,12 @@ function doExport() {
 '<H1>Bookmarks Menu</H1>\n'+
 '<DL>\n';
 	var footer = '</DL>';
+	//var tags = "";
 
 	Zotero.write(header);
 	while (item = Zotero.nextItem()) {
 		// TODO Be more verbose, making an informative title and including more metadata
+		//tags = item.tags.forEach(function (tag) {return tag.tag}).join(",");
 		if (item.url) Zotero.write('    <DT><A HREF="'+item.url+'">'+item.title+'</A>\n');
 		else Zotero.debug("Skipping item without URL: "+item.title);
 	}
