@@ -107,7 +107,6 @@ var inputTypeMap = {
 };
 
 function processTag(item, tag, value) {
-	value = value.replace(/\n/g, "<br>");
 	if (tag != "N1" && tag != "AB" && Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
@@ -246,7 +245,12 @@ function processTag(item, tag, value) {
 	} else if(tag == "N1" || tag == "AB") {
 		// notes
 		if(value != item.title) {       // why does EndNote do this!?
-			item.notes.push({note:value});
+			var clean = Zotero.Utilities.cleanTags(value);
+			if (clean == value)
+				item.notes.push({note:
+					Zotero.Utilities.text2html(value)});
+			else 
+				item.notes.push({note:value});
 		}
 	} else if(tag == "N2") {
 		// abstract
