@@ -107,8 +107,9 @@ var inputTypeMap = {
 };
 
 function processTag(item, tag, value) {
-	if (Zotero.Utilities.unescapeHTML) {
-		value = Zotero.Utilities.unescapeHTML(value.replace("\n", "<br>", "g"));
+	value = value.replace(/\n/g, "<br>");
+	if (tag != "N1" && tag != "AB" && Zotero.Utilities.unescapeHTML) {
+		value = Zotero.Utilities.unescapeHTML(value);
 	}
     
 	if(fieldMap[tag]) {
