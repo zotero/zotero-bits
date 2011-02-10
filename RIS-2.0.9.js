@@ -4,7 +4,7 @@
 	"label":"RIS",
 	"creator":"Simon Kornblith",
 	"target":"ris",
-	"minVersion":"2.1b2",
+	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,

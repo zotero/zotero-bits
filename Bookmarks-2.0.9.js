@@ -4,13 +4,14 @@
 	"label":"Bookmarks",
 	"creator":"Avram Lyon",
 	"target":"html",
-	"minVersion":"2.1b",
+	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
-	"configOptions":{"dataMode":"line"},
-	"inRepository":true,
-	"lastUpdated":"2011-02-10 04:31:00"
+	"inRepository":false,
+	"lastUpdated":"2011-01-11 04:31:00"
 }
+
+Zotero.configure("dataMode", "line");
 
 /*
    Browser bookmarks translator
