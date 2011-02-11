@@ -246,11 +246,17 @@ function processTag(item, tag, value) {
 		// notes
 		if(value != item.title) {       // why does EndNote do this!?
 			var clean = Zotero.Utilities.cleanTags(value);
-			if (clean == value)
-				item.notes.push({note:
-					Zotero.Utilities.text2html(value)});
-			else 
+			if (clean == value) {
+				// \n\n => <p>, \n => <br/>
+				//str = Zotero.Utilities.htmlSpecialChars(str);
+				value = '<p>'
+					+ value.replace(/\n\n/g, '</p><p>')
+						.replace(/\n/g, '<br/>')
+						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+						.replace(/  /g, '&nbsp;&nbsp;')
+					+ '</p>';
 				item.notes.push({note:value});
+			} else item.notes.push({note:value});
 		}
 	} else if(tag == "N2") {
 		// abstract
