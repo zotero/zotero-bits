@@ -18,7 +18,7 @@
       <term name="and others">и др.</term>
       <term name="anonymous">аноним</term>
       <term name="anonymous" form="short">анон.</term>
-      <term name="at">at</term>
+      <term name="at">на</term>
       <term name="by" />
       <term name="circa">circa</term>
       <term name="circa" form="short">ca.</term>
@@ -284,18 +284,18 @@
       <term name="month-12">декабрь</term>
 
       <!-- SHORT MONTH FORMS -->
-      <term name="month-01" form="short">янв</term>
-      <term name="month-02" form="short">фев</term>
-      <term name="month-03" form="short">мар</term>
-      <term name="month-04" form="short">апр</term>
+      <term name="month-01" form="short">янв.</term>
+      <term name="month-02" form="short">фев.</term>
+      <term name="month-03" form="short">мар.</term>
+      <term name="month-04" form="short">апр.</term>
       <term name="month-05" form="short">май</term>
-      <term name="month-06" form="short">июн</term>
-      <term name="month-07" form="short">июл</term>
-      <term name="month-08" form="short">авг</term>
-      <term name="month-09" form="short">сен</term>
-      <term name="month-10" form="short">окт</term>
-      <term name="month-11" form="short">ноя</term>
-      <term name="month-12" form="short">дек</term>
+      <term name="month-06" form="short">июн.</term>
+      <term name="month-07" form="short">июл.</term>
+      <term name="month-08" form="short">авг.</term>
+      <term name="month-09" form="short">сен.</term>
+      <term name="month-10" form="short">окт.</term>
+      <term name="month-11" form="short">ноя.</term>
+      <term name="month-12" form="short">дек.</term>
 
       <!-- SEASONS -->
       <term name="season-01">весна</term>
