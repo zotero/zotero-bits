@@ -164,6 +164,12 @@ function doWeb(doc, url) {
 					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
+
+                                var matches;
+                                if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
+                                        item.ISSN = matches[1] + '-' + matches[2];
+                                } 
+
 				
 				set.item = item;
 				
