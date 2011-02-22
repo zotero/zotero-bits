@@ -115,10 +115,21 @@ function doWeb(doc, url) {
 			var delim = (prefixes[tag.split('_')[0].toLowerCase()]) ? '_' : '.';
 			var pieces = tag.split(delim);
 			var prefix = pieces.shift();
+			if (prefix.toLowerCase() == "dc" && pieces.join(delim) == "title") {
+				foundTitle = true;
+			}
 			rdf.Zotero.RDF.addStatement(url, prefixes[prefix] + pieces.join(delim).toLowerCase(), value, true);
+		} else if(tag && value && (tag == "author" || tag == "author-personal")) {
+			rdf.Zotero.RDF.addStatement(url, prefixes["dc"] + "creator", value, true);
+		} else if(tag && value && tag == "author-corporate") {
+			rdf.Zotero.RDF.addStatement(url, prefixes["dc"] + "creator", value, true);
 		}
 	}
-	
+
+	if (!foundTitle) {
+		rdf.Zotero.RDF.addStatement(url, prefixes["dc"] + "title", doc.title, true);
+	}	
+
 	rdf.defaultUnknownType = "webpage";
 	rdf.doImport();
 }

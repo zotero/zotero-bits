@@ -379,10 +379,14 @@ function importItem(newItem, node, type) {
 	
 	// pages
 	newItem.pages = getFirstResults(node, [n.bib+"pages"], true);
-	if (!newItem.pages) {
-		newItem.pages = getFirstResults(node, [n.gh+"firstpage"], true) +
-				"-" +
-				getFirstResults(node, [n.gh+"lastpage"], true);
+	// Be careful-- zero-based page numbers are not impossible!
+	if (!newItem.pages && newItem.pages !== "0") {
+		var pages = [];
+		var pageFirst = getFirstResults(node, [n.gh+"firstpage"], true);
+		if (pageFirst || pageFirst === "0") pages.push(pageFirst);
+		var pageLast = getFirstResults(node, [n.gh+"lastpage"], true);
+		if (pageLast || pageLast === "0") pages.push(pageLast);
+		newItem.pages = pages.join('-');
 	}
 
 	// mediums
