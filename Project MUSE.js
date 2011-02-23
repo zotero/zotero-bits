@@ -1,14 +1,14 @@
 {
-        "translatorID":"c54d1932-73ce-dfd4-a943-109380e06574",
-        "label":"Project MUSE",
-        "creator":"Simon Kornblith, Avram Lyon",
-        "target":"https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
-        "minVersion":"1.0.0b4.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-05 22:03:33"
+        "translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
+        "label": "Project MUSE",
+        "creator": "Simon Kornblith, Avram Lyon",
+        "target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
+        "minVersion": "1.0.0b4.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-02-24 00:34:30"
 }
 
 function detectWeb(doc, url) {
@@ -34,19 +34,18 @@ function doWeb(doc, url) {
 		var htmlRe = /HTML/;
 		if (searchRe.test(url)) { 
 			// Search results
-			var tableRows = doc.evaluate('//div[@id="advancedsearch"]/save_form/table//tr',
+			var tableRows = doc.evaluate('//tr[@class="resultsrow"]',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				var input = doc.evaluate('.//input[@name="aid"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var link = doc.evaluate('.//div[@class="links"]//a[contains(@href,"summary") or contains(@href,".html")]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var title = doc.evaluate('.//div[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if(input && input.value && title && title.textContent) {
-					items[input.value] = title.textContent;
+				if(link && link.href && title && title.textContent) {
+					items[link.href] = title.textContent;
 				}
 			}
 		} else if (url.match(/\/toc\//)) {
-			//Zotero.debug("here");
 			var results = doc.evaluate('//div[@class="article"]',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var result; 
@@ -60,6 +59,21 @@ function doWeb(doc, url) {
 					//Zotero.debug(link.href);
 				}
 			}
+			// Some journals have old-style TOCs for back issues
+			// Ex. http://muse.jhu.edu/journals/eighteenth-century_studies/toc/ecs33.4.html
+			if (items.length == 0) {
+				var articles = doc.evaluate('//ul', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var article;
+				while (article = articles.iterateNext()) {
+					var link = doc.evaluate('./li/a[contains(@href,".html")]', article, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					var title = doc.evaluate('./li/i', article, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					//Zotero.debug(link.textContent);
+					if(link && link.href && title && title.textContent) {
+						items[link.href] = title.textContent;
+						//Zotero.debug(link.href);
+					}
+				} 
+			}
 		}
 		items = Zotero.selectItems(items);
 		if(!items) {
@@ -67,9 +81,9 @@ function doWeb(doc, url) {
 		}
 		var i;
 		var urls = [];
-		for (i in items) urls.push(i);
+		for (i in items) {urls.push(i); Zotero.debug(i);};
 		
-		Zotero.Utilities.processDocuments(urls, scrapeOne);		
+		Zotero.Utilities.processDocuments(urls, scrapeOne, function() {Zotero.done();});		
 	} else scrapeOne(doc);
 	Zotero.wait();
 }
@@ -77,6 +91,7 @@ function doWeb(doc, url) {
 // Given an article page, get the RIS and open it
 function scrapeOne(doc) {
 	var url = doc.location.href;
+	Zotero.debug("scrapeOne has "+doc.location.href)
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
