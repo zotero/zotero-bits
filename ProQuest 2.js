@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-01 01:16:36"
+        "lastUpdated": "2011-03-01 08:00:11"
 }
 
 function detectWeb(doc, url) {
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 					item.ISSN = value; break;
 			case "Source type":
 			case "Document Type":
-					item.itemType = (mapToZotero[value]) ? mapToZotero[value] : item.itemType; break;
+					item.itemType = (mapToZotero(value)) ? mapToZotero(value) : item.itemType; break;
 			case "Copyright":
 					item.rights = value; break;
 			case "Database":
@@ -115,14 +115,14 @@ function doWeb(doc, url) {
 	item.complete();
 }
 
-mapToZotero = {
+function mapToZotero (type) {
+	var map = {
 	"Scholarly Journals" : "journalArticle",
 	"Book Review-Mixed" : null, // FIX AS NECESSARY
 	"Reports" : "report",
 	"REPORT" : "report"
+	}
+	if (map[type]) return map[type];
+	Zotero.debug("No mapping for type: "+type);
+	return false;
 }
-
-function getPDF(url) {
-	var realLink = doc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if (realLink) return realLink.href;
-} 
