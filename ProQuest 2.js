@@ -2,13 +2,13 @@
         "translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
         "label": "ProQuest 2",
         "creator": "Avram Lyon",
-        "target": "^https?://search.proquest.com[^/]*/pqrl/docview/",
+        "target": "^https?://search\\.proquest\\.com[^/]*/pqrl/docview/",
         "minVersion": "2.0",
         "maxVersion": "",
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-01 08:29:20"
+        "lastUpdated": "2011-03-01 23:37:45"
 }
 
 function detectWeb(doc, url) {
@@ -16,13 +16,50 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
+	
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (record_rows.iterateNext()) {
 		return "journalArticle";	
 	}
+	var resultitem = doc.evaluate('//li[@class="resultItem"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if (resultitem.iterateNext()) {
+		return "multiple";
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+	
+	var detected = detectWeb(doc,url);
+	if (detected && detected != "multiple") {
+		scrape(doc,url);
+	} else if (detected) {
+		var articles = new Array();
+		var results = doc.evaluate('//li[@class="resultItem"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var items = new Array();
+		var result;
+		while(result = results.iterateNext()) {
+			var link = doc.evaluate('.//a[contains(@class,"previewTitle")]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var title = link.textContent;
+			var url = link.href;
+			items[url] = title;
+		}
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		for (var i in items) {
+			articles.push(i);
+		}
+		Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done();});
+		Zotero.wait();
+	}
+}
+
+function scrape (doc) {
+	var url = doc.location.href;
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
@@ -57,7 +94,9 @@ function doWeb(doc, url) {
 			case "Authors":
 					item.creators = valueAArray.map(
 							function(author) {
-								return Zotero.Utilities.cleanAuthor(author,"author",true);
+								return Zotero.Utilities.cleanAuthor(author,
+									"author",
+									author.indexOf(',') !== -1); // useComma
 							});
 					break;
 			case "Publication title":
@@ -79,8 +118,9 @@ function doWeb(doc, url) {
 					item.publisher = value; break;
 			case "Place of Publication":
 					item.place[0] = value; break;
-			case "Country of publication":
-					item.place[1] = value; break;
+			// blacklisting country-- ProQuest regularly gives us Moscow, United States
+			//case "Country of publication":
+			//		item.place[1] = value; break;
 			case "ISSN":
 					item.ISSN = value; break;
 			case "Source type":
