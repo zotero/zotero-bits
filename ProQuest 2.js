@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-01 23:37:45"
+        "lastUpdated": "2011-03-02 10:16:23"
 }
 
 function detectWeb(doc, url) {
@@ -74,6 +74,7 @@ function scrape (doc) {
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var record_row;
 	item.place = [];
+	item.thesisType = [];
 	var account_id;
 	while (record_row = record_rows.iterateNext()) {
 		var field = doc.evaluate('./div[@class="display_record_indexing_fieldname"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
@@ -106,6 +107,7 @@ function scrape (doc) {
 			case "Issue":
 					item.issue = value; break;
 			case "Pages":
+			case "First Page":
 					item.pages = value; break;
 			case "Number of pages":
 					item.numPages = value; break;
@@ -116,13 +118,27 @@ function scrape (doc) {
 					item.date = value; break;
 			case "Publisher":
 					item.publisher = value; break;
-			case "Place of Publication":
+			case "Place of Publication": // TODO Change to publisher-place when schema changes
+					item.place[0] = value; break;
+			case "Dateline":	// TODO Change to event-place when schema changes
+					item.place[0] = value; break;
+			case "School location":	// TODO Change to publisher-place when schema changes
 					item.place[0] = value; break;
 			// blacklisting country-- ProQuest regularly gives us Moscow, United States
 			//case "Country of publication":
 			//		item.place[1] = value; break;
 			case "ISSN":
 					item.ISSN = value; break;
+			case "ISBN":
+					item.ISBN = value; break;
+			case "School":
+					item.university = value; break;
+			case "Degree":
+					item.thesisType[0] = value; break;
+			case "Department":
+					item.thesisType[1] = value; break;
+			case "Advisor":		// TODO Map when exists in Zotero
+					break;
 			case "Source type":
 			case "Document Type":
 					item.itemType = (mapToZotero(value)) ? mapToZotero(value) : item.itemType; break;
@@ -132,6 +148,10 @@ function scrape (doc) {
 					item.libraryCatalog = value; break;
 			case "Language of Publication":
 					item.language = value; break;
+			case "Section":
+					item.section = value; break;
+			case "Identifiers / Keywords":
+					item.tags = value.split(', '); break;
 			case "Subjects":
 					item.tags = valueAArray; break;
 			default: Zotero.debug("Discarding unknown field '"+field+"' => '" +value+ "'");
@@ -140,39 +160,57 @@ function scrape (doc) {
 	
 	var abs = doc.evaluate('//div[@id="abstract_field"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abs) {
-		item.abstractNote = abs.textContent.replace(/\[ Show less \]/,"").trim();
+		item.abstractNote = abs.textContent.replace(/^.*\[\s*Show all\s*\]/,"").replace(/\[\s*Show less\s*\]/,"").trim();
 	}
 	
 	
 	// Ok, now we'll pull the RIS and run it through the translator. And merge with the temporary item.
 	// RIS LOGIC GOES HERE
 	
-	// The PDF link requires two requests-- we fetch the PDF full text page
-	var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if (pdf) {
-		var pdfDoc = Zotero.Utilities.retrieveDocument(pdf.href);
-		// This page gives a beautiful link directly to the PDF, right in the HTML
-		var realLink = pdfDoc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', pdfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (realLink) {
-			item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
-		}
+	// Sometimes the PDF is right on this page
+	var realLink = doc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (realLink) {
+		item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
 	} else {
-			// If no PDF, we'll save at least something. This might be fulltext, but we're not sure.
-			item.attachments.push({url:url, title:"ProQuest HTML", mimeType:"text/html"});
+		// The PDF link requires two requests-- we fetch the PDF full text page
+		var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (pdf) {
+			var pdfDoc = Zotero.Utilities.retrieveDocument(pdf.href);
+			// This page gives a beautiful link directly to the PDF, right in the HTML
+			realLink = pdfDoc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', pdfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (realLink) {
+				item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
+			}
+		} else {
+				// If no PDF, we'll save at least something. This might be fulltext, but we're not sure.
+				item.attachments.push({url:url, title:"ProQuest HTML", mimeType:"text/html"});
+		}
 	}
 	
 	item.place = item.place.join(', ');
+	item.thesisType = item.thesisType.join(', ');
+	
+	item.proceedingsTitle = item.publicationTitle;
+	
 	if(!item.itemType) item.itemType="journalArticle";
 	item.complete();
 }
 
-// This map is not complete; we're 
+// This map is not complete. See debug output to catch unassigned types
 function mapToZotero (type) {
 	var map = {
 	"Scholarly Journals" : "journalArticle",
 	"Book Review-Mixed" : false, // FIX AS NECESSARY
 	"Reports" : "report",
-	"REPORT" : "report"
+	"REPORT" : "report",
+	"Newspapers" : "newspaperArticle",
+	"News" : "newspaperArticle",
+	"Magazines" : "magazineArticle",
+	"Dissertations & Theses" : "thesis",
+	"Dissertation/Thesis" : "thesis",
+	"Conference Papers & Proceedings" : "conferencePaper",
+	"Wire Feeds": "newspaperArticle", // Good enough?
+	"WIRE FEED": "newspaperArticle" // Good enough?
 	}
 	if (map[type]) return map[type];
 	Zotero.debug("No mapping for type: "+type);
