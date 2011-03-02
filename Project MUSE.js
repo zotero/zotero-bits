@@ -8,11 +8,11 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-02-24 00:34:30"
+        "lastUpdated": "2011-03-02 23:38:17"
 }
 
 function detectWeb(doc, url) {
-	var searchRe = new RegExp("(^https?://[^/]+/search/results|/toc/)");
+	var searchRe = new RegExp("(^https?://[^/]+/search/results|/search/save|/toc/)");
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
@@ -26,7 +26,7 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var searchRe = new RegExp("^https?://[^/]+/search/results");
+	var searchRe = new RegExp("^https?://[^/]+/search/results|/search/save");
 	if(detectWeb(doc, url) == "multiple") {
 		var items = new Array();
 		var attachments = new Array();
@@ -34,18 +34,19 @@ function doWeb(doc, url) {
 		var htmlRe = /HTML/;
 		if (searchRe.test(url)) { 
 			// Search results
-			var tableRows = doc.evaluate('//tr[@class="resultsrow"]',
+			var tableRows = doc.evaluate('//save_form//tr[@class="resultsrow"]',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				var link = doc.evaluate('.//div[@class="links"]//a[contains(@href,"summary") or contains(@href,".html")]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var input = doc.evaluate('.//div[@class="links"]//a[3]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var title = doc.evaluate('.//div[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if(link && link.href && title && title.textContent) {
-					items[link.href] = title.textContent;
-				}
+				if(input && input.href && title && title.textContent) {
+					items[input.href] = title.textContent;
+				} else {Zotero.debug("bad row: "+tableRow.innerHTML)}
 			}
 		} else if (url.match(/\/toc\//)) {
+			//Zotero.debug("here");
 			var results = doc.evaluate('//div[@class="article"]',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var result; 
