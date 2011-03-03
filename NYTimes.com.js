@@ -93,7 +93,7 @@ function scrape(doc, url) {
 			author = author.substr(3);
 		}
 		
-		var authors = author.split(/ and |, /);
+		var authors = author.split(/ and |, (?!Jr.|Sr.|I[IV]|I$|I\s)/);
 		for each(var author in authors) {
 			// fix capitalization
 			var words = author.split(" ");
