@@ -2,13 +2,13 @@
         "translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
         "label": "ProQuest 2",
         "creator": "Avram Lyon",
-        "target": "^https?://search\\.proquest\\.com[^/]*/pqrl/docview/",
+        "target": "^https?://search\\.proquest\\.com[^/]*(/pqrl)?/(docview|publication|publicationissue)",
         "minVersion": "2.0",
         "maxVersion": "",
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-02 10:16:23"
+        "lastUpdated": "2011-03-05 13:30:02"
 }
 
 /*
@@ -28,6 +28,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -61,7 +62,7 @@ function doWeb(doc, url) {
 		var items = new Array();
 		var result;
 		while(result = results.iterateNext()) {
-			var link = doc.evaluate('.//a[contains(@class,"previewTitle")]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate('.//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = link.textContent;
 			var url = link.href;
 			items[url] = title;
@@ -149,6 +150,8 @@ function scrape (doc) {
 					item.ISSN = value; break;
 			case "ISBN":
 					item.ISBN = value; break;
+			case "DOI":
+					item.DOI = value; break;
 			case "School":
 					item.university = value; break;
 			case "Degree":
@@ -178,7 +181,11 @@ function scrape (doc) {
 	
 	var abs = doc.evaluate('//div[@id="abstract_field"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abs) {
-		item.abstractNote = abs.textContent.replace(/^.*\[\s*Show all\s*\]/,"").replace(/\[\s*Show less\s*\]/,"").trim();
+		item.abstractNote = abs.textContent
+					.replace(/^.*\[\s*Show all\s*\]/,"")
+					.replace(/\[\s*Show less\s*\]/,"")
+					.replace(/\[\s*PUBLICATION ABSTRACT\s*\]/,"")
+					.trim();
 	}
 	
 	
