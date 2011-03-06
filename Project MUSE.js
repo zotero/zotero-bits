@@ -39,7 +39,7 @@ function doWeb(doc, url) {
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				var input = doc.evaluate('.//div[@class="links"]//a[3]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var input = doc.evaluate('.//div[@class="links"]//a[last()]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var title = doc.evaluate('.//div[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if(input && input.href && title && title.textContent) {
 					items[input.href] = title.textContent;
@@ -52,7 +52,7 @@ function doWeb(doc, url) {
 			var result; 
 			while(result =  results.iterateNext()) {
 				//Zotero.debug(result.textContent);
-				var link = doc.evaluate('.//div[@class="links"]/p//a[3]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var link = doc.evaluate('.//div[@class="links"]/p//a[last()]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var title = doc.evaluate('.//div[@class="title"]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				//Zotero.debug(link.textContent);
 				if(link && link.href && title && title.textContent) {
