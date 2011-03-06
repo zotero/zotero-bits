@@ -1,14 +1,14 @@
 {
-        "translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
-        "label": "Project MUSE",
-        "creator": "Simon Kornblith, Avram Lyon",
-        "target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
-        "minVersion": "1.0.0b4.r1",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-02 23:38:17"
+	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
+	"label": "Project MUSE",
+	"creator": "Simon Kornblith, Avram Lyon",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": "1",
+	"translatorType": 4,
+	"lastUpdated": "2011-03-02 23:38:17"
 }
 
 function detectWeb(doc, url) {
@@ -43,7 +43,7 @@ function doWeb(doc, url) {
 				var title = doc.evaluate('.//div[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if(input && input.href && title && title.textContent) {
 					items[input.href] = title.textContent;
-				} else {Zotero.debug("bad row: "+tableRow.innerHTML)}
+				}
 			}
 		} else if (url.match(/\/toc\//)) {
 			//Zotero.debug("here");
@@ -82,7 +82,7 @@ function doWeb(doc, url) {
 		}
 		var i;
 		var urls = [];
-		for (i in items) {urls.push(i); Zotero.debug(i);};
+		for (i in items) {urls.push(i);};
 		
 		Zotero.Utilities.processDocuments(urls, scrapeOne, function() {Zotero.done();});		
 	} else scrapeOne(doc);
@@ -92,7 +92,7 @@ function doWeb(doc, url) {
 // Given an article page, get the RIS and open it
 function scrapeOne(doc) {
 	var url = doc.location.href;
-	Zotero.debug("scrapeOne has "+doc.location.href)
+	//Zotero.debug("scrapeOne has "+doc.location.href)
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
