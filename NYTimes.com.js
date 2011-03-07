@@ -82,7 +82,10 @@ function scrape(doc, url) {
 		newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 	}
 	
-	associateMeta(newItem, metaTags, "dat", "date");
+	if (metaTags["pdate"]) {
+		newItem.date = metaTags["pdate"].replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3");
+	}
+
 	associateMeta(newItem, metaTags, "hdl", "title");
 	associateMeta(newItem, metaTags, "dsk", "section");
 	associateMeta(newItem, metaTags, "articleid", "accessionNumber");
@@ -117,7 +120,7 @@ function scrape(doc, url) {
 			newItem.tags[i] = newItem.tags[i].replace("  ", ", ");
 		}
 	}
-	
+
 	newItem.complete();
 }
 
