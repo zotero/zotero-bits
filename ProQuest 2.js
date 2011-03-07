@@ -229,7 +229,7 @@ function mapToZotero (type) {
 	"Reports" : "report",
 	"REPORT" : "report",
 	"Newspapers" : "newspaperArticle",
-	"News" : "newspaperArticle",
+	//"News" : "newspaperArticle",	// Otherwise Foreign Policy is treated as a newspaper http://search.proquest.com/docview/840433348
 	"Magazines" : "magazineArticle",
 	"Dissertations & Theses" : "thesis",
 	"Dissertation/Thesis" : "thesis",
