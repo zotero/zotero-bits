@@ -196,8 +196,11 @@ function doImportFromText(text) {
 			}
 		}
 		// We use a regex to remove the section labels
-		newItem.abstractNote = article.Abstract.AbstractText.toString()
-				.replace(/<\/?AbstractText\s*(?:Label=")?([^">]+)?[^>]*>/g, "$1\n");
+		// also, we have entities to clear up
+		newItem.abstractNote = Zotero.Utilities.unescapeHTML(
+						article.Abstract.AbstractText.toString()
+							.replace(/<\/?AbstractText\s*(?:Label=")?([^">]+)?[^>]*>/g, "$1\n")
+						);
 
 			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId.(@IdType == "doi" ).text().toString();
 		newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
@@ -216,7 +219,7 @@ function doWeb(doc, url) {
 	var uid = uids.iterateNext();
 	if(uid) {
 		if (uids.iterateNext()){
-			var items = new Array();
+			var items = {};
 			var tablex = '//div[@class="rprt"]';
 			if (!doc.evaluate(tablex, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 				var tablex = '//div[@class="ResultSet"]/dl';
