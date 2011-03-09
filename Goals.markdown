@@ -12,9 +12,10 @@ _In-Progress Translators_
  * Ab Imperio
  * Gasyrlar Avazy
  * Primo
+ * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)
 
 _Other Zotero Features_
- * RTF scan fixes, see http://forums.zotero.org/discussion/16751
+ * RTF scan fixes, see http://forums.zotero.org/discussion/16751. Gnotero integration would provide something akin to Papers2's Magic Manuscripts
  * Identifiers
 
 _Scholarly Process_
