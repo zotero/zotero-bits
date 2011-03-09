@@ -2,13 +2,13 @@
 	"translatorID":"83979786-44af-494a-9ddb-46654e0486ef",
 	"translatorType":4,
 	"label":"Reuters",
-	"creator":"Michael Berkowitz",
+	"creator":"Michael Berkowitz, Avram Lyon",
 	"target":"^https?://(www\\.)?reuters\\.com/",
-	"minVersion":"1.0.0b4.r5",
+	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-07 14:50:00"
+	"lastUpdated":"2011-03-09 14:50:00"
 }
 
 function detectWeb(doc, url) {
