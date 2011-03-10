@@ -1,14 +1,14 @@
 {
-        "translatorID":"587709d3-80c5-467d-9fc8-ed41c31e20cf",
-        "label":"eLibrary.ru",
-        "creator":"Avram Lyon",
-        "target":"^http://elibrary\\.ru/",
-        "minVersion":"1.0.0b4.r5",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-10-19 21:02:57"
+        "translatorID": "587709d3-80c5-467d-9fc8-ed41c31e20cf",
+        "label": "eLibrary.ru",
+        "creator": "Avram Lyon",
+        "target": "^http://elibrary\\.ru/",
+        "minVersion": "1.0.0b4.r5",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-10 17:39:25"
 }
 
 /*
@@ -113,7 +113,7 @@ function scrape (doc) {
 					break;
 			}
 		}
-		var type = doc.evaluate('.//table[2]//tr[5]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var type = doc.evaluate('.//table[2]//tr[4]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
 		switch (type) {
 			case "научная статья":
@@ -181,20 +181,22 @@ function scrape (doc) {
 		item.date = doc.evaluate('.//table[2]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.ISSN = doc.evaluate('.//table[2]//tr[1]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.volume = doc.evaluate('.//table[2]//tr[2]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.extra = doc.evaluate('.//table[2]//tr[2]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.issue = doc.evaluate('.//table[2]//tr[3]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.pages = doc.evaluate('.//table[2]//tr[4]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.language = doc.evaluate('.//table[2]//tr[5]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.pages = doc.evaluate('.//table[2]//tr[3]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.language = doc.evaluate('.//table[2]//tr[4]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (item.extra) item.extra = "Цитируемость в РИНЦ: " + item.extra;
 		if (abstractBlock)
 			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		/*if (referenceBlock) {
-			var note = Zotero.Utilities.cleanString(
+			var note = Zotero.Utilities.trimInternal(
 							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, ns, XPathResult.ANY_TYPE, null)
 							.iterateNext().textContent);
 			Zotero.debug(note);
 			item.notes.push(note);
 		}*/
 		if (codeBlock) {
-			item.extra = doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.extra += doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
  			var doi = item.extra.match(/DOI: (10\..+?) /);
  			if (doi) item.DOI = doi[1];
  		}
