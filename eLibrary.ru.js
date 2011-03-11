@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-10 17:39:25"
+        "lastUpdated": "2011-03-11 12:12:34"
 }
 
 /*
@@ -116,6 +116,7 @@ function scrape (doc) {
 		var type = doc.evaluate('.//table[2]//tr[4]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
 		switch (type) {
+			case "обзорная статья": // Would be "review article"
 			case "научная статья":
 			        type = "journalArticle";
 			        break;
@@ -151,9 +152,12 @@ function scrape (doc) {
 		item.title = doc.title.match(/eLIBRARY.RU - (.*)/)[1];
 		
 		if (authorBlock) {
-		var authorNode = doc.evaluate('.//td[2]/font/a', authorBlock, ns, XPathResult.ANY_TYPE, null);
+		// Sometimes we don't have links, just bold text
+		var authorNode = doc.evaluate('.//td[2]/font/a | .//td[2]/font/b', authorBlock, ns, XPathResult.ANY_TYPE, null);
 		while ((author = authorNode.iterateNext()) !== null) {
-			if (!author.href.match(/org_about\.asp/)) { // Remove organizations
+			// Remove organizations; by URL or by node name
+			if ((author.href && !author.href.match(/org_about\.asp/))
+					|| author.nodeName == "B") { 
 				author = author.textContent;
 				var authors = author.split(",");
 				for (var i = 0; i < authors.length; i++) {
