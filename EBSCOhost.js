@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-02-24 23:44:28"
+        "lastUpdated": "2011-03-11 11:17:10"
 }
 
 function detectWeb(doc, url) {
@@ -85,16 +85,18 @@ function generateDeliverString(nsResolver, doc){
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
-	
-	//Zotero.debug("POSTTEXT="+text);
-	var postLocation = /<form method="post" action="([^"]+)"[^><]*id="aspnetForm"/
-	var postMatch = postLocation.exec(text);
-	var deliveryURL = postMatch[1].replace(/&amp;/g, "&");
+	var form = text.match(/<form[^>]*(?:id|name)="aspnetForm"[^>]*/);
+	if (form) postMatch = form[0].match(/action="([^"]+)"/);
+ 	if (!form || !postMatch) {
+	 	Zotero.debug("Failed to find download URI in delivery page.");
+	 	return false;
+ 	}
+	var deliveryURL = postMatch[1].replace(/&amp;/g,"&");
 	postMatch = customViewStateMatch.exec(text);
 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(postMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
 	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
-								 downloadString, function(text) {	// get marked records as RIS
+					downloadString, function(text) {	// get marked records as RIS
 		Zotero.debug(text);
 		// load translator for RIS
 		if (text.match(/^AB\s\s\-/m)) text = text.replace(/^AB\s\s\-/m, "N2  -");
@@ -164,19 +166,19 @@ function doWeb(doc, url) {
 		Zotero.Utilities.processDocuments(uris, function(newDoc){
 			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			postURL = host+"/ehost/"+postURL.nodeValue;
+			Zotero.debug(postURL);
 			var deliverString = generateDeliverString(nsResolver, newDoc);
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 		});
 	} else {
 		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
-		var link = [doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue];
+		var link = [decodeURI(doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue)];
 		Zotero.Utilities.processDocuments(link, function(newDoc){			
 			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			postURL = host+"/ehost/"+postURL.nodeValue;
 			var deliverString = generateDeliverString(nsResolver, newDoc);
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 		});
-
 	}
 	Zotero.wait();
 }
