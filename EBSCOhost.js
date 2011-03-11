@@ -85,14 +85,15 @@ function generateDeliverString(nsResolver, doc){
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
+	var postMatch = false;
 	var form = text.match(/<form[^>]*(?:id|name)="aspnetForm"[^>]*/);
 	if (form) postMatch = form[0].match(/action="([^"]+)"/);
- 	if (!form || !postMatch) {
+	else postMatch = customViewStateMatch.exec(text);
+ 	if (!postMatch) {
 	 	Zotero.debug("Failed to find download URI in delivery page.");
 	 	return false;
  	}
 	var deliveryURL = postMatch[1].replace(/&amp;/g,"&");
-	postMatch = customViewStateMatch.exec(text);
 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(postMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
 	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
