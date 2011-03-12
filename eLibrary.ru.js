@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-12 22:49:15"
+        "lastUpdated": "2011-03-12 22:55:32"
 }
 
 /*
@@ -216,6 +216,7 @@ function scrape (doc) {
 			Zotero.debug(note);
 			item.notes.push(note);
 		}*/
+		
 		if (codeBlock) {
 			item.extra += ' '+ doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
  			var doi = item.extra.match(/DOI: (10\.[^\s]+)/);
@@ -229,6 +230,11 @@ function scrape (doc) {
 			var tag, tagNode = doc.evaluate('.//td[2]/a', keywordBlock, ns, XPathResult.ANY_TYPE, null);
 			while ((tag = tagNode.iterateNext()) !== null)
 					item.tags.push(tag.textContent);
+		}
+
+		if (item.title.toUpperCase() == item.title) {
+			Zotero.debug("Trying to fix all-uppers");
+			item.title = item.title.substr(0,1) + item.title.toLowerCase().substr(1);
 		}
 
 		//if(pdf) item.attachments.push(pdf);
