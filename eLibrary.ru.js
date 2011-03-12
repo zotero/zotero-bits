@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-03-11 12:12:34"
+        "lastUpdated": "2011-03-12 22:49:15"
 }
 
 /*
@@ -85,27 +85,32 @@ function scrape (doc) {
 			switch (label) {
 				case "Названиепубликации":
 					titleBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have titleBlock");
 					break;
 				case "Авторы":
 					authorBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have authorBlock");
 					break;
 				case "Журнал":
+				case "Издательство":
 					metaBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have metaBlock");
 					break;
 				case "Коды":
 					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have codeBlock");
 					break;
 				case "Ключевыеслова":
 					keywordBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have keywordBlock");
 					break;
 				case "Аннотация":
 					abstractBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-					break;
-				case "Коды":
-					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have abstractBlock");
 					break;
 				case "Списоклитературы":
 					referenceBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					Zotero.debug("have referenceBlock");
 					break;
 				case "Переводнаяверсия":
 				default:
@@ -113,24 +118,8 @@ function scrape (doc) {
 					break;
 			}
 		}
-		var type = doc.evaluate('.//table[2]//tr[4]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
-		switch (type) {
-			case "обзорная статья": // Would be "review article"
-			case "научная статья":
-			        type = "journalArticle";
-			        break;
-			case "учебное пособие":
-			case "монография":
-			        type = "book";
-			        break;
-			default:
-		                Zotero.debug("Unknown type: "+type+". Using 'journalArticle'");
-				type = "journalArticle";
-				break;
-		}
-		
-		var item = new Zotero.Item(type);
+		var item = new Zotero.Item();
 		/*var pdf = false;
 		// Now see if we have a free PDF to download
 		var pdfImage = doc.evaluate('//a/img[@src="/images/pdf_green.gif"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
@@ -156,7 +145,8 @@ function scrape (doc) {
 		var authorNode = doc.evaluate('.//td[2]/font/a | .//td[2]/font/b', authorBlock, ns, XPathResult.ANY_TYPE, null);
 		while ((author = authorNode.iterateNext()) !== null) {
 			// Remove organizations; by URL or by node name
-			if ((author.href && !author.href.match(/org_about\.asp/))
+			if ((author.href && !author.href.match(/org_about\.asp/)
+							 && !author.href.match(/org_items\.asp/))
 					|| author.nodeName == "B") { 
 				author = author.textContent;
 				var authors = author.split(",");
@@ -179,19 +169,46 @@ function scrape (doc) {
 			} else { Zotero.debug("Skipping presumed affiliation: " + author.textContent) ; } 
 		}
 		}
-
-		item.publicationTitle = doc.evaluate('.//table[1]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.publisher = doc.evaluate('.//table[1]//tr[2]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.date = doc.evaluate('.//table[2]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.ISSN = doc.evaluate('.//table[2]//tr[1]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.volume = doc.evaluate('.//table[2]//tr[2]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.extra = doc.evaluate('.//table[2]//tr[2]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.issue = doc.evaluate('.//table[2]//tr[3]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.pages = doc.evaluate('.//table[2]//tr[3]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.language = doc.evaluate('.//table[2]//tr[4]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		// This is the table of metadata. We could walk through it, but I found it easier
+		// to just make a 2-d array of XPaths of field names values.
+		var mapped = false;
+		var metaPieces = [['.//table[1]//tr[1]/td[1]','.//table[1]//tr[1]/td[2]'],
+							['.//table[1]//tr[2]/td[1]','.//table[1]//tr[2]/td[2]'],
+							['.//table[2]//tr[1]/td[1]','.//table[2]//tr[1]/td[2]'],
+							['.//table[2]//tr[1]/td[3]','.//table[2]//tr[1]/td[4]'],
+							['.//table[2]//tr[2]/td[1]','.//table[2]//tr[2]/td[2]'],
+							['.//table[2]//tr[2]/td[3]','.//table[2]//tr[2]/td[4]'],
+							['.//table[2]//tr[3]/td[1]','.//table[2]//tr[3]/td[2]'],
+							['.//table[2]//tr[3]/td[3]','.//table[2]//tr[3]/td[4]'],
+							['.//table[2]//tr[4]/td[1]','.//table[2]//tr[4]/td[2]'],
+							['.//table[2]//tr[4]/td[3]','.//table[2]//tr[4]/td[4]']]
+		for (i in metaPieces) {
+			mapped = mapper(metaPieces[i][0], metaPieces[i][1], metaBlock, doc);
+			item[mapped[0]] = mapped[1];
+		}
 		if (item.extra) item.extra = "Цитируемость в РИНЦ: " + item.extra;
 		if (abstractBlock)
 			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		
+		// Set type
+		switch (item.itemType) {
+			case "обзорная статья": // Would be "review article"
+			case "научная статья":
+			        item.itemType = "journalArticle";
+			        break;
+			case "учебное пособие":
+			case "монография":
+			        item.itemType = "book";
+			        break;
+			case "публикация в сборнике трудов конференции":
+			        item.itemType = "conferencePaper";
+			        break;
+			default:
+		                Zotero.debug("Unknown type: "+item.itemType+". Using 'journalArticle'");
+				item.itemType = "journalArticle";
+				break;
+		}
+		
 		/*if (referenceBlock) {
 			var note = Zotero.Utilities.trimInternal(
 							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, ns, XPathResult.ANY_TYPE, null)
@@ -200,9 +217,12 @@ function scrape (doc) {
 			item.notes.push(note);
 		}*/
 		if (codeBlock) {
-			item.extra += doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
- 			var doi = item.extra.match(/DOI: (10\..+?) /);
- 			if (doi) item.DOI = doi[1];
+			item.extra += ' '+ doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+ 			var doi = item.extra.match(/DOI: (10\.[^\s]+)/);
+ 			if (doi) {
+	 			item.DOI = doi[1];
+	 			item.extra = item.extra.replace(/DOI: 10\.[^\s]+/,"");
+	 		}
  		}
 		
 		if (keywordBlock) {
@@ -214,4 +234,39 @@ function scrape (doc) {
 		//if(pdf) item.attachments.push(pdf);
 		
 		item.complete();
+}
+
+function mapper (from, to, block, doc) {
+	var name = doc.evaluate(from, block, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var value = doc.evaluate(to, block, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (!name || !value) return false;
+	var key = false;
+	switch (name.textContent.trim()) {
+		case "Журнал":
+			key = "publicationTitle"; break;
+		case "Издательство":
+			key = "publisher"; break;
+		case "Год издания":
+		case "Год выпуска":
+			key = "date"; break;
+		case "Том":
+			key = "volume"; break;
+		case "Номер":
+			key = "issue"; break;
+		case "ISSN":
+			key = "ISSN"; break;
+		case "Страницы":
+			key = "pages"; break;
+		case "Язык":
+			key = "language"; break;
+		case "Место издания":
+			key = "place"; break;
+		case "Цит. в РИНЦ":
+			key = "extra"; break;
+		case "Тип":
+			key = "itemType"; break;
+		default:
+			Zotero.debug("Unmapped field: "+name.textContent.trim());
+	}
+	return [key, value.textContent.trim()];
 }
