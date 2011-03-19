@@ -4,13 +4,12 @@
 	"label":"RIS",
 	"creator":"Simon Kornblith",
 	"target":"ris",
-	"minVersion":"2.1b2",
+	"minVersion":"2.1b6",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2010-11-07 03:10:59"
+	"lastUpdated":"2011-03-20 03:10:59"
 }
 
 function detectImport() {
@@ -406,8 +405,9 @@ function doImport(attachments) {
 			// then fetch the tag and data from this line
 			tag = line.substr(0,2);
 			
-			// Handle out-of-spec old EndNote exports
-			if (line.substr(0, 5) == "TY - ") {
+			// Handle out-of-spec old EndNote exports with one space
+			// This also happens when copying-and-pasting from the web
+			if (line.match(/^[A-Z0-9]{2} - /)) {
 				data = line.substr(5);
 			}
 			else {
