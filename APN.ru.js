@@ -1,18 +1,18 @@
 {
-        "translatorID": "f3e31f93-c18d-4ba3-9aa6-1963702b5762",
-        "label": "Ab Imperio",
+        "translatorID": "737216af-fc48-4aa5-bfae-560c9cfc5df5",
+        "label": "APN.ru",
         "creator": "Avram Lyon",
-        "target": "^https?:\\/\\/abimperio\\.net\\/",
+        "target": "^https?:\\/\\/www\\.apn\\.ru\\/",
         "minVersion": "2.0",
         "maxVersion": "",
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-02-24 23:44:11"
+        "lastUpdated": "2011-03-19 22:21:26"
 }
 
 /*
-   Ab Imperio Translator
+   APN.ru Translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
@@ -298,6 +298,9 @@ FW._MultiScraper = function (init) {
                 } else {
                     itemTrans = FW.getScraper(doc1, url1);                    
                 }
+                if (!itemTrans) {
+	                Zotero.debug("No scraper for selected item with URL: " +url1);
+                }
                 var items = itemTrans.makeItems(doc1, url1, attachments[url1]);
                 madeItems.push(items[0]);
             }
@@ -561,24 +564,18 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
 
 /** Articles */
-FW.Scraper({ itemType         : 'journalArticle',
-             detect           : FW.Xpath('//center[h3]/h3'),
-             title            : FW.Xpath('//center[h3]/h3').text().trim(),
-             attachments      : [
-				FW.Xpath('//a[contains(@href,"pdf") and contains(text(),"PDF")]').key("href").makeAttachment("application/pdf", "Ab Imperio PDF"),
-				FW.Url().makeAttachment("text/html", "Ab Imperio Snapshot"),
-				FW.Xpath('//table//td/a[img[contains(@src,"doc.gif")]]').key("href").makeAttachment("text/html", "Ab Imperio Snapshot")
-				],
-             creators         : FW.Xpath('//center[h3]').text().remove(/^[^\n]*\n/).remove(/\n.*/).cleanAuthor("author"),
-             // Of course, release date is always later, but we'll still call this a date and not a volume
-             date             : FW.Xpath('//center[h3]/font').text().match(/\/([0-9]{4})/,1),
-             issue            : FW.Xpath('//center[h3]/font').text().match(/([0-9]+)\//,1),
-             abstractNote     : FW.Xpath('//center[h3]/following-sibling::p[1]').text(),
-             publicationTitle : "Ab Imperio" });
+FW.Scraper({ itemType         : 'newspaperArticle',
+             detect           : FW.Xpath('//div[@class="block_div"]/div/*[@class="article_title"]'),
+             title            : FW.Xpath('//div[@class="block_div"]/div/*[@class="article_title"]').text().trim(),
+             attachments      : FW.Url().replace(/article/,"print").makeAttachment("text/html", "APN.ru Printable"),
+             creators         : FW.Xpath('//div[@class="block_div"]/div/a[@class="pub_aname"]').text().cleanAuthor("author"),
+             date 	      : FW.Xpath('//div[@class="block_div"]/div/span[@class="pub_date"]').text(),
+             publicationTitle : "Агенство политических новостей" });
 
 
 /** Search results */
 FW.MultiScraper({ itemType  : "multiple",
-                  detect    : FW.Xpath('//table'),
-                  titles    : FW.Xpath('//a[contains(@href,"state=showa")]').text(),
-                  urls      : FW.Xpath('//a[contains(@href,"state=showa")]').key('href').text() });
+             	  detect    : FW.Xpath('//div[@class="search_content"]'),
+             	  titles    : FW.Xpath('//div[@class="search_content"]/div/a[@class="searchtitle"]').text(),
+             	  urls    : FW.Xpath('//div[@class="search_content"]/div/a[@class="searchtitle"]').key('href').text()
+});

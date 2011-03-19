@@ -1,18 +1,18 @@
 {
-        "translatorID": "f3e31f93-c18d-4ba3-9aa6-1963702b5762",
-        "label": "Ab Imperio",
+        "translatorID": "8afd6209-ef61-4e64-ae6c-3b2d6f71aa50",
+        "label": "Гасырлар авазы / Эхо веков",
         "creator": "Avram Lyon",
-        "target": "^https?:\\/\\/abimperio\\.net\\/",
+        "target": "^http:\\/\\/www\\.archive\\.gov\\.tatarstan\\.ru\\/magazine\\/go\\/anonymous\\/main\\/\\?path=mg:\\/",
         "minVersion": "2.0",
         "maxVersion": "",
         "priority": 100,
         "inRepository": "1",
         "translatorType": 4,
-        "lastUpdated": "2011-02-24 23:44:11"
+        "lastUpdated": "2011-03-16 19:57:22"
 }
 
 /*
-   Ab Imperio Translator
+   Echo of the Ages Translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Erik's translator library */
+/* Erik's Framework */
 /**
     Copyright (c) 2010, Erik Hetzner
 
@@ -555,30 +555,28 @@ FW.doWeb = function (doc, url) {
 /* End generic code */
 
 function detectWeb(doc, url) { 
+	if (url.match(/numbers\/\d{4}[^/]*\/[\d_]+\/[\d_]+\/?$/)) {
 		return FW.detectWeb(doc, url);
+	}
+	return false; // no multi now
 }
 function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
-
 /** Articles */
 FW.Scraper({ itemType         : 'journalArticle',
-             detect           : FW.Xpath('//center[h3]/h3'),
-             title            : FW.Xpath('//center[h3]/h3').text().trim(),
-             attachments      : [
-				FW.Xpath('//a[contains(@href,"pdf") and contains(text(),"PDF")]').key("href").makeAttachment("application/pdf", "Ab Imperio PDF"),
-				FW.Url().makeAttachment("text/html", "Ab Imperio Snapshot"),
-				FW.Xpath('//table//td/a[img[contains(@src,"doc.gif")]]').key("href").makeAttachment("text/html", "Ab Imperio Snapshot")
-				],
-             creators         : FW.Xpath('//center[h3]').text().remove(/^[^\n]*\n/).remove(/\n.*/).cleanAuthor("author"),
-             // Of course, release date is always later, but we'll still call this a date and not a volume
-             date             : FW.Xpath('//center[h3]/font').text().match(/\/([0-9]{4})/,1),
-             issue            : FW.Xpath('//center[h3]/font').text().match(/([0-9]+)\//,1),
-             abstractNote     : FW.Xpath('//center[h3]/following-sibling::p[1]').text(),
-             publicationTitle : "Ab Imperio" });
+             detect           : FW.Xpath('//span[@class="bt1b"]').text(),
+             title            : FW.Xpath('//span[@class="bt1b"]').text().trim(),
+             attachments      : FW.Url().makeAttachment("text/html", "Echo of the Ages Snapshot"),
+             creators         : FW.Xpath('//td[p[@align="justify"]]/p[@align="right"]').text().remove(/,[^,]*(доктор|кандидат|специалист|аспирант)[^,]*/g).split(',').cleanAuthor("author"),
+             date             : FW.Xpath('//td[span[@class="bt1b"]]/a[1]').text().match(/([0-9]{4})/),
+             issue            : FW.Xpath('//td[span[@class="bt1b"]]/a[1]').text().match(/([0-9]{4})(.*)/,2),
+             section            : FW.Xpath('//td[span[@class="bt1b"]]/a[2]').text(),
+             publicationTitle : "Гасырлар авазы / Эхо веков" });
 
-
-/** Search results */
+/** Search results
 FW.MultiScraper({ itemType  : "multiple",
-                  detect    : FW.Xpath('//table'),
-                  titles    : FW.Xpath('//a[contains(@href,"state=showa")]').text(),
-                  urls      : FW.Xpath('//a[contains(@href,"state=showa")]').key('href').text() });
+                  detect    : !FW.Url().match(/numbers\/\d{4}[^/]*\/\d+\/\d+\/?$/),
+                  titles    : FW.Xpath('//a').text().replace(/numbers\/\d{4}[^/]*\/\d+\/\d+\/?$/),
+                  urls      : FW.Xpath('//ul[@class="results-list"]//h3/a').key('href').text() });
+
+ */
