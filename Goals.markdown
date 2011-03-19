@@ -6,6 +6,7 @@ _New Translators_
 
 _Broken Translators_
  * MetaPress (SpringerLink) 
+ * Ingenta (need for Brill)
 
 _In-Progress Translators_
  * Wiley (need multiple-item save)
@@ -13,6 +14,7 @@ _In-Progress Translators_
  * Gasyrlar Avazy
  * Primo
  * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)
+ * Explore EZProxy+JSTOR issues (http://forums.zotero.org/discussion/15987/)
 
 _Other Zotero Features_
  * RTF scan fixes, see http://forums.zotero.org/discussion/16751. Gnotero integration would provide something akin to Papers2's Magic Manuscripts
