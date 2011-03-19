@@ -1,4 +1,4 @@
-*Goals for Zotero development*
+ *Goals for Zotero development*
 
 _New Translators_
  * Write IMDB translator, perhaps using http://amazon.libcat.org/cgi-bin/imdb2marc.pl
