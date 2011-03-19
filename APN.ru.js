@@ -1,6 +1,6 @@
 {
         "translatorID": "737216af-fc48-4aa5-bfae-560c9cfc5df5",
-        "label": "APN.ru",
+        "label": "Агенство политических новостей",
         "creator": "Avram Lyon",
         "target": "^https?:\\/\\/www\\.apn\\.ru\\/",
         "minVersion": "2.0",
@@ -12,7 +12,7 @@
 }
 
 /*
-   APN.ru Translator
+   APN.ru (Агенство политических новостей) Translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
