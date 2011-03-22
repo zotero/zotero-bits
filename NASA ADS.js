@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-03-22 04:31:00"
 }
 
 function detectWeb(doc, url) {
@@ -30,13 +30,14 @@ function detectWeb(doc, url) {
 function parseRIS(bibcodes, hostname){
 	var getURL = "http://" + hostname + "/cgi-bin/nph-bib_query?"
 		+ bibcodes + "data_type=REFMAN&nocookieset=1";
-	Zotero.Utilities.HTTP.doGet(getURL, function(text){	
+	Zotero.Utilities.HTTP.doGet(getURL, function(text){
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {item.complete()});
 		translator.translate();
-		Zotero.done();
+		Zotero.done(); 
 	}, function() {});
 	Zotero.wait();
 }
