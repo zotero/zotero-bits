@@ -94,7 +94,9 @@ function downloadFunction(text) {
 	 	return false;
  	}
 	var deliveryURL = postMatch[1].replace(/&amp;/g,"&");
-	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(postMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
+ 	var viewstateMatch = customViewStateMatch.exec(text);
+ 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(viewstateMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
+
 	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
 					downloadString, function(text) {	// get marked records as RIS
