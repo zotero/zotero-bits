@@ -29,6 +29,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/****START STANDARD BLOCK****/
 /* Erik's translator library */
 /**
     Copyright (c) 2010, Erik Hetzner
@@ -298,9 +299,6 @@ FW._MultiScraper = function (init) {
                 } else {
                     itemTrans = FW.getScraper(doc1, url1);                    
                 }
-                if (!itemTrans) {
-	                Zotero.debug("No scraper for selected item with URL: " +url1);
-                }
                 var items = itemTrans.makeItems(doc1, url1, attachments[url1]);
                 madeItems.push(items[0]);
             }
@@ -554,8 +552,7 @@ FW.doWeb = function (doc, url) {
     scraper.evaluate('scraperDoneHook', doc, url);
     Zotero.debug("Leaving FW.doWeb");
 };
-
-/* End generic code */
+/****END STANDARD BLOCK****/
 
 function detectWeb(doc, url) { 
 		return FW.detectWeb(doc, url);
