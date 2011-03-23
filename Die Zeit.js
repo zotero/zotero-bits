@@ -1,8 +1,8 @@
 {
         "translatorID":"312bbb0e-bfb6-4563-a33c-085445d391ed",
-        "label":"DIE ZEIT",
+        "label":"Die Zeit",
         "creator":"Martin Meyerhoff",
-        "target":"^http://www.zeit.de/",
+        "target":"^http://www\\.zeit\\.de/",
         "minVersion":"1.0",
         "maxVersion":"",
         "priority":100,
@@ -11,7 +11,23 @@
         "lastUpdated":"2011-03-17 19:37:59"
 }
 
-// Copyleft: This is GPL Code. 
+/*
+   Die Zeit Translator
+   Copyright (C) 2011 Martin Meyerhoff
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 // Diese Funktion bestimmt, ob gesucht wird, und wenn ja, was
 function detectWeb(doc, url) {
@@ -57,8 +73,6 @@ function scrape(doc, url) {
 	if (doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var author  = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		author = author.replace(/^\s*Von\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
-	} else {
-		var author = "Die Zeit";
 	}
 	var author = author.split(" | "); // this seems to work even if there's no |
 	for (var i in author) {
@@ -121,7 +135,6 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "newspaperArticle") {
 		scrape(doc, url);
 	}
-	Zotero.wait()
 }
 
 
