@@ -11,6 +11,24 @@
         "lastUpdated":"2011-01-13 10:29:52"
 }
 
+/*
+    SFU IPinCH - translator for Zotero
+    Copyright (C) 2010 Gladys Tang
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 function detectWeb(doc, url) {
 	if (url.match(/records\//)) {
 		var metasT = doc.evaluate('//meta', doc, null , XPathResult.ANY_TYPE, null);
@@ -66,7 +84,7 @@ function scrape(doc, url) {
 					firstname = creatorStr.slice(i +1 );
 					creatorStr = firstname +' ' + lastname;
 				}
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(creatorStr, meta.name, false));
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(creatorStr, meta.name, true));
 			}
 			else
 				if(item='newspaperArticle' && meta.name == 'title')

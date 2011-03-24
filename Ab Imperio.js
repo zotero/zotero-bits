@@ -12,7 +12,7 @@
 }
 
 /*
-   Ab Imperio Translator
+   Echo of the Ages Translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/****START STANDARD BLOCK****/
 /* Erik's translator library */
 /**
     Copyright (c) 2010, Erik Hetzner
@@ -551,8 +552,7 @@ FW.doWeb = function (doc, url) {
     scraper.evaluate('scraperDoneHook', doc, url);
     Zotero.debug("Leaving FW.doWeb");
 };
-
-/* End generic code */
+/****END STANDARD BLOCK****/
 
 function detectWeb(doc, url) { 
 		return FW.detectWeb(doc, url);

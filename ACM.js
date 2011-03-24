@@ -1,14 +1,14 @@
 {
-        "translatorID":"f3f092bf-ae09-4be6-8855-a22ddd817925",
-        "label":"ACM Digital Library",
-        "creator":"Simon Kornblith, Michael Berkowitz and John McCaffery",
-        "target":"^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-10 23:55:19"
+	"translatorID":"f3f092bf-ae09-4be6-8855-a22ddd817925",
+	"label":"ACM Digital Library",
+	"creator":"Simon Kornblith, Michael Berkowitz and John McCaffery",
+	"target":"^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
+	"minVersion":"1.0",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2011-01-10 21:10:00"
 }
 
 /**
@@ -114,14 +114,13 @@ function scrapeMulti(doc, url, nsResolver, type) {
 		default:
 			var resultPath= doc.evaluate(searchResultX, doc, null, XPathResult.ANY_TYPE, null);
 	}
-	Zotero.debug("hi"+resultPath.iterateNext().textContent);
 
 	//Count how mange pages have been scraped
 	var node;
 	var urls = {};
 	//Iterate through all the results
 	while(node= resultPath.iterateNext()) {
-		urls[node.href] = node.textContent;
+		urls[node.href + '&preflayout=flat'] = node.textContent;
 	}
 	
 	var items = Zotero.selectItems(urls);
@@ -171,7 +170,7 @@ function scrape(doc) {
 		}
 		// If the URL is just a DOI, clear it.
 		if (newItem.url.match(/^http:\/\/doi\.acm\.org\//)) newItem.url = "";
-		newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
+		if (newItem.DOI) newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
 		var acmid = bibtex.match(/acmid = {(\d+)}/);
 		if(acmid) newItem.extra = "ACM ID: "+ acmid[1];
 		//Complete the parsing of the page
@@ -283,7 +282,7 @@ function scrapeAttachments(doc, url) {
  */
 function scrapeAbstract(doc) {
 	Zotero.debug("Scraping abstract");
-	var text = getText('//div[@style="display: inline;"]', doc);
+	var text = getText('//div[@class="flatbody" or @class="tabbody"]', doc);
 	return text;
 }
 

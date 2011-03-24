@@ -18,11 +18,14 @@ _In-Progress Translators_
 
 _Other Zotero Features_
  * RTF scan fixes, see http://forums.zotero.org/discussion/16751. Gnotero integration would provide something akin to Papers2's Magic Manuscripts
+   * "inability to read names with accent marks" http://forums.zotero.org/discussion/17040
+   * "Author suppression doesn't work well--a symbol is probably required (like the one used in Bookends) in order to force suppression e.g. {-Author, 1995, 45}" (Ibid.)
  * Identifiers
 
 _Scholarly Process_
  * Start using XML-TILE or other textual annotation system, and find a way to integrate with Zotero
  * Integrate OCR, or integrate Archive.org OCR more tightly
+   * Papers2 uses Tesseract-- I've been looking at it too, but we'd need training data
  * Image capture-- scanning, folder watching, etc.
 
 _Data Model_

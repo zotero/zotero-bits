@@ -4,7 +4,7 @@
 	"label":"Bookmarks",
 	"creator":"Avram Lyon",
 	"target":"html",
-	"minVersion":"2.1b",
+	"minVersion":"2.1b6",
 	"maxVersion":"",
 	"priority":100,
 	"configOptions":{"dataMode":"line"},
