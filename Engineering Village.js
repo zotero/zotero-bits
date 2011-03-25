@@ -44,6 +44,7 @@ function parseRIS(uris)
 				item.attachments[i]["itemType"] = "attachment";
 			}
 		}
+		item.complete();
 		});
              translator.translate();
              Zotero.done();
