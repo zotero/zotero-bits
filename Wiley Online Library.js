@@ -1,14 +1,14 @@
 {
-	"translatorID":"fe728bc9-595a-4f03-98fc-766f1d8d0936",
-	"translatorType":4,
-	"label":"Wiley Online Library",
-	"creator":"Sean Takats, Michael Berkowitz and Avram Lyon",
-	"target":"^https?://onlinelibrary\\.wiley\\.com[^\\/]*/doi",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-08-03 01:25:00"
+        "translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
+        "label": "Wiley Online Library",
+        "creator": "Sean Takats, Michael Berkowitz and Avram Lyon",
+        "target": "https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:doi|advanced/search)",
+        "minVersion": "1.0.0b4.r5",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-27 01:29:16"
 }
 
 function detectWeb(doc, url){
@@ -27,14 +27,12 @@ function doWeb(doc, url){
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	var host = 'http://' + doc.location.host + "/";
 	
-	var ids = new Array();
+	var urls = new Array();
 	if(detectWeb(doc, url) == "multiple") {  //search
-		var title;
 		var availableItems = new Array();
-		var articles = doc.evaluate('//div[@class="citation_article"]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var article;
+		var articles = doc.evaluate('//li//div[@class="citation article"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var article = false;
 		while (article = articles.iterateNext()) {
 			availableItems[article.href] = article.textContent;
 		}
@@ -42,7 +40,10 @@ function doWeb(doc, url){
 		if(!items) {
 			return true;
 		}
-		Zotero.Utilities.processDocuments(items, scrape, function () { Zotero.done(); });
+		for (var i in items) {
+			urls.push(i);
+		}
+		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
 	} else { //single article
 		scrape(doc, url);
 	}
@@ -110,8 +111,8 @@ function scrape(doc,url)
 	for (var i = 0; i< metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		var value = metaTags[i].getAttribute("content");
-		Zotero.debug(pages + pdf + html);
-       		Zotero.debug("Have meta tag: " + tag + " => " + value);
+		//Zotero.debug(pages + pdf + html);
+       		//Zotero.debug("Have meta tag: " + tag + " => " + value);
 		switch (tag) {
 			// PRISM
 			case "prism.publicationName": newItem.publicationTitle = value; break;
