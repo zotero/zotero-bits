@@ -44,17 +44,32 @@ function doWeb(doc, url){
 	var ns = n ? function(prefix) {
 		if (prefix == 'x') return n; else return null;
 	} : null;
+	
+	// Since we don't know much about the site, we have to assume that
+	// it is a webpage
 	var item = new Zotero.Item("webpage");
 	var title = doc.evaluate('//h1[@id="article-entry-title"]', doc, ns, XPathResult.ANY_TYPE, null);
 	item.title = title.iterateNext().textContent;
 	var rurl = doc.evaluate('//a[@id="article-url"]', doc, ns, XPathResult.ANY_TYPE, null);
 	rurl = rurl.iterateNext();
 	item.url = rurl.href;
+
+	// This is just the domain name, but it'll serve as the site title,
+	// since we don't know anything else.
 	item.websiteTitle = rurl.textContent;
+
+	// It is possible that Readability sometimes has multiple authors,
+	// in which case this will have to be slightly amended
 	var author = doc.evaluate('//span[@id="article-author"]/span[@class="fn"]', doc, ns, XPathResult.ANY_TYPE, null);
-	if (author) item.creators.push(Zotero.Utilities.cleanAuthor(author.iterateNext().textContent,"author"));		
+	if (author) item.creators.push(Zotero.Utilities.cleanAuthor(author.iterateNext().textContent,"author"));
+	
+	// There is also a standardized timestamp, but we're ignoring that
+	// in favor of the nice-looking time.
 	var time = doc.evaluate('//time[@id="article-timestamp"]', doc, ns, XPathResult.ANY_TYPE, null);
 	if(time) item.date = time.iterateNext().textContent;
-	item.attachments = [{itemType:"attachment", url:url, title:"Readability Snapshot", mimeType:"text/html"}]
+
+	// We snapshot the page, using the existing document
+	// TODO Eliminate the itemType:"attachment" when Z 2.1.2 is released
+	item.attachments = [{itemType:"attachment", document:doc, title:"Readability Snapshot"}]
 	item.complete();
 }
