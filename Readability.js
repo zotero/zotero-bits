@@ -61,8 +61,13 @@ function doWeb(doc, url){
 	// It is possible that Readability sometimes has multiple authors,
 	// in which case this will have to be slightly amended
 	var author = doc.evaluate('//span[@id="article-author"]/span[@class="fn"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
-	if (author) item.creators.push(Zotero.Utilities.cleanAuthor(author.textContent,"author"));
-	
+	if (author) {
+		var auts = author.textContent.split(" and ");
+		for (var i in auts) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(auts[i],"author"));
+		}
+	}
+
 	// There is also a standardized timestamp, but we're ignoring that
 	// in favor of the nice-looking time.
 	var time = doc.evaluate('//time[@id="article-timestamp"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
