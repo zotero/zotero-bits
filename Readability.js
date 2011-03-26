@@ -47,13 +47,14 @@ function doWeb(doc, url){
 	var item = new Zotero.Item("webpage");
 	var title = doc.evaluate('//h1[@id="article-entry-title"]', doc, ns, XPathResult.ANY_TYPE, null);
 	item.title = title.iterateNext().textContent;
-	var url = doc.evaluate('//a[@id="article-url"]', doc, ns, XPathResult.ANY_TYPE, null);
-	url = url.iterateNext();
-	item.url = url.href;
-	item.websiteTitle = url.textContent;
+	var rurl = doc.evaluate('//a[@id="article-url"]', doc, ns, XPathResult.ANY_TYPE, null);
+	rurl = rurl.iterateNext();
+	item.url = rurl.href;
+	item.websiteTitle = rurl.textContent;
 	var author = doc.evaluate('//span[@id="article-author"]/span[@class="fn"]', doc, ns, XPathResult.ANY_TYPE, null);
 	if (author) item.creators.push(Zotero.Utilities.cleanAuthor(author.iterateNext().textContent,"author"));		
 	var time = doc.evaluate('//time[@id="article-timestamp"]', doc, ns, XPathResult.ANY_TYPE, null);
 	if(time) item.date = time.iterateNext().textContent;
+	item.attachments = [{itemType:"attachment", url:url, title:"Readability Snapshot", mimeType:"text/html"}]
 	item.complete();
 }
