@@ -60,13 +60,13 @@ function doWeb(doc, url){
 
 	// It is possible that Readability sometimes has multiple authors,
 	// in which case this will have to be slightly amended
-	var author = doc.evaluate('//span[@id="article-author"]/span[@class="fn"]', doc, ns, XPathResult.ANY_TYPE, null);
-	if (author) item.creators.push(Zotero.Utilities.cleanAuthor(author.iterateNext().textContent,"author"));
+	var author = doc.evaluate('//span[@id="article-author"]/span[@class="fn"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+	if (author) item.creators.push(Zotero.Utilities.cleanAuthor(author.textContent,"author"));
 	
 	// There is also a standardized timestamp, but we're ignoring that
 	// in favor of the nice-looking time.
-	var time = doc.evaluate('//time[@id="article-timestamp"]', doc, ns, XPathResult.ANY_TYPE, null);
-	if(time) item.date = time.iterateNext().textContent;
+	var time = doc.evaluate('//time[@id="article-timestamp"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+	if(time) item.date = time.textContent;
 
 	// We snapshot the page, using the existing document
 	// TODO Eliminate the itemType:"attachment" when Z 2.1.2 is released
