@@ -1,14 +1,14 @@
 {
-        "translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
-        "label": "EBSCOhost",
-        "creator": "Simon Kornblith and Michael Berkowitz",
-        "target": "https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)",
-        "minVersion": "1.0.0b3.r1",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-11 11:17:10"
+	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
+	"label": "EBSCOhost",
+	"creator": "Simon Kornblith and Michael Berkowitz",
+	"target": "https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": "1",
+	"translatorType": 4,
+	"lastUpdated": "2011-03-24 23:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -99,7 +99,7 @@ function downloadFunction(text) {
 
 	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
-					downloadString, function(text) {	// get marked records as RIS
+								 downloadString, function(text) {	// get marked records as RIS
 		Zotero.debug(text);
 		// load translator for RIS
 		if (text.match(/^AB\s\s\-/m)) text = text.replace(/^AB\s\s\-/m, "N2  -");
@@ -169,12 +169,12 @@ function doWeb(doc, url) {
 		Zotero.Utilities.processDocuments(uris, function(newDoc){
 			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			postURL = host+"/ehost/"+postURL.nodeValue;
-			Zotero.debug(postURL);
 			var deliverString = generateDeliverString(nsResolver, newDoc);
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 		});
 	} else {
 		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
+		// The URL-encoding can cause issues too-- we decode it
 		var link = [decodeURI(doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue)];
 		Zotero.Utilities.processDocuments(link, function(newDoc){			
 			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -182,6 +182,7 @@ function doWeb(doc, url) {
 			var deliverString = generateDeliverString(nsResolver, newDoc);
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 		});
+
 	}
 	Zotero.wait();
 }
