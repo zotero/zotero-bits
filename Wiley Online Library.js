@@ -16,8 +16,10 @@ function detectWeb(doc, url){
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-		
-	return "journalArticle";
+	
+	if (url.match(/\/issuetoc|\/results/)) {
+		return "multiple";
+	} else return "journalArticle";
 }
 
 function doWeb(doc, url){
@@ -31,14 +33,16 @@ function doWeb(doc, url){
 	if(detectWeb(doc, url) == "multiple") {  //search
 		var title;
 		var availableItems = new Array();
+		var articles = doc.evaluate('//div[@class="citation_article"]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var article;
+		while (article = articles.iterateNext()) {
+			availableItems[article.href] = article.textContent;
+		}
 		var items = Zotero.selectItems(availableItems);
 		if(!items) {
 			return true;
 		}
-		for(var id in items) {
-			ids.push(id);
-		}
-		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
+		Zotero.Utilities.processDocuments(items, scrape, function () { Zotero.done(); });
 	} else { //single article
 		scrape(doc, url);
 	}
