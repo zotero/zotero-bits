@@ -2,7 +2,7 @@
 	"translatorID":"1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
 	"translatorType":4,
 	"label":"Primo",
-	"creator":"Matt Burton, Avram Lyon",
+	"creator":"Matt Burton, Avram Lyon, Etienne Cavalié",
 	"target":"/primo_library/",
 	"minVersion":"2.0",
 	"maxVersion":"",
@@ -11,6 +11,13 @@
 	"lastUpdated":"2010-06-08 07:15:00"
 }
 
+/*
+Supports Primo 2:
+Université de Nice, France (http://catalogue.unice.fr/)
+Supports Primo 3
+Boston College (http://www.bc.edu/supersleuth),
+Oxford Libraries (http://solo.ouls.ox.ac.uk/)
+*/
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -20,8 +27,14 @@ function detectWeb(doc, url) {
 		
 		if (doc.evaluate('//span[@class="results_corner EXLResultsTitleCorner"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			 return 'multiple';
-		} else if (doc.evaluate('//div[@class="results2 EXLFullResultsHeader"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
-			// Since we can't get the actual type without an additional request, assume it's a book
+		}
+		else if (doc.evaluate('//div[@class="EXLContent EXLBriefDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+			 return 'multiple';
+		}
+		else if (doc.evaluate('//div[@class="results2 EXLFullResultsHeader"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+			return 'book';
+		}
+		else if (doc.evaluate('//div[@class="EXLContent EXLFullDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			return 'book';
 		}
 }
@@ -34,75 +47,51 @@ function doWeb(doc, url) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
 	var links = new Array();
-	var RISregex = /^(.*display.do?).*(doc=[^&]+)/;		
-		
-	// This is a global, so that the itemDone handler can see it
-	domain = url.match(/https?:\/\/([^\/:]+)/);
 	
 	if (detectWeb(doc,url) == 'multiple') {
-		
-		var items = new Object();
-		var linkIterator = doc.evaluate('//div[contains(@class, "title")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titleIterator = doc.evaluate('//div[contains(@class, "title")]/a/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
-
-		// try/catch for the case when there are no search results, let doc.evaluate fail quietly
-		try {
-			while (link = linkIterator.iterateNext(), title = titleIterator.iterateNext()) {
-				// XXX RIS BLOCK
-				// create an array containing the links to RIS
-			 	/*var link_pieces = RISregex.exec(link.textContent);
-				var title = Zotero.Utilities.trimInternal(title.textContent);
-				var linkRIS = link_pieces[1]+"?ct=display&"+link_pieces[2]+"&showRIS=true&afterPDS=true";
-				items[linkRIS] = title;
-				*/
-				// create an array containing the links and add '&showPnx=true' to the end
-			 	var xmlLink = Zotero.Utilities.trimInternal(link.textContent)+'&showPnx=true';
-				var title = Zotero.Utilities.trimInternal(title.textContent);
-				items[xmlLink] = title;
+			var items = new Object();
+			
+			var linkIterator = "";
+			var titleIterator = "";
+			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0)
+			{
+				// Primo v2
+				linkIterator = doc.evaluate('//div[contains(@class, "title")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				titleIterator = doc.evaluate('//div[contains(@class, "title")]/a/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			}
-			items = Zotero.selectItems(items);
-			if(!items) return;
-			for(var link in items) {
-				links.push(link);
+			else
+			{
+				// Primo v3
+				linkIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			}
-		} catch(e) {
-			Zotero.debug("Search results contained zero items. "+e);
-			return;
-		}
 
-		
+			
+			// try/catch for the case when there are no search results, let doc.evealuate fail quietly
+			try {
+				while (link = linkIterator.iterateNext(), title = titleIterator.iterateNext()) {
+					
+					// create an array containing the links and add '&showPnx=true' to the end
+					var xmlLink = Zotero.Utilities.trimInternal(link.textContent)+'&showPnx=true';
+					Zotero.debug(xmlLink);
+					var title = Zotero.Utilities.trimInternal(title.textContent);
+					items[xmlLink] = title;
+				}
+				items = Zotero.selectItems(items);
+				for(var link in items) {
+					links.push(link);
+				}
+			} catch(e) {
+				Zotero.debug("Search results contained zero items. "+e);
+				return;
+			}
+
 	} else {
 		links.push(url+'&showPnx=true');
-		// XXX RIS BLOCK
-		/*var link_pieces = RISregex.exec(url);
-		var linkRIS = link_pieces[1]+"?ct=display&"+link_pieces[2]+"&showRIS=true&afterPDS=true";
-		links.push(linkRIS);*/
 	}
 	
-	// XXX RIS BLOCK
-	/*
-	Zotero.Utilities.processDocuments(links, function(doc) {
-		var text = doc.evaluate('//textarea[@name="ImportData"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		text = text.replace(/[ \t]*$/gm,"");
-		text = text.replace(/[\r\n]+[ \t]*[\r\n]+/g,"\n");
-		Zotero.debug(text);
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
-			item.repository = domain[1]+" Library Catalog";
-			item.complete(); 
-		});
-		translator.translate();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-	*/
+	Zotero.Utilities.HTTP.doGet(links, function(text) {
 	
-	Zotero.Utilities.HTTP.doGet(links, pnxToItem, function() {Zotero.done();});
-	Zotero.wait();
-}
-
-function pnxToItem(text) {
 		text = text.replace(/^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, ""); //because E4X is full of FAIL
 		var xmldoc = new XML(text);
 		
@@ -173,7 +162,12 @@ function pnxToItem(text) {
 		}
 		// does callNumber get stored anywhere else in the xml?
 		item.callNumber = xmldoc.enrichment.classificationlcc[0];
-		item.complete();		
+		
+		item.complete();
+		
+	}, function() {Zotero.done();});
+	Zotero.wait();
+
 }
 
 /* The next two functions are logic that could be bundled away into the translator toolkit. */
@@ -823,5 +817,6 @@ MAP_ISO6391_ISO6392 = {'aar' : 'Afar',
 'zun' : 'Zuni',
 'zxx' : 'No linguistic content; Not applicable',
 'zza' : 'Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki'};
-	return ((var lang = MAP_ISO6391_ISO6392[code]) !== null) ? lang : false;
+	var lang;
+	return ((lang = MAP_ISO6391_ISO6392[code]) !== null) ? lang : false;
 }
