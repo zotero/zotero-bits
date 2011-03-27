@@ -6,7 +6,7 @@
         "minVersion":"1.0.0b4.r5",
         "maxVersion":"",
         "priority":100,
-        "inRepository":"1",
+        "inRepository":true,
         "translatorType":4,
         "lastUpdated":"2011-02-05 18:26:24"
 }
@@ -39,9 +39,6 @@ Zotero.debug("Item url is:" + newItem.url);
 	var flyTitle = doc.evaluate('//h2[@class="fly-title"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
 	var headline = doc.evaluate('/html/body/div[2]/div[3]/div/div/div/div', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
       newItem.title= flyTitle + ': ' + headline;
-
-      
-       if (newItem.abstractNote) newItem.abstractNote = Zotero.Utilities.trimInternal(newItem.abstractNote);
        //get date and extra stuff
    if (doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
                newItem.date = Zotero.Utilities.trim(doc.evaluate('/html/body/div[2]/div[3]/div/div/div/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split("|")[0]);
