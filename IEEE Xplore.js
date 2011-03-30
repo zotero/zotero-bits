@@ -146,9 +146,9 @@ function scrape(doc,url)
 			// Google.
 			case "citation_journal_title": if (!newItem.publicationTitle) newItem.publicationTitle = value; break;
 			case "citation_authors":
-				if (newItem.creators.length == 0) {
-					for each(var author in value.split(';')) newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
-				}
+				// I'm a little concerned we'll see multiple copies of the author names...
+				for each(var author in value.split(';'))
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
 				break;
 			case "citation_title": if (!newItem.title) newItem.title = value; break;
 			case "citation_publisher": if (!newItem.publisher) newItem.publisher = value; break;
