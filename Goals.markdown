@@ -3,16 +3,16 @@
 _New Translators_
  * Write IMDB translator, perhaps using http://amazon.libcat.org/cgi-bin/imdb2marc.pl
  * Write Mendeley.com translator
+ * Write email translator
 
 _Broken Translators_
  * MetaPress (SpringerLink) 
  * Ingenta (need for Brill)
 
 _In-Progress Translators_
- * Wiley (need multiple-item save)
- * Ab Imperio
- * Gasyrlar Avazy
- * Primo
+ * Wiley (final QA before SVN)
+ * Ab Imperio (uses FW)
+ * Gasyrlar Avazy (uses FW)
  * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)
  * Explore EZProxy+JSTOR issues (http://forums.zotero.org/discussion/15987/)
 
@@ -21,12 +21,15 @@ _Other Zotero Features_
    * "inability to read names with accent marks" http://forums.zotero.org/discussion/17040
    * "Author suppression doesn't work well--a symbol is probably required (like the one used in Bookends) in order to force suppression e.g. {-Author, 1995, 45}" (Ibid.)
  * Identifiers
+ * PDF metadata lookup fallback
 
 _Scholarly Process_
  * Start using XML-TILE or other textual annotation system, and find a way to integrate with Zotero
  * Integrate OCR, or integrate Archive.org OCR more tightly
    * Papers2 uses Tesseract-- I've been looking at it too, but we'd need training data
  * Image capture-- scanning, folder watching, etc.
+ * Full-text indexing for more file types, see http://forums.zotero.org/discussion/17075/
+   * Extend interfaces in /chrome/content/zotero/xpcom/fulltext.js
 
 _Data Model_
  * Write an RDF triple store for the Firefox/XULRunner environment, and allow it to integrate with Zotero
