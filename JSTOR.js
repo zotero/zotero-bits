@@ -1,14 +1,14 @@
 {
-        "translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
-        "label":"JSTOR",
-        "creator":"Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-        "target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
-        "minVersion":"1.0.0b4.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2011-01-12 19:22:04"
+        "translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
+        "label": "JSTOR",
+        "creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
+        "target": "https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
+        "minVersion": "2.1b6",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-04-01 22:08:33"
 }
 
  
@@ -35,32 +35,6 @@ function detectWeb(doc, url) {
 	if(elmt || url.match(/pss/)) {
 	return "journalArticle";
 	}
-}
-
-
-Zotero.Utilities.processAsync = function (sets, callbacks, onDone) {
-	var currentSet;
-	var index = 0;
-	
-	var nextSet = function () {
-		if (!sets.length) {
-			onDone();
-			return;
-		}
-		index = 0;
-		currentSet = sets.shift();
-		callbacks[0](currentSet, nextCallback);
-	};
-	var nextCallback = function () {
-		index++;
-		callbacks[index](currentSet, nextCallback);
-	};
-	
-	// Add a final callback to proceed to the next set
-	callbacks[callbacks.length] = function () {
-		nextSet();
-	}
-	nextSet();
 }
 
 function doWeb(doc, url) {
@@ -111,7 +85,7 @@ function doWeb(doc, url) {
 	while (currTitleElmt = allTitlesElmts.iterateNext()) {
 		var title = currTitleElmt.textContent;
 		// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
-		if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)?/.test(currTitleElmt.href))
+		if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href))
 			var jid = RegExp.$1;
 		else
 			var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
@@ -150,7 +124,7 @@ function doWeb(doc, url) {
 				if(item.notes && item.notes[0]) {
 					// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
 					item.abstractNote = item.notes[0].note;
-					
+					item.abstractNote = item.abstractNote.replace(/^<p>ABSTRACT /,'').replace(/<\/p>$/,'');
 					delete item.notes;
 					item.notes = undefined;
 				}
@@ -169,8 +143,7 @@ function doWeb(doc, url) {
                                 if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
                                         item.ISSN = matches[1] + '-' + matches[2];
                                 } 
-
-				
+	
 				set.item = item;
 				
 				next();
