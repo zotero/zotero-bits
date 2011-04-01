@@ -81,6 +81,7 @@ function processCrossRef(xmlOutput) {
                item.place = metadataXML.publisher.publisher_place.toString();
 	} else if(xml.doi_record[0].crossref.book.length()) {
 		// Book chapter
+		// Example: doi: 10.1017/CCOL0521858429.016
 		if(xml.doi_record[0].crossref.book.@book_type.length()
 				&& xml.doi_record[0].crossref.book.@book_type == 'edited_book') {
 			var item = new Zotero.Item("bookSection");
