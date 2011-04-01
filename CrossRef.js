@@ -3,7 +3,7 @@
 	"translatorType":8,
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
-	"target":"http://partneraccess.oclc.org/",
+	"target":"^https?://partneraccess\\.oclc\\.org/",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":90,
@@ -85,9 +85,34 @@ function processCrossRef(xmlOutput) {
 				&& xml.doi_record[0].crossref.book.@book_type == 'edited_book') {
 			var item = new Zotero.Item("bookSection");
 			var refXML = xml.doi_record[0].crossref.book.content_item;
-			var metadataXML = xml.doi_record[0].crossref.book.book_series_metadata;
+			if (xml.doi_record[0].crossref.book.book_series_metadata.length())
+				var metadataXML = xml.doi_record[0].crossref.book.book_series_metadata;
+			else if (xml.doi_record[0].crossref.book.book_metadata.length())
+				var metadataXML = xml.doi_record[0].crossref.book.book_metadata;
+			if (metadataXML.series_metadata.length())
+				item.bookTitle = metadataXML.series_metadata.titles.title[0].toString();
+			else if (metadataXML.length())
+				item.bookTitle = metadataXML.titles.title[0].toString();
 			
-			item.publicationTitle = metadataXML.series_metadata.titles.title[0].toString();
+			// Handle book authors
+			if (metadataXML.contributors.length()) {
+				for each (var creatorXML in metadataXML.contributors.children()) {
+					var creator = {creatorType:"bookAuthor"};
+					if(creatorXML.@contributor_role == "editor") {
+						creator.creatorType = "editor";
+					} else if(creatorXML.@contributor_role == "translator") {
+						creator.creatorType = "translator";
+					}
+					if(creatorXML.localName() == "organization") {
+						creator.fieldMode = 1;
+						creator.lastName = creatorXML.toString();
+					} else if(creatorXML.localName() == "person_name") {
+						creator.firstName = fixAuthorCapitalization(creatorXML.given_name.toString());
+						creator.lastName = fixAuthorCapitalization(creatorXML.surname.toString());
+					}
+					item.creators.push(creator);
+				}
+			}
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
 		// http://www.crossref.org/openurl/?url_ver=Z39.88-2004&req_dat=usr:pwd&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
@@ -97,7 +122,7 @@ function processCrossRef(xmlOutput) {
 			var item = new Zotero.Item("bookSection");
 			var refXML = xml.doi_record[0].crossref.book.content_item;
 			var metadataXML = xml.doi_record[0].crossref.book.book_metadata;
-			item.publicationTitle = metadataXML.titles.title[0].toString();
+			item.bookTitle = metadataXML.titles.title[0].toString();
 			
 			// Handle book authors
 			if (metadataXML.contributors.length()) {
