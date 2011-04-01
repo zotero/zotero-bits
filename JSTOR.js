@@ -1,14 +1,14 @@
 {
-        "translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
-        "label": "JSTOR",
-        "creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-        "target": "https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
-        "minVersion": "2.1b6",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-04-01 22:08:33"
+	"translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
+	"label":"JSTOR",
+	"creator":"Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
+	"target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
+	"minVersion":"2.1b6",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2011-04-01 22:08:33"
 }
 
  
@@ -139,11 +139,11 @@ function doWeb(doc, url) {
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
 
-                                var matches;
-                                if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
-                                        item.ISSN = matches[1] + '-' + matches[2];
-                                } 
-	
+				var matches;
+				if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
+					item.ISSN = matches[1] + '-' + matches[2];
+				}
+
 				set.item = item;
 				
 				next();
