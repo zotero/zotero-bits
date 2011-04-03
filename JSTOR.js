@@ -133,11 +133,15 @@ function doWeb(doc, url) {
 				item.attachments = [];
 				
 				set.doi = "10.2307/" + jid;
-				
+
 				if (/stable\/(\d+)/.test(item.url)) {
 					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
+
+				
+				item.attachments.push({url:item.url, title:"JSTOR Entry", snapshot:false});
+				item.url = "";
 
 				var matches;
 				if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
