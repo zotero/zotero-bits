@@ -4,13 +4,14 @@ _New Translators_
  * Write IMDB translator, perhaps using http://amazon.libcat.org/cgi-bin/imdb2marc.pl
  * Write Mendeley.com translator
  * Write email translator
+ * Write ФЭБ translator
+ * Write import translator for Zotero's JSON
 
 _Broken Translators_
  * MetaPress (SpringerLink) 
- * Ingenta (need for Brill)
+ * IngentaConnect imprints (need for Brill)
 
 _In-Progress Translators_
- * Wiley (final QA before SVN)
  * Ab Imperio (uses FW)
  * Gasyrlar Avazy (uses FW)
  * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)
@@ -22,6 +23,7 @@ _Other Zotero Features_
    * "Author suppression doesn't work well--a symbol is probably required (like the one used in Bookends) in order to force suppression e.g. {-Author, 1995, 45}" (Ibid.)
  * Identifiers
  * PDF metadata lookup fallback
+ * Combine Embedded RDF, DOI, COinS and unAPI into a super-translator
 
 _Scholarly Process_
  * Start using XML-TILE or other textual annotation system, and find a way to integrate with Zotero
