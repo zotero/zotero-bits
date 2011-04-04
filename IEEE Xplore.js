@@ -30,6 +30,9 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
+	var hostRe = new RegExp("^(https?://[^/]+)/");
+	var hostMatch = hostRe.exec(url);
+	
 	var articleRe = /[?&]ar(?:N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 	
@@ -66,8 +69,8 @@ function doWeb(doc, url) {
 	} else {
 		// Some pages have no data
 		if (url.match("freesrchabstract.jsp")) {
-			var url = "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=";
-			Zotero.Utilities.processDocuments(url+m[1], scrape, function () { Zotero.done(); });
+			var url = hostMatch[1]+"/xpls/abs_all.jsp?arnumber="+m[1];
+			Zotero.Utilities.processDocuments(url, scrape, function () { Zotero.done(); });
 		} else {
 			scrape(doc, url);
 		}
