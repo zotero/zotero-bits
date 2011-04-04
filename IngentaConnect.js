@@ -38,14 +38,20 @@ function doWeb(doc, url) {
 	}
 	Zotero.debug(articles);
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var abs, pdf;
 		var risurl = newDoc.evaluate('//div[contains(@class,"export-formats")]/ul/li/a[@title="EndNote Export"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-		if (newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) var abs = Zotero.Utilities.trimInternal(newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+		if (newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			abs = Zotero.Utilities.trimInternal(newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+		}
+		if (newDoc.evaluate('//div[@id="purchaseexpand"]//a[contains(@title,"download")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			pdf = newDoc.evaluate('//div[@id="purchaseexpand"]//a[contains(@title,"download")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		}
 		if (newDoc.evaluate('//div[@id="info"]/p[1]/a', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var keywords = newDoc.evaluate('//div[@id="info"]/p[1]/a', newDoc, null, XPathResult.ANY_TYPE, null);
 			var key;
 			var keys = new Array();
 			while (key = keywords.iterateNext()) {
-				keys.push(Zotero.Utilities.capitalizeTitle(key.textContent));
+				keys.push(Zotero.Utilities.capitalizeTitle(key.textContent, true));
 			}
 		}
 		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
@@ -59,7 +65,8 @@ function doWeb(doc, url) {
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				if (abs) item.abstractNote = abs;
-				item.attachments = [{url:item.url, title:"IngentaConnect Snapshot", mimeType:"text/html"}];
+				if (pdf) item.attachments.push({url:pdf, title:"IngentaConnect Full Text PDF", mimeType:"application/pdf"});
+				// Note that the RIS translator gives us a link to the record already
 				item.url = null;
 				if (keys) item.tags = keys;
 				if (item.DOI) {
