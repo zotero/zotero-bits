@@ -30,7 +30,7 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
+	var articleRe = /[?&]ar(?:N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 	
 	if(detectWeb(doc, url) == "multiple") {
@@ -64,7 +64,13 @@ function doWeb(doc, url) {
 		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
 		Zotero.wait();
 	} else {
-		scrape(doc, url);
+		// Some pages have no data
+		if (url.match("freesrchabstract.jsp")) {
+			var url = "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=";
+			Zotero.Utilities.processDocuments(url+m[1], scrape, function () { Zotero.done(); });
+		} else {
+			scrape(doc, url);
+		}
 	}
 }
 
@@ -182,6 +188,13 @@ function scrape(doc,url) {
 				Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
 		}
 	}
+	
+	// Split if we have only one tag
+	if (newItem.tags.length == 1) {
+		newItem.tags = newItem.tags[0].split(";");
+	}
+	
+	if (pdf) newItem.attachments = [{url:pdf, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
 	if (html) newItem.attachments = [{url:html, title:"IEEE Xplore Full Text HTML"}];
 	
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
