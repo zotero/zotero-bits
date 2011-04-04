@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"IngentaConnect",
 	"creator":"Michael Berkowitz",
-	"target":"http://(www.)?ingentaconnect.com",
+	"target":"^https?://(www\\.)?ingentaconnect\\.com",
 	"minVersion":"1.0.0b3r1",
 	"maxVersion":"",
 	"priority":100,
@@ -49,6 +49,9 @@ function doWeb(doc, url) {
 			}
 		}
 		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+			// fix spacing per spec
+			text = text.replace(/([A-Z0-9]{2})  ?-/g,"$1  -");
+			Zotero.debug(text);
 			text = text.replace(/(PY\s+\-\s+)\/+/, "$1");
 			text = text.replace(/ER\s\s\-/, "") + "\nER  - ";
 			var translator = Zotero.loadTranslator("import");
@@ -57,9 +60,10 @@ function doWeb(doc, url) {
 			translator.setHandler("itemDone", function(obj, item) {
 				if (abs) item.abstractNote = abs;
 				item.attachments = [{url:item.url, title:"IngentaConnect Snapshot", mimeType:"text/html"}];
+				item.url = null;
 				if (keys) item.tags = keys;
 				if (item.DOI) {
-					if (item.DOI.match(/doi/)) {
+					if (item.DOI.match(/^doi:/)) {
 						item.DOI = item.DOI.substr(4);
 					}
 				}
