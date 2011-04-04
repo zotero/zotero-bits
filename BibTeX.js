@@ -1622,7 +1622,7 @@ function processField(item, field, value) {
 	} else if(field == "keywords") {
 		if(value.indexOf(",") == -1) {
 			// keywords/tags
-			item.tags = value.split(" ");
+			item.tags = value.split("/");
 		} else {
 			item.tags = value.split(/, ?/g);
 		}
