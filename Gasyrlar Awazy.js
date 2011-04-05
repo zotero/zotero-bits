@@ -30,7 +30,6 @@
  */
 
 /****START STANDARD BLOCK****/
-/* Erik's Framework */
 /**
     Copyright (c) 2010, Erik Hetzner
 
@@ -67,6 +66,15 @@ var FW = {
 };
 
 FW._Base = function () {
+    this.callHook = function (hookName, item, doc, url) {
+        if (typeof this['hooks'] === 'object') {
+            var hook = this['hooks'][hookName];
+            if (typeof hook === 'function') {
+                hook(item, doc, url);
+            }
+        }
+    };
+
     this.evaluateThing = function(val, doc, url) {
         var valtype = typeof val;
         if (valtype === 'string') {
@@ -539,7 +547,10 @@ FW.detectWeb = function (doc, url) {
 
 FW.getScraper = function (doc, url) {
     var itemType = FW.detectWeb(doc, url);
-    return FW._scrapers.filter(function(s) s.evaluate('itemType', doc, url) == itemType)[0];
+    return FW._scrapers.filter(function(s) {
+        (s.evaluate('itemType', doc, url) == itemType)
+	&& (s.evaluate('detect', doc, url))
+    })[0];
 };
 
 FW.doWeb = function (doc, url) {
@@ -547,11 +558,13 @@ FW.doWeb = function (doc, url) {
     var scraper = FW.getScraper(doc, url);
     var items = scraper.makeItems(doc, url);
     for (var i in items) {
-        items[i].complete();   
+        scraper.callHook('scraperDone', items[i], doc, url);
+        items[i].complete();
     }
-    scraper.evaluate('scraperDoneHook', doc, url);
     Zotero.debug("Leaving FW.doWeb");
 };
+
+/* End generic code */
 /****END STANDARD BLOCK****/
 
 function detectWeb(doc, url) { 
