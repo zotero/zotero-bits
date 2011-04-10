@@ -35,63 +35,46 @@ function scrape(doc, url) {
 	} : null;	
 	
 	var dataTags = new Object();
-	var odd = "yes";
 	var creatorType = new Array();
 	var creatorField = new Array();
 	var creatorContent = new Array();
 	
 	var newItem = new Zotero.Item("book");
 
-	var headingsEven = doc.evaluate('//tr[@class="oddrow"]/th', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var headingsEvenCount = doc.evaluate('count(//tr[@class="oddrow"]/th)', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var headings = doc.evaluate('//table[@class="bibrec"]//tr/th', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	
-	var headingsOdd = doc.evaluate('//tr[@class="evenrow"]/th', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var headingsOddCount = doc.evaluate('count(//tr[@class="evenrow"]/th)', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	
-	var content = doc.evaluate('//div[@class="pgdbdata"]/table/tbody//td', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	
-	for (var i = 0; i < headingsEvenCount.numberValue + headingsOddCount.numberValue; i++) {
-		if (odd == "yes") {
-			fieldTitle = headingsOdd.iterateNext().textContent.replace(/\s+/g, '');
-			odd = "no";
-		} else {
-			fieldTitle = headingsEven.iterateNext().textContent.replace(/\s+/g, '');
-			odd = "yes";
-		}
+	var content = doc.evaluate('//table[@class="bibrec"]//tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var i;
+
+	while (i = headings.iterateNext()) {
+		fieldTitle = i.textContent;
 		dataTags[fieldTitle] = Zotero.Utilities.cleanTags(content.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
-		
+		Zotero.debug(i.textContent);
 		if (fieldTitle == "Creator") {
-			
 			creatorType.push("author");
 			creatorField.push("Creator");
 			creatorContent.push(dataTags[fieldTitle]);
-			
+		} else if (fieldTitle == "Author") {
+			creatorType.push("author");
+			creatorField.push("Author");
+			creatorContent.push(dataTags[fieldTitle]);
 		} else if (fieldTitle == "Illustrator") {
-			
 			creatorType.push("illustrator");
 			creatorField.push("Illustrator");
 			creatorContent.push(dataTags[fieldTitle]);
-			
-		}else if (fieldTitle == "Translator") {
-			
+		} else if (fieldTitle == "Translator") {
 			creatorType.push("translator");
 			creatorField.push("Translator");
-			creatorContent.push(dataTags[fieldTitle]);
-			
+			creatorContent.push(dataTags[fieldTitle]);	
 		} else if (fieldTitle == "Editor") {
-			
 			creatorType.push("editor");
 			creatorField.push("Editor");
 			creatorContent.push(dataTags[fieldTitle]);
-			
 		} else if (fieldTitle == "Commentator") {
-			
 			creatorType.push("commentator");
 			creatorField.push("Commentator");
 			creatorContent.push(dataTags[fieldTitle]);
-			
 		} else if (fieldTitle == "Contributor") {
-			
 			creatorType.push("contributor");
 			creatorField.push("Contributor");
 			creatorContent.push(dataTags[fieldTitle]);
@@ -101,7 +84,6 @@ function scrape(doc, url) {
 			newItem.place = place[0];
 			Zotero.debug(place);
 		}
-		
 		 if (fieldTitle == "Subject") {
 			newItem.tags[i] = dataTags["Subject"];
 		}
@@ -167,9 +149,9 @@ function doWeb(doc, url) {
 		for (var i in items) {
 			articles.push(i);
 		}
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.wait();
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }
