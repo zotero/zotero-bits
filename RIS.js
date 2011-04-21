@@ -53,7 +53,8 @@ var inputFieldMap = {
 	TI:"title",
 	CT:"title",
 	CY:"place",
-	ST:"shortTitle"
+	ST:"shortTitle",
+	DO:"DOI"
 };
 
 // TODO: figure out if these are the best types for letter, interview, webpage
@@ -103,7 +104,12 @@ var inputTypeMap = {
 	PAMP:"manuscript",
 	SER:"book",
 	SLIDE:"artwork",
-	UNBILL:"manuscript"
+	UNBILL:"manuscript",
+	CPAPER:"conferencePaper",
+	WEB:"webpage",
+	EDBOOK:"book",
+	MANSCPT:"manuscript",
+	GOVDOC:"document"
 };
 
 function processTag(item, tag, value) {
@@ -132,8 +138,8 @@ function processTag(item, tag, value) {
 			if(inputTypeMap[value]) {
 				item.itemType = inputTypeMap[value];
 			} else {
-				// default to generic from inputTypeMap
-				item.itemType = inputTypeMap["GEN"];
+				// default to document
+				item.itemType = "document";
 			}
 		}
 	} else if(tag == "JO") {
@@ -397,7 +403,6 @@ function doImport(attachments) {
 	
 	var rawLine;
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
-		Zotero.debug(rawLine);		
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		// Handle out-of-spec old EndNote exports with one space
