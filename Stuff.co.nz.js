@@ -1,5 +1,5 @@
 {
-        "translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44",
+        "translatorID":"631ff0c7-2e64-4279-a9c9-ad9518d40f2b",
         "label":"Stuff.co.nz",
         "creator":"Sopheak Hean (University of Waikato, Faculty of Education)",
         "target":"^http://(www\\.)?stuff\\.co\\.nz/",
@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-08-23 00:34:34"
+        "lastUpdated":"2011-03-14 15:51:51"
 }
 
 /*
@@ -169,82 +169,67 @@ function scrape(doc, url) {
 		
 		//get Abstract
 		newItem.abstractNote = doAbstract(doc, url);
+		try {
+		
 		var authorXPath = '//span[@class="storycredit"]';
-		
+	
 		var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (authorXPathObject){
-			var authorArray = new Array("NZPA", "The Press", "The Dominion Post");
-			authorXPathObject = authorXPathObject.textContent;
+							
+		if (authorXPathObject) {
+				var authorString = authorXPathObject.textContent.toLowerCase();
 			
-			if(authorXPathObject.match(/[\s\n\r\t]+-[\s\n\r\t]+\b[a-zA-Z\s\n\r\t]*|^\s+\bBy\s*/g)){
-				authorXPathObject = authorXPathObject.replace(/([\s\n\r\t]+-[\s\n\r\t]+\b[a-zA-Z\s\n\r\t]*)|\b.co.nz|\b.com|(-[a-zA-Z0-9]*)/g, '');
-				var authorString = authorXPathObject.replace(/^\s+\bBy\s*|^\s+\bBY\s*/g, '');
-				
 				if (authorString.match(/\W\band\W+/g)){
-								authorTemp = authorString.replace(/\W\band\W+/g, ', ');
-								authorArray = authorTemp.split(", ");
-							
-						} else if (!authorString.match(/\W\band\W+/g))
-							{
-								authorArray = authorString.toLowerCase();
-							}
-						if( authorArray instanceof Array ) {
-							for (var i in authorArray){			
-							splitIntoArray = authorArray[i].split (" ");
-								for (var i = 0; i < splitIntoArray.length; i++){
-									firstName = splitIntoArray[i].substring(0,1).toUpperCase();
-									lastName = splitIntoArray[i].substring(1).toLowerCase();
-									fullName += firstChar + lastChar + emptyString;
-										
-								
-								}
-							newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
-							
-							}
-							
-						} else {
-							
+					authorTemp = authorString.replace(/\W\band\W+/g, ', ');
+					authorArray = authorTemp.split(", ");
+					} else if (!authorString.match(/\W\band\W+/g)){
+						authorArray = authorString.toLowerCase();
+					}
 					
-							if (authorString.match(/\W\bof\W+/g)){
-								authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
-								splitIntoArray = authorTemp.split (" ");
-								for (var i = 0; i < splitIntoArray.length; i++){
-											firstName = splitIntoArray[i].substring(0,1).toUpperCase();
-											lastName = splitIntoArray[i].substring(1).toLowerCase();
-											fullName += firstChar + lastChar + emptyString;
-									
-									}
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
-							
-		
-							} else {
-								
-								splitIntoArray = authorArray.split (" ");
-								for (var i = 0; i < splitIntoArray.length; i++){	
-									firstName = splitIntoArray[i].substring(0,1).toUpperCase();
-									lastName = splitIntoArray[i].substring(1).toLowerCase();
-									fullName += firstName+ lastName + emptyString;
-										
-									
-								}
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName, "author"));
-							}
-										
-						}
-			}  else {
-				
-						if(authorXPathObject.match(/[\s\n\r]+/g)){
-							
-						authorXPathObject = authorXPathObject.replace(/^\s*|\s*$/g, '').replace(/\s+/g, '-');
-						newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject, "author"));
-						}
-						else { newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject , "author"));}
+					if( authorArray instanceof Array ) {
+						
 					
+						for (var i in authorArray){
+								fullName="";
+						 	splitIntoArray = authorArray[i].split(" ");
+							for (var j=0; j < splitIntoArray.length; j++){
+								firstName = splitIntoArray[j].substring(0,1).toUpperCase();
+								lastName = splitIntoArray[j].substring(1).toLowerCase();
+								fullName += firstName + lastName + emptyString;
+								 
+							}
+						
+							newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName, "author"));  
+					
+						
+						
+						
+						}
+						
+					}  else if (!authorString.match(/[a-zA-Z]/)){
+						newItem.creator ="";
+						
+						
+					} else {
+							splitIntoArray = authorString.split (" ");
+							for (var i = 0; i < splitIntoArray.length; i++){
+								firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+								lastName = splitIntoArray[i].substring(1).toLowerCase();
+								fullName += firstName + lastName + emptyString;
+										
+							}
+					 	newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName , "author"));   
+					
+						
+					}
 			}
 			
-		} else{
-			newItem.creators ="";
-		}
+						
+		
+	} catch (errs) {
+		newItem.creators="";
+	}
+			
+						
 			
 		//Title of the Article
 		newItem.title= doTitle(doc, url);
@@ -340,8 +325,7 @@ function scrape(doc, url) {
 			}
 		}
 		//Snapshot of  the web page.
-		newItem.attachments.push({url:url, title:"Stuff.co.nz Snapshot",
-	 	                          mimeType:"text/html"});
+		newItem.attachments.push({title:"Stuff.co.nz Snapshot", snapshot:false, mimeType:"text/html", url:url});
 	 	                          
 		//Call Do date function to make it cleaner in scape. This way things are easier to follow.
 		newItem.date = doDate(doc,url);
