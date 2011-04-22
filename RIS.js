@@ -205,10 +205,15 @@ function processTag(item, tag, value) {
 				month = undefined;
 			}
 
-			item.date = Zotero.Utilities.formatDate({year:dateParts[0],
+			item.date = ((dateParts[0]) ? dateParts[0] : "0000") + "/" 
+					+ ((month) ? month : "0") + "/"
+					+ ((dateParts[2]) ? dateParts[2] : "0")
+					+ (dateParts[3]) ? " " + dateParts[3] : "";
+			/*item.date = Zotero.Utilities.formatDate({year:dateParts[0],
 								  month:month,
 								  day:dateParts[2],
 								  part:dateParts[3]});
+			*/
 		}
 	} else if(tag == "Y2") {
 		// the secondary date field can mean two things, a secondary date, or an
