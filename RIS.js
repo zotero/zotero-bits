@@ -398,8 +398,8 @@ function doImport(attachments) {
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		// Handle out-of-spec old EndNote exports with one space
-		var split = line.match(/^([A-Z0-9]{2}) {1,2}- ([^\n]*)/);
-		if(split || line.match(/^(ER|TY) {1,2}-/)) {
+		var split = line.match(/^([A-Z0-9]{2}) {1,2}-(?: ([^\n]*))?/);
+		if(split) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
