@@ -1,14 +1,14 @@
 {
-        "translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
-        "label":"Highwire 2.0",
-        "creator":"Matt Burton",
-        "target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-        "minVersion":"1.0.0b4.r5",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-11 21:19:55"
+	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+	"label":"Highwire 2.0",
+	"creator":"Matt Burton",
+	"target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"minVersion":"1.0.0b4.r5",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2011-01-05 17:05:00"
 }
 
 /*
@@ -47,9 +47,10 @@ function detectWeb(doc, url) {
 			url.match("content/firstcite") 
 		) {
 			return "multiple";
-		} else if (url.match("content/(early/)?[0-9]+")) {
+		} else if (url.match("content/(early/)?[0-9]+") 
+				&& (url.indexOf("frame") === -1 || url.indexOf("frame=sidebar") !== -1)) {
 			return "journalArticle";
-		}
+		} 
 	}
 }
 
@@ -117,10 +118,12 @@ function doWeb(doc, url) {
 		newurl = newurls.shift();		
 		if (newurl.match("cgi/content")) {
 			pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
+		// This is here to catch those pdf+html pages
+		} else if (newurl.match("\.full\.pdf")) {
+			pdfurl = newurl.slice(0, newurl.lastIndexOf(".full.pdf")) + ".full.pdf";
 		} else {
 			// This is not ideal...todo: brew a regex that grabs the correct URL
-			// The extra replace(..) call is for URLs like ../1.full.pdf+html
-			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")).replace(/\.full/,"") + ".full.pdf";
+			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
 		}
 		get = host + 'citmgr?type=refman&gca=' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
