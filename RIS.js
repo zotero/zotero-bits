@@ -4,7 +4,7 @@
 	"label":"RIS",
 	"creator":"Simon Kornblith",
 	"target":"ris",
-	"minVersion":"2.1b6",
+	"minVersion":"2.1.3",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
@@ -49,6 +49,8 @@ var bookSectionFieldMap = {
 	M3:"DOI"
 };
 
+// Accounting for input fields that we don't export the same way;
+// mainly for common abuses of the spec
 var inputFieldMap = {
 	TI:"title",
 	CT:"title",
@@ -129,7 +131,7 @@ function processTag(item, tag, value) {
 		
 		// first check typeMap
 		for(var i in typeMap) {
-			if(value == typeMap[i]) {
+			if(value.toUpperCase() == typeMap[i]) {
 				item.itemType = i;
 			}
 		}
