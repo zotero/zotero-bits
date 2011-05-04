@@ -22,7 +22,7 @@ Journal issue ToC:
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("quicksearch") != -1) {
+	if (url.indexOf("quicksearch") !== -1 || url.indexOf("title~db") !== -1) {
 		return "multiple";
 	} else if (doc.evaluate('//a[substring(text(), 2, 8) = "Download"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		if (doc.evaluate('//img[substring(@title, 1, 17) = "Publication type:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
