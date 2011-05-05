@@ -130,7 +130,7 @@ function scrape(doc,url) {
 
 	//Create Zotero Ref
 	var newArticle = new Zotero.Item('patent');
-	newArticle.url = doc.location.href;
+	newArticle.attachments = [{url:doc.location.href, title:"Espacenet patent record"}];
 	newArticle.title = title;
 	newArticle.date = date;
 	newArticle.abstractNote = abstract;
