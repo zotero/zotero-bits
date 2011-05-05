@@ -62,14 +62,13 @@ function getISBNs(doc) {
 		var ISBN = m[0];
 		ISBN = ISBN.replace(/[^0-9xX]/g,'').toUpperCase();
 		// only add new ISBNs, not previously found to be bad
-		if((ISBN.length == 10 || ISBN.length == 13)
+		// We handle ISBN-13 only to eliminate false positives
+		if(ISBN.length == 13
 				&& ISBNs.indexOf(ISBN) == -1
 				&& badIDs.indexOf(ISBN) == -1) {
 			var checked = idCheck(ISBN);
-			if (checked["isbn13"]){
+			if (checked["isbn13"]) {
 				ISBNs.push(checked["isbn13"]);
-			} else if (checked["isbn10"]) {
-				ISBNs.push(checked["isbn10"]);
 			} else {
 				badIDs.push(ISBN);
 				Zotero.debug("Discarding invalid ISBN " + ISBN);
@@ -321,6 +320,7 @@ idCheck = function(isbn) {
 	if(!valid_upc) {num_upc = false};
 	if(!valid13) {num_ean = false; num13 = false;};
 	// Enforce that UPC-13 is an EAN from Bookland, with prefix 978 or 979
-	if(num13 && !num13.match(/^97[89]/)) num13 = false;
+	if(num13 && num13.substr(0,3) != "978"
+	 		    && num13.substr(0,3) != "979") num13 = false;
 	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8, "upc" : num_upc, "ean" : num_ean};
 }
