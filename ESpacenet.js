@@ -1,7 +1,7 @@
 {
         "translatorID":"176948f7-9df8-4afc-ace7-4c1c7318d426",
         "label":"ESpacenet",
-        "creator":"Gilles Poulain and Rintze Zelle",
+        "creator":"Gilles Poulain, Rintze Zelle, and Edouard Leroy",
         "target":"^https?://worldwide\\.espacenet\\.com/",
         "minVersion":"1.0.0b4.r5",
         "maxVersion":"",
