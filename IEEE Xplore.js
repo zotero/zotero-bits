@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-04-03 04:31:00"
+	"lastUpdated":"2011-05-05 22:04:16"
 }
 
 function detectWeb(doc, url) {
@@ -62,15 +62,22 @@ function doWeb(doc, url) {
 		
 		var urls = new Array();
 		for(var url in items) {
+			// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
+			// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
+			// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
+			var arnumber = url.match(/arnumber=(\d+)/)[1];
+			url = url.replace(/\/search\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
 			urls.push(url);
 		}
 		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
 		Zotero.wait();
 	} else {
-		// Some pages have no data
-		if (url.match("freesrchabstract.jsp")) {
-			var url = hostMatch[1]+"/xpls/abs_all.jsp?arnumber="+m[1];
-			Zotero.Utilities.processDocuments(url, scrape, function () { Zotero.done(); });
+		if (url.indexOf("/search/") !== -1) {
+			// Address the same missing metadata problem as above
+			var arnumber = url.match(/arnumber=(\d+)/)[1];
+			url = url.replace(/\/search\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
+			Zotero.Utilities.processDocuments([url], scrape, function () { Zotero.done(); });
+			Zotero.wait();
 		} else {
 			scrape(doc, url);
 		}
@@ -126,7 +133,8 @@ function scrape(doc,url) {
        var row;
        var rows;
 
-       newItem.url = doc.location.href;
+       newItem.attachments = [];
+       newItem.tags = [];
        var metaTags = doc.getElementsByTagName("meta");
 
        var pages = [false, false];
@@ -173,7 +181,7 @@ function scrape(doc,url) {
 								&& value != "null" && value != "") newItem.language = value; break;
 			case "citation_doi": if (!newItem.DOI) newItem.DOI = value; break;
 			case "citation_abstract": newItem.abstractNote = value; break;
-			case "citation_abstract_html_url": newItem.url = value; break;
+			case "citation_abstract_html_url": newItem.attachments.push({url:value, title:"IEEE Xplore Abstract Record", snapshot:false}); break;
 			case "citation_pdf_url": if(!pdf) pdf = value; break;
 			case "citation_keywords": newItem.tags.push(value); break;
 			case "citation_fulltext_html_url": if(!pdf) pdf = value; break;
@@ -197,8 +205,7 @@ function scrape(doc,url) {
 		newItem.tags = newItem.tags[0].split(";");
 	}
 	
-	if (pdf) newItem.attachments = [{url:pdf, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
-	if (html) newItem.attachments = [{url:html, title:"IEEE Xplore Full Text HTML"}];
+	if (html) newItem.attachments.push({url:html, title:"IEEE Xplore Full Text HTML"});
 	
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
 	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
