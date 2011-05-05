@@ -186,19 +186,24 @@ function doWeb(doc, url) {
 // It also adds the customary hyphen to valid ISSNs.
 
 // Takes the first 8 valid digits and tries to read an ISSN,
-// takes the first 10 valid digits and tries to read an ISBN 10,
-// and takes the first 13 valid digits to try to read an ISBN 13
-// Returns an object with three attributes:
+// takes the first 10 valid digits and tries to read an ISBN 10 or a UPC-A,
+// and takes the first 13 valid digits to try to read an ISBN 13 or EAN
+// Returns an object with five attributes:
 // 	"issn" 
 // 	"isbn10"
 // 	"isbn13"
+// 	"upc"
+//	"ean"
 // Each will be set to a valid identifier if found, and otherwise be a
 // boolean false.
+
+// The UPC logic is for a 10-digit UPC-A; the newer EAN system is equivalent
+// to the isbn13 algorithm.
 
 // There could conceivably be a valid ISBN-13 with an ISBN-10
 // substring; this should probably be interpreted as the latter, but it is a
 // client UI issue.
-function idCheck(isbn) {
+idCheck = function(isbn) {
 	// For ISBN 10, multiple by these coefficients, take the sum mod 11
 	// and subtract from 11
 	var isbn10 = [10, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -309,10 +314,13 @@ function idCheck(isbn) {
 	} 
 
 	var num_upc = num10;
+	var num_ean = num13;
 
 	if(!valid8) {num8 = false};
 	if(!valid10) {num10 = false};
 	if(!valid_upc) {num_upc = false};
-	if(!valid13) {num13 = false};
-	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8, "upc" : num_upc};
+	if(!valid13) {num_ean = false; num13 = false;};
+	// Enforce that UPC-13 is an EAN from Bookland, with prefix 978 or 979
+	if(num13 && !num13.match(/^97[89]/)) num13 = false;
+	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8, "upc" : num_upc, "ean" : num_ean};
 }
