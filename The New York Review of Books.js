@@ -2,7 +2,7 @@
         "translatorID": "e0c6b94a-6099-4d08-b474-d384cb27e98a",
         "label": "The New York Review of Books",
         "creator": "Avram Lyon",
-        "target": "^https?://www\\.nybooks\\.com/(?:articles|issues)",
+        "target": "^https?://www\\.nybooks\\.com/(?:articles|issues|search)",
         "minVersion": "1.0",
         "maxVersion": "",
         "priority": 100,
