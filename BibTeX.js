@@ -4,13 +4,13 @@
 	"label":"BibTeX",
 	"creator":"Simon Kornblith and Richard Karnesky",
 	"target":"bib",
-	"minVersion":"1.0.0b4.r1",
+	"minVersion":"2.1.3",
 	"maxVersion":"",
 	"priority":200,
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-04-01 21:20:00"
 }
 
 function detectImport() {
@@ -80,7 +80,8 @@ var inputFieldMap = {
 	booktitle :"publicationTitle",
 	school:"publisher",
 	institution:"publisher",
-	publisher:"publisher"
+	publisher:"publisher",
+	issue:"issue"
 };
 
 var zotero2bibtexTypeMap = {
@@ -165,11 +166,13 @@ var mappingTable = {
     "\u00C6":"{\\AE}", // LATIN CAPITAL LETTER AE
     "\u00D0":"{\\DH}", // LATIN CAPITAL LETTER ETH
     "\u00D7":"{\\texttimes}", // MULTIPLICATION SIGN
+    "\u00D8":"{\\O}", // latin capital letter o with stroke
     "\u00DE":"{\\TH}", // LATIN CAPITAL LETTER THORN
     "\u00DF":"{\\ss}", // LATIN SMALL LETTER SHARP S
     "\u00E6":"{\\ae}", // LATIN SMALL LETTER AE
     "\u00F0":"{\\dh}", // LATIN SMALL LETTER ETH
     "\u00F7":"{\\textdiv}", // DIVISION SIGN
+    "\u00F8":"{\\o}", // latin small letter o with stroke
     "\u00FE":"{\\th}", // LATIN SMALL LETTER THORN
     "\u0131":"{\\i}", // LATIN SMALL LETTER DOTLESS I
     "\u0132":"IJ", // LATIN CAPITAL LIGATURE IJ
@@ -1089,11 +1092,13 @@ var reversemappingTable = {
     "{\\AE}"                          : "\u00C6", // LATIN CAPITAL LETTER AE
     "{\\DH}"                          : "\u00D0", // LATIN CAPITAL LETTER ETH
     "{\\texttimes}"                   : "\u00D7", // MULTIPLICATION SIGN
+    "{\\O}"                          : "\u00D8", // latin small letter o with stroke
     "{\\TH}"                          : "\u00DE", // LATIN CAPITAL LETTER THORN
     "{\\ss}"                          : "\u00DF", // LATIN SMALL LETTER SHARP S
     "{\\ae}"                          : "\u00E6", // LATIN SMALL LETTER AE
     "{\\dh}"                          : "\u00F0", // LATIN SMALL LETTER ETH
     "{\\textdiv}"                     : "\u00F7", // DIVISION SIGN
+    "{\\o}"                          : "\u00F8", // latin small letter o with stroke
     "{\\th}"                          : "\u00FE", // LATIN SMALL LETTER THORN
     "{\\i}"                           : "\u0131", // LATIN SMALL LETTER DOTLESS I
     "'n"                              : "\u0149", // LATIN SMALL LETTER N PRECEDED BY APOSTROPHE
@@ -1622,7 +1627,7 @@ function processField(item, field, value) {
 	} else if(field == "keywords") {
 		if(value.indexOf(",") == -1) {
 			// keywords/tags
-			item.tags = value.split("/");
+			item.tags = value.split(" ");
 		} else {
 			item.tags = value.split(/, ?/g);
 		}
