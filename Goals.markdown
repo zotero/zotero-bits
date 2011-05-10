@@ -5,11 +5,15 @@ _New Translators_
  * Write Mendeley.com translator
  * Write email translator
  * Write ФЭБ translator
- * Write import translator for Zotero's JSON
+ * Write import/export translator for Zotero's JSON (or citeproc-js's JSON)
+   * This would make it easier to force-feed Zotero full-fledged items
+   * Also for alternatively pathways of citation processor integration
+ * Write import translator for BMC XML, http://www.biomedcentral.com/xml/article.dtd
 
 _Broken Translators_
  * MetaPress (SpringerLink) 
  * IngentaConnect imprints (need for Brill)
+ * Biomedcentral is between formats and needs special-cased treatment (http://forums.zotero.org/discussion/17365/)
 
 _In-Progress Translators_
  * Ab Imperio (uses FW)
