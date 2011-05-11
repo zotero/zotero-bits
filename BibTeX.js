@@ -2016,7 +2016,7 @@ function doExport() {
 				var creatorString = creator.lastName;
 
 				if (creator.firstName) {
-					creatorString = creator.firstName + " " + creator.lastName;
+					creatorString = creator.lastName + ", " + creator.firstName;
 				}
 
 				if (creator.creatorType == "editor") {
