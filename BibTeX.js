@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-05-10 21:20:00"
+	"lastUpdated":"2011-05-12 21:20:00"
 }
 
 function detectImport() {
@@ -115,7 +115,8 @@ var bibtex2zoteroTypeMap = {
 	"manual":"book",
 	"mastersthesis":"thesis",
 	"misc":"book",
-	"proceedings":"book"
+	"proceedings":"book",
+	"collection":"book"
 };
 
 /*
@@ -1737,7 +1738,8 @@ function beginRecord(type, closeChar) {
 	if(type != "string") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
-			Zotero.debug("discarded item from BibTeX; type was "+type);
+			Zotero.debug("invalid type from BibTeX, using 'book'; type was "+type);
+			zoteroType = "document";
 		}
 		var item = new Zotero.Item(zoteroType);
 		
