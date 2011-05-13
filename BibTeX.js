@@ -1738,7 +1738,7 @@ function beginRecord(type, closeChar) {
 	if(type != "string") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
-			Zotero.debug("invalid type from BibTeX, using 'book'; type was "+type);
+			Zotero.debug("invalid type from BibTeX, falling back on 'document'; type was "+type);
 			zoteroType = "document";
 		}
 		var item = new Zotero.Item(zoteroType);
