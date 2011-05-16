@@ -34,19 +34,19 @@
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
+		if (prefix == "x" ) return namespace; else return null;
 	} : null;
 	var definePath = '//div[@class="blog_content"]';
 	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-if  (XpathObject){
+	if  (XpathObject){
 		return "blogPost";
 	}
 
 	else {
-	var definePath = '//div[@class="story_landing"]';
-	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if  (XpathObject){
-		return "newspaperArticle";
+		var definePath = '//div[@class="story_landing"]';
+		var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if  (XpathObject){
+			return "newspaperArticle";
 		}
 	}
 
@@ -79,8 +79,6 @@ function scrape(doc, url) {
 		newItem.language = "English";
 
 		//Get Author
-		try { /*Try and Catch if encounter erro */
-		
 			var blogAuthor = "//div[@id='left_col']/span";
 			var blogAuthorObject = doc.evaluate(blogAuthor, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if (blogAuthorObject) {
@@ -114,10 +112,6 @@ function scrape(doc, url) {
 					 	newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName , "author"));   }
 					}
 				}
-		} catch (err) {
-			newItem.creators ="error";
-	
-			}
 			
 		//Title of the Article
 		var getBlogTitle = "//span[@class='hbox_top_title headlines_title']/a";
@@ -169,7 +163,6 @@ function scrape(doc, url) {
 		
 		//get Abstract
 		newItem.abstractNote = doAbstract(doc, url);
-		try {
 		
 		var authorXPath = '//span[@class="storycredit"]';
 	
@@ -222,14 +215,6 @@ function scrape(doc, url) {
 						
 					}
 			}
-			
-						
-		
-	} catch (errs) {
-		newItem.creators="";
-	}
-			
-						
 			
 		//Title of the Article
 		newItem.title= doTitle(doc, url);
@@ -396,7 +381,6 @@ function doDate(doc, url){
 	
 	var dateXpath = "//div[@id='toolbox']/div[3]";
 	var dateXpathObject = doc.evaluate(dateXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	try {
 		if (dateXpathObject){
 			var storeDateValue = dateXpathObject.textContent.replace(/\b(Last updated )\d{0,9}:\d{0,9} /g,'');
 			
@@ -420,11 +404,6 @@ function doDate(doc, url){
 			DateString = "";
 			return DateString;
 		}
-	}catch (err) {
-		
-		DateString = "";
-	}
-	return DateString;
 }
 
 
@@ -436,18 +415,12 @@ function doWeb(doc, url) {
 	
 	//var articles = new Array();
 	
-	if (detectWeb(doc, url) == "newspaperArticle") {
-		var articles = [url];
-		
-	}else if (detectWeb(doc, url) == "blogPost") {
-		var articles = [url];
-		
+	if (detectWeb(doc, url) == "newspaperArticle" || detectWeb(doc, url) == "blogPost") {
+		scrape(doc, url);
+	} else {
+	/* Multiple save not yet defined
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.wait();
+	*/
 	}
-
-
-	//Zotero.debug(articles);
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-	
 }
-
