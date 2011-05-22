@@ -44,8 +44,12 @@ function doWeb(doc, url) {
 		var tableRows = doc.evaluate(xPathRows, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		while(tableRow = tableRows.iterateNext()) {
-			var link = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;			
-			
+			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+			if(!linknode) {
+				// There are things like tables of contents that don't have item pages, so we'll just skip them
+				continue;
+			}
+			var link = linknode.href;
 			var title = "";
 			var strongs = tableRow.getElementsByTagName("h3");
 			for each(var strong in strongs) {
@@ -183,6 +187,10 @@ function scrape(doc,url) {
 			case "citation_language": if ((!newItem.language || newItem.language.length < 4)
 								&& value != "null" && value != "") newItem.language = value; break;
 			case "citation_doi": if (!newItem.DOI) newItem.DOI = value; break;
+			case "citation_conference":
+						 newItem.itemType = "conferencePaper";
+						 newItem.conferenceName = value;
+						 break;
 			case "citation_abstract": newItem.abstractNote = value; break;
 			case "citation_abstract_html_url": newItem.attachments.push({url:value, title:"IEEE Xplore Abstract Record", snapshot:false}); break;
 			case "citation_pdf_url": if(!pdf) pdf = value; break;
@@ -212,6 +220,11 @@ function scrape(doc,url) {
 	
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
 	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
+
+	// Re-assign fields if the type changed
+	if (newItem.itemType == "conferencePaper") {
+		newItem.proceedingsTitle = newItem.publicationTitle;
+	}
 
 	// Abstracts don't seem to come with
 	if (!newItem.abstractNote) {
