@@ -35,6 +35,12 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
+	if (url.match(/fmt=bibtex/)) {
+		useBib(doc.documentElement.innerHTML);
+		Zotero.done();
+		return true;
+	}
+	
 	var pub = "http://www.ams.org/mathscinet/search/publications.html?fmt=bibtex";
 	
 	var tableRows = doc.evaluate('//div[@id="content"]/form/div[@class="headline"]', doc, nsResolver,
@@ -69,7 +75,10 @@ function doWeb(doc, url) {
 		pub += "&b="+MR.replace(/^MR0*/, "");
 	}
 	
-	Zotero.Utilities.HTTP.doGet(pub, function(text) {
+	Zotero.Utilities.HTTP.doGet(pub, useBib, function() {Zotero.done()});
+}
+
+function useBib(text) {
 		var m = text.match(/<pre>(?:.|[\r\n])*?<\/pre>/g);
 		var bibTeXString = "";
 		for each(var citation in m) {
@@ -82,7 +91,7 @@ function doWeb(doc, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibTeXString);
-		translator.setHandler("itemDone", function(obj, item) {
+		/*translator.setHandler("itemDone", function(obj, item) {
 			if(docLinks) {
 				item.attachments.push({title:"MathSciNet Snapshot", url:docLinks.shift(), mimeType:"text/html"});
 			} else {
@@ -90,9 +99,6 @@ function doWeb(doc, url) {
 			}
 			
 			item.complete();
-		});
+		});*/
 		translator.translate();
-		
-		Zotero.done();
-	});
 }
