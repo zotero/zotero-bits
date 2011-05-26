@@ -24,17 +24,16 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
-		
-		if (doc.evaluate('//span[@class="results_corner EXLResultsTitleCorner"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		if (doc.evaluate('//span[contains(@class, "results_corner") and contains(@class, "EXLResultsTitleCorner")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			 return 'multiple';
 		}
-		else if (doc.evaluate('//div[@class="EXLContent EXLBriefDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		else if (doc.evaluate('//div[contains(@class, "EXLContent") and contains(@class,"EXLBriefDisplay")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			 return 'multiple';
 		}
-		else if (doc.evaluate('//div[@class="results2 EXLFullResultsHeader"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		else if (doc.evaluate('//div[contains(@class, "results2") and contains(@class, "EXLFullResultsHeader")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			return 'book';
 		}
-		else if (doc.evaluate('//div[@class="EXLContent EXLFullDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		else if (doc.evaluate('//div[contains(@class, "EXLContent") and contains(@class, "EXLFullDisplay")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			return 'book';
 		}
 }
@@ -59,13 +58,17 @@ function doWeb(doc, url) {
 				linkIterator = doc.evaluate('//div[contains(@class, "title")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
 				titleIterator = doc.evaluate('//div[contains(@class, "title")]/a/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			}
-			else
+			else if(doc.evaluate('//li[contains(@class, "EXLDetailsTab")]/a/@href', doc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0)
 			{
 				// Primo v3
 				linkIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
 				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			}
-
+			else {
+				// Primo v3 But make use of details tab. Title does not have to contain a link
+				linkIterator = doc.evaluate('//li[contains(@class, "EXLDetailsTab")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			}
 			
 			// try/catch for the case when there are no search results, let doc.evealuate fail quietly
 			try {
