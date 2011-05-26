@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-06-08 07:15:00"
+	"lastUpdated":"2011-05-26 15:20:00"
 }
 
 /*
@@ -65,7 +65,7 @@ function doWeb(doc, url) {
 				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			}
 			else {
-				// Primo v3 But make use of details tab. Title does not have to contain a link
+				// Primo v3.1
 				linkIterator = doc.evaluate('//li[contains(@class, "EXLDetailsTab")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
 				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			}
