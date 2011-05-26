@@ -93,84 +93,110 @@ function doWeb(doc, url) {
 		links.push(url+'&showPnx=true');
 	}
 	
-	Zotero.Utilities.HTTP.doGet(links, function(text) {
+	var doRIS = [];
+	
+	Zotero.Utilities.HTTP.doGet(links, function(text, response, url) {
 	
 		text = text.replace(/^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, ""); //because E4X is full of FAIL
-		var xmldoc = new XML(text);
+		try {
+			var xmldoc = new XML(text);
 		
-		if (xmldoc.display.type.toString() == 'book') {
-			var item = new Zotero.Item("book");
-		} else if (xmldoc.display.type.toString() == 'audio') {
-			var item = new Zotero.Item("audioRecording");
-		} else if (xmldoc.display.type.toString() == 'video') {
-			var item = new Zotero.Item("videoRecording");
-		} else {
-			var item = new Zotero.Item("document");
-		}
-		item.title = xmldoc.display.title.toString();
-		
-		var creators = xmldoc.display.creator.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
-		var contributors = xmldoc.display.contributor.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
-		
-		if (!creators[0]) { // <contributor> not available using <contributor> as author instead
-			creators = contributors;
-			contributors = null;
-		}
-		for (creator in creators) {
-			if (creators[creator]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(creators[creator], "author"));
+			if (xmldoc.display.type.toString() == 'book') {
+				var item = new Zotero.Item("book");
+			} else if (xmldoc.display.type.toString() == 'audio') {
+				var item = new Zotero.Item("audioRecording");
+			} else if (xmldoc.display.type.toString() == 'video') {
+				var item = new Zotero.Item("videoRecording");
+			} else {
+				var item = new Zotero.Item("document");
 			}
-		}
+			item.title = xmldoc.display.title.toString();
 		
-		for (contributor in contributors) {
-			if (contributors[contributor]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(contributors[contributor], "contributor"));
+			var creators = xmldoc.display.creator.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
+			var contributors = xmldoc.display.contributor.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
+		
+			if (!creators[0]) { // <contributor> not available using <contributor> as author instead
+				creators = contributors;
+				contributors = null;
 			}
-		}
+			for (creator in creators) {
+				if (creators[creator]) {
+					item.creators.push(Zotero.Utilities.cleanAuthor(creators[creator], "author"));
+				}
+			}
 		
-		var pubplace = xmldoc.display.publisher.toString().split(" : ");
-		if (pubplace) {
-			item.place = pubplace[0];
-			item.publisher = pubplace[1];
-		}
+			for (contributor in contributors) {
+				if (contributors[contributor]) {
+					item.creators.push(Zotero.Utilities.cleanAuthor(contributors[contributor], "contributor"));
+				}
+			}
 		
-		var date = xmldoc.display.creationdate.toString();
-		if (date) item.date = date.match(/\d+/)[0];
+			var pubplace = xmldoc.display.publisher.toString().split(" : ");
+			if (pubplace) {
+				item.place = pubplace[0];
+				item.publisher = pubplace[1];
+			}
 		
-		var language = xmldoc.display.language.toString();
-		// We really hope that Primo always uses ISO 639-2
-		// This looks odd, but it just means that we're using the verbatim
-		// content if it isn't in our ISO 639-2 hash.
-		if (language)
-			if(!(item.language = iso6392(language)))
-				item.language = language;
+			var date = xmldoc.display.creationdate.toString();
+			if (date) item.date = date.match(/\d+/)[0];
+		
+			var language = xmldoc.display.language.toString();
+			// We really hope that Primo always uses ISO 639-2
+			// This looks odd, but it just means that we're using the verbatim
+			// content if it isn't in our ISO 639-2 hash.
+			if (language)
+				if(!(item.language = iso6392(language)))
+					item.language = language;
 
 		
-		var pages = xmldoc.display.format.toString().match(/(\d+)\sp\./);
-		if (pages) item.pages = pages[1];
+			var pages = xmldoc.display.format.toString().match(/(\d+)\sp\./);
+			if (pages) item.pages = pages[1];
 	
-		// The identifier field is supposed to have standardized format, but
-		// the super-tolerant idCheck should be better than a regex.
-		// (although note that it will reject invalid ISBNs)	
-		var locators = idCheck(xmldoc.display.identifier.toString());
-		if (locators.isbn10) item.ISBN = locators.isbn10;
-		if (locators.isbn13) item.ISBN = locators.isbn13;
-		if (locators.issn) item.ISSN = locators.issn;
+			// The identifier field is supposed to have standardized format, but
+			// the super-tolerant idCheck should be better than a regex.
+			// (although note that it will reject invalid ISBNs)	
+			var locators = idCheck(xmldoc.display.identifier.toString());
+			if (locators.isbn10) item.ISBN = locators.isbn10;
+			if (locators.isbn13) item.ISBN = locators.isbn13;
+			if (locators.issn) item.ISSN = locators.issn;
 		
-		var edition = xmldoc.display.edition.toString();
-		if (edition) item.edition = edition;
+			var edition = xmldoc.display.edition.toString();
+			if (edition) item.edition = edition;
 		
-		for each (subject in xmldoc.search.subject) {
-			item.tags.push(subject.toString());
+			for each (subject in xmldoc.search.subject) {
+				item.tags.push(subject.toString());
+			}
+			// does callNumber get stored anywhere else in the xml?
+			item.callNumber = xmldoc.enrichment.classificationlcc[0];
+		
+			item.complete();
+		} catch (e) {
+			// When we fail using PNX, we'll try to use RIS, but sometimes that's missing too
+			doRIS.push(url);
 		}
-		// does callNumber get stored anywhere else in the xml?
-		item.callNumber = xmldoc.enrichment.classificationlcc[0];
-		
-		item.complete();
-		
-	}, function() {Zotero.done();});
+	}, function() {
+		// If we have a broken item, we'll try to get it using RIS
+		if (doRIS.length == 0) {
+			Zotero.done();
+			return true;
+		}
+		for (var i in doRIS) doRIS[i] = doRIS[i].replace(/showPnx/,"showRIS");
+	       	Zotero.Utilities.processDocuments(doRIS, function(doc) {
+        	       var text = doc.evaluate('//textarea[@name="ImportData"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+        	       if (!text) {
+	        	       Zotero.debug("No RIS‌ data for item, sorry!");
+	        	} 
+        	       text = text.textContent.replace(/[ \t]*$/gm,"");
+        	       text = text.replace(/[\r\n]+[ \t]*[\r\n]+/g,"\n");
+        	       if (!text.match(/^TY/g)) text = "TY  - GENERAL\n" + text;
+        	       Zotero.debug(text);
+               		var translator = Zotero.loadTranslator("import");
+               		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+               		translator.setString(text);
+               		translator.translate();
+		}, function() {Zotero.done();})
+	});
 	Zotero.wait();
-
 }
 
 /* The next two functions are logic that could be bundled away into the translator toolkit. */
