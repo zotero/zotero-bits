@@ -2,8 +2,6 @@
 
 _New Translators_
  * Write IMDB translator, perhaps using http://amazon.libcat.org/cgi-bin/imdb2marc.pl
- * Write Mendeley.com translator
- * Write email translator
  * Write ФЭБ translator
  * Write import/export translator for Zotero's JSON (or citeproc-js's JSON)
    * This would make it easier to force-feed Zotero full-fledged items
@@ -16,10 +14,9 @@ _Broken Translators_
  * Biomedcentral is between formats and needs special-cased treatment (http://forums.zotero.org/discussion/17365/)
 
 _In-Progress Translators_
- * Ab Imperio (uses FW)
- * Gasyrlar Avazy (uses FW)
  * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)
  * Explore EZProxy+JSTOR issues (http://forums.zotero.org/discussion/15987/)
+ * Write email translator (undertested, etc.-- but now in github)
 
 _Other Zotero Features_
  * RTF scan fixes, see http://forums.zotero.org/discussion/16751. Gnotero integration would provide something akin to Papers2's Magic Manuscripts
