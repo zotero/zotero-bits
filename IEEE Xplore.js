@@ -232,6 +232,11 @@ function scrape(doc,url) {
 		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
 	}
 	
+	var res;
+	// Rearrange titles, per http://forums.zotero.org/discussion/8056
+	if (res = newItem.publicationTitle.match(/^([^,]*),(.*)$/))
+		newItem.publicationTitle = res[2]+" "+res[1];
+	
 	if (pdf) {
 		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
 				var namespace = doc.documentElement.namespaceURI;
