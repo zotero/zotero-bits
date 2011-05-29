@@ -234,7 +234,9 @@ function scrape(doc,url) {
 	
 	var res;
 	// Rearrange titles, per http://forums.zotero.org/discussion/8056
-	if (res = newItem.publicationTitle.match(/^([^,]*),(.*)$/))
+	// If something has a comma, and the text after comma ends with "of" or "IEEE",
+	// we switch the parts.
+	if (res = newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|IEEE))$/))
 		newItem.publicationTitle = res[2]+" "+res[1];
 	
 	if (pdf) {
