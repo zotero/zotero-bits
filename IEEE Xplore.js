@@ -1,14 +1,14 @@
 {
-	"translatorID":"92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
-	"translatorType":4,
-	"label":"IEEE Xplore",
-	"creator":"Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target":"^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))",
-	"minVersion":"2.1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-05-12 22:04:16"
+        "translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
+        "label": "IEEE Xplore",
+        "creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
+        "target": "^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))",
+        "minVersion": "2.1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-05-29 20:01:06"
 }
 
 function detectWeb(doc, url) {
@@ -236,7 +236,7 @@ function scrape(doc,url) {
 	// Rearrange titles, per http://forums.zotero.org/discussion/8056
 	// If something has a comma, and the text after comma ends with "of" or "IEEE",
 	// we switch the parts.
-	if (res = newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|IEEE))$/))
+	if (res = newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|IEEE|IET))$/))
 		newItem.publicationTitle = res[2]+" "+res[1];
 	
 	if (pdf) {
