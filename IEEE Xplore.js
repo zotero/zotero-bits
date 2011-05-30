@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-05-29 20:01:06"
+        "lastUpdated": "2011-05-31 01:46:08"
 }
 
 function detectWeb(doc, url) {
@@ -234,9 +234,9 @@ function scrape(doc,url) {
 	
 	var res;
 	// Rearrange titles, per http://forums.zotero.org/discussion/8056
-	// If something has a comma, and the text after comma ends with "of" or "IEEE",
-	// we switch the parts.
-	if (res = newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|IEEE|IET))$/))
+	// If something has a comma, and the text after comma ends with
+	//"of", "IEEE", or the like, then we switch the parts.
+	if (res = newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
 		newItem.publicationTitle = res[2]+" "+res[1];
 	
 	if (pdf) {
