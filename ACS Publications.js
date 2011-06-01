@@ -39,7 +39,7 @@ function doWeb(doc, url){
 		var doi;
 		var title;
 		var availableItems = new Array();
-		var xpath = '//div[@class="articleBox"]';
+		var xpath = '//div[@class="articleBox" or @class="articleBox "]';
 		if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var elmt = elmts.iterateNext();
