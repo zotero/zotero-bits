@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-05-31 01:46:08"
+        "lastUpdated": "2011-06-04 12:17:06"
 }
 
 function detectWeb(doc, url) {
@@ -169,6 +169,7 @@ function scrape(doc,url) {
 			// Google.
 			case "citation_journal_title": if (!newItem.publicationTitle) newItem.publicationTitle = value; break;
 			case "citation_authors":
+			case "citation_author":
 				// I'm a little concerned we'll see multiple copies of the author names...
 				for each(var author in value.split(';'))
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
@@ -223,7 +224,7 @@ function scrape(doc,url) {
 
 	// Re-assign fields if the type changed
 	if (newItem.itemType == "conferencePaper") {
-		newItem.proceedingsTitle = newItem.publicationTitle;
+		newItem.proceedingsTitle = newItem.publicationTitle = newItem.conferenceName;
 	}
 
 	// Abstracts don't seem to come with
@@ -234,10 +235,13 @@ function scrape(doc,url) {
 	
 	var res;
 	// Rearrange titles, per http://forums.zotero.org/discussion/8056
-	// If something has a comma, and the text after comma ends with
-	//"of", "IEEE", or the like, then we switch the parts.
-	if (res = newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
+	// If something has a comma or a period, and the text after comma ends with
+	//"of", "IEEE", or the like, then we switch the parts. Prefer periods.
+	if (res = (newItem.publicationTitle.indexOf(".") !== -1) ?
+				 newItem.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) :
+				 newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
 		newItem.publicationTitle = res[2]+" "+res[1];
+	newItem.proceedingsTitle = newItem.conferenceName = newItem.publicationTitle;
 	
 	if (pdf) {
 		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
