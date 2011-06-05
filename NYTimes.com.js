@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-06-05 17:59:07"
+        "lastUpdated": "2011-06-05 18:03:44"
 }
 
 function detectWeb(doc, url) {
@@ -108,6 +108,8 @@ function scrape(doc, url) {
 	
 	if (metaTags["pdate"]) {
 		newItem.date = metaTags["pdate"].replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3");
+	} else if (metaTags["PUD"]) {
+		newItem.date = metaTags["PUD"].replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3");
 	}
 	
 	if(metaTags["byl"] || metaTags["CLMST"]) {
