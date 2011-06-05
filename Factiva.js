@@ -1,14 +1,14 @@
 {
-	"translatorID":"7bdb79e-a47f-4e3d-b317-ccd5a0a74456",
-	"translatorType":4,
-	"label":"Factiva",
-	"creator":"Simon Kornblith",
-	"target":"https?://[^/]*global\\.factiva\\.com[^/]*/ha/default\\.aspx$",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-05-20 19:10:00"
+        "translatorID": "7bdb79e-a47f-4e3d-b317-ccd5a0a74456",
+        "label": "Factiva",
+        "creator": "Simon Kornblith",
+        "target": "https?://[^/]*global\\.factiva\\.com[^/]*/ha/default\\.aspx$",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-06-05 16:02:29"
 }
 
 function detectWeb(doc, url) {
@@ -41,7 +41,7 @@ function doWeb(doc, url) {
 		var hdl = doc.evaluate('.//input[@name="hdl"]', tableRow, nsResolver, XPathResult.ANY_TYPE,
 			null).iterateNext().value;
 		if(!singlePage){
-			items[hdl] = Zotero.Utilities.cleanString(tableRow.getElementsByTagName("a")[0].textContent);
+			items[hdl] = Zotero.Utilities.trimInternal(tableRow.getElementsByTagName("a")[0].textContent);
 		} else {
 			var m = doc.evaluate('.//td[@class="count"]', tableRow, nsResolver, XPathResult.ANY_TYPE, 
 				null).iterateNext().textContent.match(/[0-9]+/);
@@ -93,29 +93,33 @@ function doWeb(doc, url) {
 		// kill hlt tags; they just make parsing harder
 		text = text.replace(/<\/?hlt>/g, "");
 		var xml = new XML(text);
+		Zotero.debug(text);
 		
 		// loop through articles
 		for each(var ppsarticle in xml[0]..ppsarticle) {
 			var article = ppsarticle.article;
 			var newItem = new Zotero.Item("newspaperArticle");
 			
-			newItem.title = Zotero.Utilities.cleanString(article.headline.paragraph.text().toString());
-			newItem.publicationTitle = Zotero.Utilities.cleanString(article.sourceName.text().toString());
+			newItem.title = Zotero.Utilities.trimInternal(article.headline.paragraph.text().toString());
+			newItem.publicationTitle = Zotero.Utilities.trimInternal(article.sourceName.text().toString());
 			for each(var tag in article..name) {
 				newItem.tags.push(tag.text().toString());
 			}
 			newItem.date = Zotero.Utilities.formatDate(Zotero.Utilities.strToDate(article.publicationDate.date.text().toString()));
 			if(article.byline.length()) {
-				var byline = Zotero.Utilities.cleanString(article.byline.text().toString().replace(/By/i, ""));
+				var byline = Zotero.Utilities.trimInternal(article.byline.text().toString().replace(/By/i, ""));
 				var authors = byline.split(/ (?:\&|and) /i);
 				for each(var author in authors) {
-					// This may not be the right way to do this, but byline capitalisation is erratic
-					author = Zotero.Utilities.capitalizeTitle(author, "force");
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+					// fix all-caps
+					if (author.toUpperCase() == author) author = Zotero.Utilities.capitalizeTitle(author.toLowerCase(),true);
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", (author.indexOf(',') !== -1)));
 				}
 			}
 			newItem.section = article.sectionName.text().toString();
 			newItem.edition = article.edition.text().toString();
+			newItem.rights = article.copyright.text().toString().trim();
+			newItem.language = article.baseLanguage.text().toString();
+			newItem.extra = "Accession Number: " + article.accessionNo.text().toString().trim();
 			
 			if(article.pages.length()) {
 				newItem.pages = "";
@@ -125,18 +129,14 @@ function doWeb(doc, url) {
 				newItem.pages = newItem.pages.substr(1);
 			}
 			
-			var m = article.volume.text().toString().match(/ISSN[:\s]*([\-0-9]{8,9})/i);
-			if(m) newItem.ISSN = m[1];
-			// Collate the article body and create a child note containing it
-			var articleText = "";
-			for (var para in article.leadParagraph.paragraph) {
-				articleText += "<p>"+article.leadParagraph.paragraph[para]+"</p>";
-			}
-			for (var para in article.tailParagraphs.paragraph) {
-				articleText += "<p>"+article.tailParagraphs.paragraph[para]+"</p>";
-			}
-			newItem.notes.push({note: articleText});
-
+			var m = article.volume.text().toString().match(/(.*)ISSN[:\s]*([\-0-9]{8,9})/i);
+			// use volume, because it should be defined for newspaperArticle some day
+			if(m) {
+				newItem.ISSN = m[2];
+				newItem.volume = m[1].trim();
+			} else {
+				newItem.volume = article.volume.text().toString().trim();
+			}			
 			newItem.complete();
 		}
 		
