@@ -1,14 +1,14 @@
 {
-	"translatorID":"ce7a3727-d184-407f-ac12-52837f3361ff",
-	"translatorType":4,
-	"label":"NYTimes.com",
-	"creator":"Simon Kornblith",
-	"target":"^https?://(?:query\\.nytimes\\.com/search/(alternate/)?)query|(?:select\\.|www\\.)?nytimes\\.com/.)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-03-21 04:31:00"
+        "translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
+        "label": "NYTimes.com",
+        "creator": "Simon Kornblith",
+        "target": "^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?query|(?:select\\.|\\w+\\.blogs\\.|www\\.)?nytimes\\.com/.)",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-06-05 17:59:07"
 }
 
 function detectWeb(doc, url) {
@@ -27,6 +27,9 @@ function detectWeb(doc, url) {
 		var metaTags = doc.getElementsByTagName("meta");
 		if(metaTags.namedItem("hdl") && metaTags.namedItem("byl")) {
 			return "newspaperArticle";
+		}
+		if(url.indexOf("blogs.nytimes") !== -1) {
+			return "blogPost";
 		}
 	}
 }
@@ -79,8 +82,11 @@ function scrape(doc, url) {
 		for(var i=0; i<metaTagHTML.length; i++) {
 			var key = metaTagHTML[i].getAttribute("name");
 			var value = metaTagHTML[i].getAttribute("content");
+			var property = metaTagHTML[i].getAttribute("property");
 			if(key && value) {
 				metaTags[key] = value;
+			} else if (property && value) {
+				metaTags[property] = value;
 			}
 		}
 		// Get everything on one page is possible
@@ -104,8 +110,9 @@ function scrape(doc, url) {
 		newItem.date = metaTags["pdate"].replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3");
 	}
 	
-	if(metaTags["byl"]) {
-		var author = Zotero.Utilities.trimInternal(metaTags["byl"]);
+	if(metaTags["byl"] || metaTags["CLMST"]) {
+		var author = metaTags["byl"] ? metaTags["byl"] : metaTags["CLMST"]
+		author =  Zotero.Utilities.trimInternal(author);
 		if(author.substr(0, 3).toLowerCase() == "by ") {
 			author = author.substr(3);
 		}
@@ -133,6 +140,13 @@ function scrape(doc, url) {
 		for(var i in newItem.tags) {
 			newItem.tags[i] = newItem.tags[i].replace("  ", ", ");
 		}
+	}
+
+	if (metaTags["PST"] == "Blog Post") {
+		newItem.itemType = "blogPost";
+		associateMeta(newItem, metaTags, "og:site_name", "blogTitle");
+		associateMeta(newItem, metaTags, "og:title", "title");
+		associateMeta(newItem, metaTags, "og:description", "abstractNote");
 	}
 	
 	// Remove pagewanted from URL in item (keeping other pieces, in case they might matter)
