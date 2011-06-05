@@ -9,7 +9,7 @@
 	"priority":100,
 	"inRepository":true,
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-03-20 03:10:59"
+	"lastUpdated":"2011-04-01 20:50:00"
 }
 
 function detectImport() {
@@ -43,7 +43,9 @@ var bookSectionFieldMap = {
 	ID:"itemID",
 	T1:"title",
 	T3:"series",
+	// We cover book sections and conference papers here
 	T2:"bookTitle",
+	T2:"proceedingsTitle",
 	CY:"place",
 	JA:"journalAbbreviation",
 	M3:"DOI"
@@ -258,6 +260,8 @@ function processTag(item, tag, value) {
 				item.notes.push({note:value});
 			} else item.notes.push({note:value});
 		}
+	// The RIS spec insanely claims that AB == N1, but other software seems
+	// to overlook or ignore this, so we will too on import
 	} else if(tag == "N2" || tag == "AB") {
 		// abstract
 		item.abstractNote = value;
