@@ -1,15 +1,15 @@
 {
-	"translatorID":"4e7119e0-02be-4848-86ef-79a64185aad8",
-	"translatorType":3,
-	"label":"Bookmarks",
-	"creator":"Avram Lyon",
-	"target":"html",
-	"minVersion":"2.1b6",
-	"maxVersion":"",
-	"priority":100,
-	"configOptions":{"dataMode":"line"},
-	"inRepository":true,
-	"lastUpdated":"2011-02-10 04:31:00"
+        "translatorID": "4e7119e0-02be-4848-86ef-79a64185aad8",
+        "label": "Bookmarks",
+        "creator": "Avram Lyon",
+        "target": "html",
+        "minVersion": "2.1b6",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+		"configOptions":{"dataMode":"line"},
+        "translatorType": 3,
+        "lastUpdated": "2011-06-07 19:00:38"
 }
 
 /*
@@ -49,13 +49,15 @@
 </DL>
   */
 
+const MAX_DETECT_LINES = 150;
 
 function detectImport() {
 	var text = "";
 	var line;
 	var match;
 	var re = /<DT>\s*<A[^>]*HREF="([^"]+)"[^>]*>([^<\n]+)/gi;
-	while((line = Zotero.read()) !== false) {
+	var i = 0;
+	while((line = Zotero.read()) !== false && (i++ < MAX_DETECT_LINES)) {
 		text += line;
 		match = re.exec(text);
 		if (match) {
@@ -69,22 +71,30 @@ function detectImport() {
 function doImport() {
 	var line;
 	var hits;
+	var title;
 	var item = false;
 	var itemIncomplete = false;
 	var re = /([A-Za-z_]+)="([^"]+)"/g; 
 	while((line = Zotero.read()) !== false) {
 		if (line.indexOf("<DT>") !== -1) {
 			if (itemIncomplete) item.complete();
-			itemIncomplete = true;
 			item = new Zotero.Item("webpage");
-			item.title = line.match(/>([^<]*)<\/A>/)[1];
-			Zotero.debug(item.title);
+			title = line.match(/>([^<]*)<\/A>/);
+			if (title) {
+				item.title = title[1];
+				itemIncomplete = true;
+			} else {
+				Zotero.debug("Discarding line with no <A>: "+ line);
+				continue;
+			}
 			while(hits = re.exec(line)) {
 				if (!hits) { Zotero.debug("RE no match in "+line);
 				}
 				switch (hits[1]) {
 					case "HREF": item.url = hits[2]; break;
 					case "TAGS": item.tags = hits[2].split(','); break;
+					case "ICON_URI":
+					case "ICON": break;
 					default: item.extra = item.extra ? 	item.extra + "; "+ [hits[1], hits[2]].join("=") :
 										[hits[1], hits[2]].join("=");
 				}
