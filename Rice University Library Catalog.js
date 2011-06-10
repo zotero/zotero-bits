@@ -5,7 +5,7 @@
         "target": "^https?://\\S*\\.rice\\.edu[^/]*/cgisirsi",
         "minVersion": "2.1",
         "maxVersion": "",
-        "priority": 100,
+        "priority": 90,
         "inRepository": true,
         "translatorType": 4,
         "lastUpdated": "2011-06-10 15:26:03"
@@ -14,6 +14,8 @@
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
    and the modifications for Rutgers (IRIS) by Chad Mills.
  */
+
+// Priority of 90 to override SIRSI
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
