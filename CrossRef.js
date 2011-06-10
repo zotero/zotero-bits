@@ -4,12 +4,14 @@
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
 	"target":"^https?://partneraccess\\.oclc\\.org/",
-	"minVersion":"1.0.0b3.r1",
+	"minVersion":"2.1",
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2011-01-09 18:20:00"
+	"lastUpdated":"2011-06-10 17:19:11"
 }
+
+/* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
 
 function detectSearch(item) {
 	if(item.itemType == "journalArticle") {
@@ -59,8 +61,7 @@ function processCrossRef(xmlOutput) {
 		var itemXML = xml.doi_record.crossref.journal;
 		var refXML = itemXML.journal_article;
 		var metadataXML = itemXML.journal_metadata;
-		
-		item.ISSN = itemXML.journal_metadata.issn[0].toString();
+	
 		item.publicationTitle = itemXML.journal_metadata.full_title.toString();
 		if (itemXML.journal_metadata.abbrev_title.length()) {
 			item.journalAbbreviation = itemXML.journal_metadata.abbrev_title[0].toString();
@@ -118,11 +119,15 @@ function processCrossRef(xmlOutput) {
 		// Example: doi: 10.1002/14651858.CD002966.pub3
 		// http://www.crossref.org/openurl/?url_ver=Z39.88-2004&req_dat=usr:pwd&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
 		} else if(xml.doi_record[0].crossref.book.@book_type.length()
-				&& xml.doi_record[0].crossref.book.@book_type == 'reference'
-				&& xml.doi_record[0].crossref.book.content_item.@component_type == 'reference_entry') {
+				&& (xml.doi_record[0].crossref.book.@book_type == 'reference'
+					|| xml.doi_record[0].crossref.book.@book_type == 'other')
+				&& (xml.doi_record[0].crossref.book.content_item.@component_type == "chapter"
+					|| xml.doi_record[0].crossref.book.content_item.@component_type == 'reference_entry')) {
 			var item = new Zotero.Item("bookSection");
 			var refXML = xml.doi_record[0].crossref.book.content_item;
-			var metadataXML = xml.doi_record[0].crossref.book.book_metadata;
+			var metadataXML = (xml.doi_record[0].crossref.book.book_metadata.length() ? 
+				xml.doi_record[0].crossref.book.book_metadata :
+				xml.doi_record[0].crossref.book.book_series_metadata);
 			item.bookTitle = metadataXML.titles.title[0].toString();
 			
 			// Handle book authors
