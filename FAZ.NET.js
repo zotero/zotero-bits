@@ -8,12 +8,12 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":false,
-	"lastUpdated":"2010-09-08 12:00:00"
+	"lastUpdated":"2011-06-14 12:00:00"
 }
 
 /*
 	FAZ Translator - Parses FAZ articles and creates Zotero-based metadata.
-	Copyright (C) 2010 ibex
+	Copyright (C) 2010-2011 ibex
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -54,8 +54,12 @@ function doWeb(doc, url) {
 	//Zotero.debug("ibex doWeb URL = "+ url);
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc.getElementById("MainColumn").getElementsByTagName("h1"), '/s/.+\\.html');
+		var items = Zotero.Utilities.getItemArray(doc,
+                doc.getElementById("MainColumn")
+                .getElementsByTagName("h1"),
+                '/artikel/.+\\.html');
 		if (!items || countObjectProperties(items) == 0) {
+            Zotero.debug("no items");
 			return true;
 		}
 		items = Zotero.selectItems(items);
@@ -74,11 +78,11 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc) {
-	//Zotero.debug("ibex scrape URL = "+ doc.location.href);
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
 	newArticle.title = Zotero.Utilities.trimInternal(getXPath('//div[@class = "Article"]/h1', doc).textContent);
-	newArticle.date = Zotero.Utilities.trimInternal(getXPath('//div[@class = "Article"]/span[@class = "Italic"][1]', doc).textContent);
+	newArticle.date = Zotero.Utilities.trimInternal(
+        getXPath('//div[@class = "Article"]/p[@class = "Italic"][1]', doc).textContent);
 
 	var subtitle = getXPath('//div[@class = "Article"]/h2', doc);
 	if (subtitle != null) {
