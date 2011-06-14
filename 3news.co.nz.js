@@ -1,14 +1,14 @@
 {
-        "translatorID":"a9f7b277-e134-4d1d-ada6-8f7942be71a6",
-        "label":"3news.co.nz",
-        "creator":"Sopheak Hean",
-        "target":"www.3news.co.nz",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2011-04-07 16:06:23"
+        "translatorID": "a9f7b277-e134-4d1d-ada6-8f7942be71a6",
+        "label": "3news.co.nz",
+        "creator": "Sopheak Hean",
+        "target": "^https?://www\\.3news\\.co\\.nz",
+        "minVersion": "1.0",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": false,
+        "translatorType": 4,
+        "lastUpdated": "2011-04-21 09:17:38"
 }
 
 /*
@@ -39,22 +39,18 @@ function detectWeb(doc, url) {
 	var blog= '//div[@class="newsWrapperDisp"]/div[@class="news"]/span';
 	var blogObject = doc.evaluate(blog, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if  (blogObject){
-				
-		
 		return "blogPost";
 	} else {
 		var date='//div[@class="ModArticleDisplayC"]/div[@class="newsWrapperFullDisp09"]/div[@class="news"]/span';
 		var dateObject = doc.evaluate(date, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (dateObject){
-			
 			return "newspaperArticle";
-		}
-				
+		}	
 	} 
-	
+	return false;
 }
 
-function scrape (doc, url, a) {
+function scrape (doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
@@ -90,7 +86,7 @@ function scrape (doc, url, a) {
 		if(doCopyright(doc,url) !=null){
 			newItem.rights = doCopyright(doc,url);
 		}
-		newItem.attachments.push({title:"Snapshot", snapshot:false, mimeType:"text/html", url:newItem.url});
+		newItem.attachments.push({title:"3news.co.nz Snapshot", mimeType:"text/html", url:newItem.url});
 		newItem.complete();
 	}
 
@@ -120,7 +116,7 @@ function scrape (doc, url, a) {
 		if(doCopyright(doc,url) !=null){
 			newItem.rights = doCopyright(doc,url);
 		}
-		newItem.attachments.push({title:"Snapshot", snapshot:false, mimeType:"text/html", url:newItem.url});
+		newItem.attachments.push({title:"3news.co.nz Snapshot", mimeType:"text/html", url:newItem.url});
 		newItem.complete();
 		
 	}
@@ -222,17 +218,13 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	/** Multiple cannot be done for this translator **/
 	
 	var articles = new Array();
-	 if (detectWeb(doc, url) == "newspaperArticle") {
-		articles = [url];
-		
-	}else if (detectWeb(doc, url) == "blogPost") {
-		articles = [url];
-		
+	if (detectWeb(doc, url) == "newspaperArticle" || detectWeb(doc, url) == "blogPost") {
+		scrape(doc, url);
+	} else {
+		/** Multiple cannot be done for this translator **/
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.wait();
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-	
 }

@@ -140,6 +140,7 @@ function doExport() {
 				var interviewers = [];
 				var translators = [];
 				for(var i in item.creators) {
+					if (!item.creators[i]) continue; // If we've spliced out elements, the iterator can go too far
 					if(item.creators[i].creatorType == "translator") {
 						translators = translators.concat(item.creators.splice(i, 1));
 					} else if(item.creators[i].creatorType == "interviewer") {
@@ -186,6 +187,7 @@ function doExport() {
 				var translators = [];
 				for(var i in item.creators) {
 					if (!item.creators[i]) continue; // If we've spliced out elements, the iterator can go too far
+					Zotero.debug(item.creators[i].creatorType);
 					if(item.creators[i].creatorType == "translator") {
 						translators = translators.concat(item.creators.splice(i, 1));
 					} else if(item.creators[i].creatorType == "editor") {

@@ -1,14 +1,14 @@
 {
-	"translatorID":"f3f092bf-ae09-4be6-8855-a22ddd817925",
-	"label":"ACM Digital Library",
-	"creator":"Simon Kornblith, Michael Berkowitz and John McCaffery",
-	"target":"^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
-	"minVersion":"1.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2011-04-13 23:30:00"
+        "translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
+        "label": "ACM Digital Library",
+        "creator": "Simon Kornblith, Michael Berkowitz and John McCaffery",
+        "target": "^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
+        "minVersion": "1.0",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-06-10 01:14:01"
 }
 
 /**

@@ -17,6 +17,7 @@ Université de Nice, France (http://catalogue.unice.fr/)
 Supports Primo 3
 Boston College (http://www.bc.edu/supersleuth),
 Oxford Libraries (http://solo.ouls.ox.ac.uk/)
+LIBIS (http://limo.libis.be/)
 */
 
 function detectWeb(doc, url) {

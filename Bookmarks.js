@@ -7,7 +7,6 @@
         "maxVersion": "",
         "priority": 100,
         "inRepository": true,
-		"configOptions":{"dataMode":"line"},
         "translatorType": 3,
         "lastUpdated": "2011-06-07 19:00:38"
 }

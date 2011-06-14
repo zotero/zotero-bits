@@ -1,14 +1,14 @@
 {
-        "translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
-        "label":"WilsonWeb",
-        "creator":"Brinda Shah",
-        "target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-23 14:12:32"
+        "translatorID": "af1af8fa-19dc-486f-a8cc-107acb849101",
+        "label": "WilsonWeb",
+        "creator": "Brinda Shah",
+        "target": "^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
+        "minVersion": "1.0",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-29 01:02:36"
 }
 
 var dispType='brief';
@@ -692,7 +692,11 @@ function scrape(doc, url) {
 		else 
 			return null;
 	} : null;
-		
+	
+	// We'll try to determine record form:
+	var brevity = doc.evaluate('//input[@name="displayType"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (brevity && brevity.value == "full") 1==1; //Zotero.debug("hi"); //dispType = "details";
+	
 	var newItem = new Zotero.Item(resultType);
 	newItem.url = doc.location.href;
 	

@@ -2,7 +2,7 @@
         "translatorID":"c436f3c7-4246-4ed3-a227-a538c8113a0e",
         "label":"fishpond.co.nz",
         "creator":"Sopheak Hean",
-        "target":"www.fishpond.co.nz/",
+        "target":"^https?://www\\.fishpond\\.co\\.nz/",
         "minVersion":"1.0",
         "maxVersion":"",
         "priority":100,
@@ -34,21 +34,17 @@
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
+		if (prefix == "x" ) return namespace; else return null;
 	} : null;
 	var definePath = '//td[@class="main hproduct"]/h1';
 	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if  (XpathObject) {
 		return "book";
-	}
-
-	else {
-	var definePath = '//td[@id="page_title"]/h1';
-	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if  (XpathObject){
-		
-		
-		return "multiple";
+	} else {
+		var definePath = '//td[@id="page_title"]/h1';
+		var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if  (XpathObject) {
+			return "multiple";
 		}
 	}
 
@@ -57,7 +53,7 @@ function detectWeb(doc, url) {
 function scrape(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
-	if (prefix == 'x') return namespace; else return null;
+		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
 	var newItem = new Zotero.Item("book");
@@ -65,8 +61,8 @@ function scrape(doc, url) {
 	var title = '//span[@class="fn"]';
 	var titleObject = doc.evaluate(title, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (titleObject){
-			newItem.title = titleObject.textContent;
-		}
+		newItem.title = titleObject.textContent;
+	}
 		
 	var author = '//p[@id="product_author"]';
 	var authorObject = doc.evaluate(author, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -117,7 +113,7 @@ function scrape(doc, url) {
 	 	newItem.publisher= publisherObject.textContent;
 	}
 	newItem.language = "English";
-	newItem.attachments.push({title:"Snapshot", snapshot:false, mimeType:"text/html", url:newItem.url});
+	newItem.attachments.push({title:"FishPond Snapshot", mimeType:"text/html", url:newItem.url});
 	newItem.complete();
 }
 
@@ -140,17 +136,12 @@ function doWeb(doc, url) {
 		}
 		items = Zotero.selectItems(items);
 	
-		
 		for (var i in items) {
 			articles.push(i);
-			
-			
 		}
-		
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.wait();
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }

@@ -36,7 +36,6 @@ function doWeb(doc, url) {
 	} else {
 		articles = [url];
 	}
-	Zotero.debug(articles);
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
 		var abs, pdf;
 		var risurl = newDoc.evaluate('//div[contains(@class,"export-formats")]/ul/li/a[@title="EndNote Export"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;

@@ -266,6 +266,8 @@ function doWeb(doc, url) {
 		}
 		if (!uid) {
 			// Fall back on <dl class="rprtid"> 
+			// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
+			// Discussed http://forums.zotero.org/discussion/17662
 			uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
 					nsResolver, XPathResult.ANY_TYPE, null);
 			uid = uids.iterateNext();

@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Project Gutenberg",
 	"creator":"Adam Crymble",
-	"target":"http://www.gutenberg.org",
+	"target":"^http://www\\.gutenberg\\.org",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
