@@ -1,5 +1,5 @@
 {
-        "translatorID": "aff274ac-d3d1-4977-80f4-5320613226ec",
+        "translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
         "label": "IMDb",
         "creator": "Avram Lyon",
         "target": "^https?://www\\.imdb\\.com/",
@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-06-14 21:03:15"
+        "lastUpdated": "2011-06-14 22:23:43"
 }
 
 function detectWeb(doc, url){
@@ -110,11 +110,64 @@ var testCases = [
         "type": "web",
         "url": "http://www.imdb.com/title/tt0061722/",
         "items": [
-            {
-                "itemType": "journalArticle",
-                "title": "Title"
-            }
-        ]
+             {
+                 "itemType": "film",
+                 "creators": [
+                     {
+                         "firstName": "Mike",
+                         "lastName": "Nichols",
+                         "creatorType": "director"
+                     },
+                     {
+                         "firstName": "Calder",
+                         "lastName": "Willingham",
+                         "creatorType": "scriptwriter"
+                     },
+                     {
+                         "firstName": "Buck",
+                         "lastName": "Henry",
+                         "creatorType": "scriptwriter"
+                     },
+                     {
+                         "firstName": "Dustin",
+                         "lastName": "Hoffman",
+                         "creatorType": "contributor"
+                     },
+                     {
+                         "firstName": "Anne",
+                         "lastName": "Bancroft",
+                         "creatorType": "contributor"
+                     },
+                     {
+                         "firstName": "Katharine",
+                         "lastName": "Ross",
+                         "creatorType": "contributor"
+                     },
+                     {
+                         "firstName": "William",
+                         "lastName": "Daniels",
+                         "creatorType": "contributor"
+                     }
+                 ],
+                 "notes": [],
+                 "tags": [],
+                 "seeAlso": [],
+                 "attachments": [
+                     {
+                         "url": "http://ia.media-imdb.com/images/M/MV5BMTQ0ODc4MDk4Nl5BMl5BanBnXkFtZTcwMTEzNzgzNA@@._V1._SX320.jpg",
+                         "title": "Poster"
+                     }
+                 ],
+                 "title": "The Graduate",
+                 "date": "22 Dec 1967",
+                 "genre": "Comedy, Drama, Romance",
+                 "abstractNote": "Recent college graduate Benjamin Braddock is trapped into an affair with Mrs. Robinson, who happens to be the wife of his father's business partner and then finds himself falling in love with her teenage daughter, Elaine.",
+                 "runningTime": "1 hr 46 mins",
+                 "extra": "IMDB ID: tt0061722; IMDB Rating: 8.2 (82945 votes); Rotten Tomatoes: 8.1 (46 reviews  40 fresh, 6 rotten), Tomato Meter: 87",
+                 "libraryCatalog": "IMDb",
+                 "checkFields": "title"
+             }
+         ]
     },
     {
         "type": "web",
