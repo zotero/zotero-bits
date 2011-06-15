@@ -2,7 +2,7 @@
         "translatorID": "3bdaeab1-2200-4e18-a68a-430d1cd50d21",
         "label": "The Daily Beast",
         "creator": "Sebastian Karcher",
-        "target": "^https?://(.*)thedailybeast.com",
+        "target": "^https?://(.*)thedailybeast\\.com",
         "minVersion": "1.0",
         "maxVersion": "",
         "priority": 100,
