@@ -33,6 +33,10 @@
     <http://www.gnu.org/licenses/>.
 */
 
+/* There are at least three major page structures on LJ, represented
+   by the scrapers and tests specified below. Additional structures
+   may need additional logic. */
+
 function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
 function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
