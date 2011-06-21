@@ -1,16 +1,22 @@
 {
-	"translatorID":"9cb70025-a888-4a29-a210-93ec52da40d4",
-	"translatorType":3,
-	"label":"BibTeX",
-	"creator":"Simon Kornblith and Richard Karnesky",
-	"target":"bib",
-	"minVersion":"2.1.3",
-	"maxVersion":"",
-	"priority":200,
-	"configOptions":{"dataMode":"block"},
-	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
-	"inRepository":true,
-	"lastUpdated":"2011-05-12 21:20:00"
+        "translatorID": "9cb70025-a888-4a29-a210-93ec52da40d4",
+        "label": "BibTeX",
+        "creator": "Simon Kornblith and Richard Karnesky",
+        "target": "bib",
+        "minVersion": "2.1.3",
+        "maxVersion": "",
+        "priority": 200,
+        "configOptions": {
+                "dataMode": "block"
+        },
+        "displayOptions": {
+                "exportCharset": "UTF-8",
+                "exportNotes": true,
+                "exportFileData": false
+        },
+        "inRepository": true,
+        "translatorType": 3,
+        "lastUpdated": "2011-06-21 23:49:19"
 }
 
 function detectImport() {
@@ -1633,7 +1639,7 @@ function processField(item, field, value) {
 			item.tags = value.split(/, ?/g);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
-		item.notes.push({note:value});
+		item.notes.push({note:Zotero.Utilities.text2html(value)});
 	} else if (field == "pdf") {
 		if (/:\/\//.test(value)) { // a full uri is given
 			item.attachments = [{url:value, mimeType:"application/pdf", downloadable:true}];
@@ -1697,7 +1703,7 @@ function getFieldValue(read) {
 	
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
-		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "$1{$2}");
+		value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "$1{$2}");
 		for (var mapped in reversemappingTable) { // really really slow!
 			var unicode = reversemappingTable[mapped];
 			if (value.indexOf(mapped) != -1) {
@@ -2076,9 +2082,9 @@ function doExport() {
 		if(item.itemType == "webpage") {
 			writeField("howpublished", item.url);
 		}
-		if (item.notes) {
+		if (item.notes && Zotero.getOption("exportNotes")) {
 			for each (var note in item.notes) {
-				writeField("annote", note["note"]);
+				writeField("annote", Zotero.Utilities.unescapeHTML(note["note"]));
 			}
 		}		
 		
