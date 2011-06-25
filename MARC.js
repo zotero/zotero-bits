@@ -197,7 +197,7 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 					} else {
 						// Duplicate subfield
 						Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
-						returnFields[i][subfieldIndex] = returnFields[i][subfieldIndex] + subfields[j].substr(this.subfieldCodeLength-1);
+						returnFields[i][subfieldIndex] = returnFields[i][subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
 					}
 				}
 			}
@@ -465,6 +465,7 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "050", "ab", "callNumber");
 		this._associateDBField(item, "090", "a", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
+		this._associateDBField(item, "852", "khim", "callNumber");
 		
 		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
