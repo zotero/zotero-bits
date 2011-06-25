@@ -9,7 +9,7 @@
 	"priority":100,
 	"inRepository":true,
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-04-01 20:50:00"
+	"lastUpdated":"2011-06-17 20:07:40"
 }
 
 function detectImport() {
@@ -167,6 +167,8 @@ function processTag(item, tag, value) {
 		var tempType;
 		if (item.itemType == "patent") {
 			tempType = "inventor";
+		} else if (item.itemType == "map") {
+			tempType = "cartographer";
 		} else {
 			tempType = "author";
 		}
@@ -488,7 +490,9 @@ function doExport() {
 			// only two types, primary and secondary
 			var risTag;
 			// authors and inventors are primary creators
-			if (item.creators[j].creatorType == "author" || item.creators[j].creatorType == "inventor") {
+			if (item.creators[j].creatorType == "author" 
+				|| item.creators[j].creatorType == "inventor"
+				|| item.creators[j].creatorType == "cartographer") {
 				risTag = "A1";
 			} else if (item.creators[j].creatorType == "editor") {
 				risTag = "ED";
