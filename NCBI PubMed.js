@@ -3,7 +3,7 @@
 	"translatorType":13,
 	"label":"NCBI PubMed",
 	"creator":"Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target":"https?://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
+	"target":"https?://[^/]*(?:http/)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
 	"minVersion":"2.1b1",
 	"maxVersion":"",
 	"priority":100,
