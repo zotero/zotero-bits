@@ -1,14 +1,15 @@
 {
-	"translatorID":"4f0d0c90-5da0-11df-a08a-0800200c9a66",
-	"translatorType":4,
-	"label":"FAZ.NET",
-	"creator":"ibex",
-	"target":"^http://((www\\.)?faz\\.net/.)",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2011-06-14 12:00:00"
+        "translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
+        "label": "FAZ.NET",
+        "creator": "ibex",
+        "target": "^http://((www\\.)?faz\\.net/.)",
+        "minVersion": "2.1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "browserSupport": "g",
+        "lastUpdated": "2011-07-01 10:53:41"
 }
 
 /*
@@ -27,6 +28,12 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+Test with the following URLs:
+http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html
+http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1
 */
 
 /* Get the first xpath element from doc, if not found return null. */
@@ -81,8 +88,9 @@ function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
 	newArticle.title = Zotero.Utilities.trimInternal(getXPath('//div[@class = "Article"]/h1', doc).textContent);
-	newArticle.date = Zotero.Utilities.trimInternal(
-        getXPath('//div[@class = "Article"]/p[@class = "Italic"][1]', doc).textContent);
+	var date = getXPath('//div[@class = "Article"]//span[@id = "dateline"][1]', doc).textContent;
+	newArticle.date = Zotero.Utilities.trimInternal(date.replace(/ .*$/, ""));
+
 
 	var subtitle = getXPath('//div[@class = "Article"]/h2', doc);
 	if (subtitle != null) {
@@ -135,3 +143,54 @@ function countObjectProperties(obj) {
 	}
 	return size;
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
+        "items": [
+            {
+                "itemType": "newspaperArticle",
+                "creators": [
+                    {
+                        "firstName": "Fynn Ole",
+                        "lastName": "Engler",
+                        "creatorType": "author"
+                    },
+                    {
+                        "firstName": "Jürgen",
+                        "lastName": "Renn",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "title": "FAZ.NET Article Snapshot",
+                        "mimeType": "text/html",
+                        "url": false,
+                        "snapshot": true
+                    }
+                ],
+                "url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
+                "title": "Wissenschaftsphilosophie: Krumme Wege der Vernunft",
+                "date": "2011-06-13",
+                "shortTitle": "Krumme Wege der Vernunft",
+                "abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+                "publicationTitle": "FAZ.NET",
+                "extra": "Fynn Ole Engler ist Mitherausgeber der als Langzeitvorhaben der Akademie der Wissenschaften in Hamburg erscheinenden Moritz-Schlick-Gesamtausgabe. Jürgen Renn ist Direktor am Max-Planck-Institut für Wissenschaftsgeschichte in Berlin. Text: F.A.S. Bildmaterial: Foto ETH Zürich, ÖNB Bildarchiv Austria",
+                "libraryCatalog": "FAZ.NET"
+            }
+        ]
+    },
+    {
+        "type": "web",
+        "url": "http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1",
+        "items": "multiple"
+    }
+]
+/** END TEST CASES **/
