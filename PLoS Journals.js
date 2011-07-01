@@ -61,7 +61,7 @@ function doWeb(doc, url) {
         Zotero.debug(text);
         var pdfURL = risLink.replace("info", "fetchObjectAttachment.action?uri=info") + '&representation=PDF';
 		var doi = risLink.match(/doi(\/|%2F)(.*)$/)[2];
-		text = text.replace(text.match(/(^ER[^\n]*)([^\0]*)/m)[2],"");//Remove stray M3-tag at the end of the RIS record
+		text = text.replace(text.match(/(^\s*ER[^\n]*)([^\0]*)/m)[2],"");//Remove stray M3-tag at the end of the RIS record
 		text = text.replace("%2F","/");//Replace %2F characters by forward slashes in url
 		doi  = doi.replace("%2F","/");//Replace %2F characters by forward slashes in doi
 		
