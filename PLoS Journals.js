@@ -1,14 +1,14 @@
 {
-	"translatorID":"9575e804-219e-4cd6-813d-9b690cbfc0fc",
-	"translatorType":4,
-	"label":"PLoS Journals",
-	"creator":"Michael Berkowitz And Rintze Zelle",
-	"target":"^http://www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org/(search|article)/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-06-04 00:00:00"
+        "translatorID": "9575e804-219e-4cd6-813d-9b690cbfc0fc",
+        "label": "PLoS Journals",
+        "creator": "Michael Berkowitz And Rintze Zelle",
+        "target": "^http://www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org/(search|article)/",
+        "minVersion": "2.1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-07-02 01:01:44"
 }
 
 function detectWeb(doc, url) {
@@ -57,14 +57,18 @@ function doWeb(doc, url) {
 
 	Zotero.Utilities.HTTP.doGet(risLinks, function(text) {
 		var risLink = texts.shift();
-		var pdfURL = risLink.replace("info", "fetchObjectAttachment.action?uri=info") + '&representation=PDF';
+        text = text.replace(/^N2  -.*^[A-Z0-9]{2}/m,'');
+        Zotero.debug(text);
+        var pdfURL = risLink.replace("info", "fetchObjectAttachment.action?uri=info") + '&representation=PDF';
 		var doi = risLink.match(/doi(\/|%2F)(.*)$/)[2];
-		text = text.replace(text.match(/(ER[^\n]*)([^\0]*)/)[2],"");//Remove stray M3-tag at the end of the RIS record
+		text = text.replace(text.match(/(^ER[^\n]*)([^\0]*)/m)[2],"");//Remove stray M3-tag at the end of the RIS record
 		text = text.replace("%2F","/");//Replace %2F characters by forward slashes in url
 		doi  = doi.replace("%2F","/");//Replace %2F characters by forward slashes in doi
 		
 		// grab the UR link for a snapshot then blow it away 
-		var snapshot = text.match(/UR\s+\-\s+(.*)/)[1];
+		var snapshot = text.match(/UR\s+\-\s+(.*)/)
+        if (snapshot) snapshot = snapshot[1]
+        else snapshot = false;
 		text = text.replace(/UR\s+\-(.*)/, "");
 				
 		var translator = Zotero.loadTranslator("import");
@@ -82,3 +86,93 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://www.plosone.org/article/info:doi/10.1371/journal.pone.0012968",
+        "items": [
+            {
+                "itemType": "journalArticle",
+                "creators": [
+                    {
+                        "lastName": "Choi",
+                        "firstName": "Jin Won ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Kim",
+                        "firstName": "Sujung ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Kim",
+                        "firstName": "Tae Min ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Kim",
+                        "firstName": "Young Min ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Seo",
+                        "firstName": "Hee Won ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Park",
+                        "firstName": "Tae Sub ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Jeong",
+                        "firstName": "Jae-Wook ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Song",
+                        "firstName": "Gwonhwa ",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Han",
+                        "firstName": "Jae Yong ",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": false,
+                        "title": "PLoS Full Text PDF",
+                        "mimeType": "application/pdf"
+                    },
+                    {
+                        "url": false,
+                        "title": "PLoS Snapshot",
+                        "mimeType": "text/html",
+                        "snapshot": true
+                    }
+                ],
+                "title": "Basic Fibroblast Growth Factor Activates MEK/ERK Cell Signaling Pathway and Stimulates the Proliferation of Chicken Primordial Germ Cells",
+                "date": "2010",
+                "abstractNote": "Long-term maintenance of avian primordial germ cells (PGCs) in vitro has tremendous potential because it can be used to deepen our understanding of the biology of PGCs. A transgenic bioreactor based on the unique migration of PGCs toward the recipients' sex cord via the bloodstream and thereby creating a germline chimeric bird has many potential applications. However, the growth factors and the signaling pathway essential for inducing proliferation of chicken PGCs are unknown.\u000a\u000aTherefore, we conducted this study to investigate the effects of various combinations of growth factors on the survival and proliferation of PGCs under feeder-free conditions. We observed proliferation of PGCs in media containing bFGF. Subsequent characterization confirmed that the cultured PGCs maintained expression of PGC-specific markers, telomerase activity, normal migrational activity, and germline transmission. We also found that bFGF activates the mitogen-activated protein kinase kinase/extracellular-signal regulated kinase (MEK/ERK) signaling. Also, the expression of 133 transcripts was reversibly altered by bFGF withdrawal.\u000a\u000aOur results demonstrate that chicken PGCs can be maintained in vitro without any differentiation or dedifferentiation in feeder free culture conditions, and subsequent analysis revealed that bFGF is one of the key factors that enable proliferation of chicken PGCs via MEK/ERK signaling regulating downstream genes that may be important for PGC proliferation and survival.\u000a",
+                "publicationTitle": "PLoS ONE",
+                "journalAbbreviation": "PLoS ONE",
+                "volume": "5",
+                "issue": "9 ",
+                "pages": "e12968",
+                "publisher": "Public Library of Science",
+                "url": "http://dx.doi.org/10.1371/journal.pone.0012968",
+                "DOI": "10.1371/journal.pone.0012968",
+                "libraryCatalog": "PLoS ONE"
+            }
+        ]
+    }
+]
+/** END TEST CASES **/
