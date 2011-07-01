@@ -1,14 +1,14 @@
 {
         "translatorID": "8082115d-5bc6-4517-a4e8-abed1b2a784a",
-        "label": "Copernicus2",
+        "label": "Copernicus",
         "creator": "Michael Berkowitz",
         "target": "http://www.(adv-sci-res|adv-geosci|adv-radio-sci|ann-geophys|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/",
-        "minVersion": "1.0.0b4.r5",
+        "minVersion": "2.1",
         "maxVersion": "",
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-06-29 09:34:38"
+        "lastUpdated": "2011-07-01 10:38:24"
 }
 
 function detectWeb(doc, url) {
@@ -122,11 +122,6 @@ var testCases = [
                 "shortTitle": "Preface ''Precipitation"
             }
         ]
-    },
-    {
-        "type": "web",
-        "url": "http://www.adv-geosci.net/30/index.html",
-        "items": []
     },
     {
         "type": "web",
