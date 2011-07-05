@@ -3,11 +3,12 @@
         "label": "Foreign Policy",
         "creator": "Sebastian Karcher",
         "target": "^https?://(.*)foreignpolicy\\.com",
-        "minVersion": "1.0",
+        "minVersion": "2.1.9",
         "maxVersion": "",
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
+	"browserSupport": "gcs",
         "lastUpdated": "2011-06-18 00:43:21"
 }
 
