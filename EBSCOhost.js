@@ -1,9 +1,9 @@
 {
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
-	"creator": "Simon Kornblith and Michael Berkowitz",
+	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
 	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder)",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": "1",
@@ -121,8 +121,9 @@ function doWeb(doc, url) {
 		/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
 		for(var i in items) {
 			Zotero.debug(i + folderInfos[i]);
-			var newDoc = Zotero.Utilities.retrieveDocument(i); 
-			doDelivery(newDoc, nsResolver, folderInfos[i]);
+			var newDoc = Zotero.Utilities.processDocuments(i, function (newDoc) {
+				doDelivery(newDoc, nsResolver, folderInfos[i]);
+			}, function() {Zotero.done()}); 
 		}
 	} else {
 		/* Individual record. Record key exists in attribute for add to folder link in DOM */
