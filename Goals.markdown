@@ -1,7 +1,6 @@
  *Goals for Zotero development*
 
 _New Translators_
- * Write IMDB translator, perhaps using http://amazon.libcat.org/cgi-bin/imdb2marc.pl
  * Write ФЭБ translator
  * Write import/export translator for Zotero's JSON (or citeproc-js's JSON)
    * This would make it easier to force-feed Zotero full-fledged items
@@ -12,6 +11,7 @@ _Broken Translators_
  * MetaPress (SpringerLink) 
  * IngentaConnect imprints (need for Brill)
  * Biomedcentral is between formats and needs special-cased treatment (http://forums.zotero.org/discussion/17365/)
+ * Sage journals (http://forums.zotero.org/discussion/18592/)
 
 _In-Progress Translators_
  * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)

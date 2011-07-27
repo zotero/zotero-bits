@@ -11,10 +11,8 @@
 	"lastUpdated":"2011-01-11 04:31:00"
 }
 
-Zotero.configure("dataMode", "line");
-
 /*
-   Browser bookmarks translator
+   Zotero JSON translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
@@ -31,25 +29,9 @@ Zotero.configure("dataMode", "line");
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /* This translator imports and exports browser bookmark files in the standard
-  * "Netscape Bookmark Format".
-  * See http://msdn.microsoft.com/en-us/library/aa753582%28VS.85%29.aspx
-  * This code draws from the CSL style for bookmark export, by Rintze Zelle
-  * http://www.zotero.org/styles/bookmark-export
-  * Input looks like:
-<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<!-- This is an automatically generated file.
-     It will be read and overwritten.
-     DO NOT EDIT! -->
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>Bookmarks</TITLE>
-<H1>Bookmarks Menu</H1>
-<DL>
-    <DT><A HREF="http://www.example.com/">Example Site</A></DT>
-    <DD>Longer title</DD>
-</DL>
-  */
-
+/*
+This translator works with the JSON representation of Zotero data
+ */
 
 function detectImport() {
 	var text = "";

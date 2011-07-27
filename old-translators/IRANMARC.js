@@ -1,15 +1,17 @@
 {
-	"translatorID":"a6ee60df-1ddc-4aae-bb25-45e0537be973",
-	"translatorType":1,
-	"label":"MARC",
-	"creator":"Simon Kornblith, updated for unimarc by Sylvain Machefert",
-	"target":"marc",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:00:00"
+        "translatorID": "0dc5fbe8-f6b0-46e4-aafb-73b3a75c7e59",
+        "label": "IRANMARC",
+        "creator": "CRCIS",
+        "target": "txt",
+        "minVersion": "1.0",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 1,
+        "lastUpdated": "2011-06-08 20:04:25"
 }
+
+//most of the code is from "MARC" translator by "Simon Kornblith" and "Sylvain Machefert"
 
 function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
@@ -35,6 +37,7 @@ function clean(value) {
 	value = value.replace(/^[\s\.\,\/\:;]+/, '');
 	value = value.replace(/[\s\.\,\/\:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
+
 	
 	var char1 = value[0];
 	var char2 = value[value.length-1];
@@ -48,6 +51,22 @@ function clean(value) {
 
 // number extraction
 function pullNumber(text) {
+	//<abszh>
+	//convert persian and arabic numbers to latin digits
+	var ntext='';
+	for (var i=0; i<text.length; i++) {
+		if ((text.charCodeAt(i)>=0x06F0) && (text.charCodeAt(i)<=0x06F9)) { 
+			ntext+=String.fromCharCode(text.charCodeAt(i)-0x06F0+48);
+		} else if ((text.charCodeAt(i)>=0x0660) && (text.charCodeAt(i)<=0x0669)) {
+			ntext+=String.fromCharCode(text.charCodeAt(i)-0x0660+48);
+		} else {
+			ntext+=text[i];
+		}
+	}
+	text=ntext;
+	//</abszh>
+
+
 	var pullRe = /[0-9]+/;
 	var m = pullRe.exec(text);
 	if(m) {
@@ -158,7 +177,7 @@ record.prototype.addField = function(field, indicator, value) {
 record.prototype.getField = function(field) {
 	field = parseInt(field, 10);
 	var fields = new Array();
-	
+	Zotero.debug("directory="+this.directory);  //abszh
 	// make sure fields exist
 	if(!this.directory[field]) {
 		return fields;
@@ -174,6 +193,7 @@ record.prototype.getField = function(field) {
 		               location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
 	}
 	
+	Zotero.debug("fields is"+fields); //abszh
 	return fields;
 }
 
@@ -194,15 +214,22 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
 					if(!returnFields[i][subfieldIndex]) {
 						returnFields[i][subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
-					} else {
-						// Duplicate subfield
-						Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
-						returnFields[i][subfieldIndex] = returnFields[i][subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
 					}
 				}
 			}
 		}
 	}
+	
+	//<abszh>
+	//omit \u200d character. many IRANMARC records from "nlai.ir" contain this useless character
+	//failing to remove these extra characters results in incorrectly seperated characters in imported words
+	for (var j in returnFields) {
+		for (var k in returnFields[j]) {
+			Zotero.debug("returnFileds"+j+" "+k+" = "+returnFields[j][k]);
+			returnFields[j][k]=returnFields[j][k].replace(/\u200d/g,'');
+		}
+	}
+	//</abszh>
 	
 	return returnFields;
 }
@@ -257,6 +284,21 @@ record.prototype._associateTags = function(item, fieldNo, part) {
 	}
 }
 
+//<abszh>
+//In "nlai.ir" records sometimes author name contains extra dashes, persian commas 
+//or year of birth and death of the author
+//e.g. jamalzadeh 1270-1376. These extra characters and numbers should be removed to get correct author name
+function abszhClean(str) {
+	str=str.replace(/،/g,'');					//remove persian comma
+	str=str.replace(/[\u0660-\u0669]/g,'');		//remove arabic numbers
+	str=str.replace(/[\u06F0-\u06F9]/g,'');		//remove persian numbers
+	str=str.replace(/[0-9]/g,'');				//remove english numbers
+	str=str.replace(/-/g,'');					//remove dash
+	return str;
+}
+//</abszh>
+
+
 // this function loads a MARC record into our database
 record.prototype.translate = function(item) {
 	// get item type
@@ -299,19 +341,19 @@ record.prototype.translate = function(item) {
 		// Extract creators (700, 701 & 702)
 		for (var i = 700; i < 703; i++)
 		{
+			Zotero.debug("I am in for 700 to 703"); //abszh
 			var authorTab = this.getFieldSubfields(i);
 			for (var j in authorTab) 
 			{
 				var aut = authorTab[j];
 				var authorText = "";
 				if (aut.b) {
-					authorText = aut['a'] + ", " + aut['b'];
-				} 
-				else
-				{
-					authorText = aut['a'];
-				}
-				
+					authorText = abszhClean(aut['a']) + ", " + abszhClean(aut['b']);
+				} /*<abszh>*/ else if (aut.a)	{ 
+					authorText = abszhClean((aut['a']).replace(/،/g,','));
+				} else {
+					authorText=abszhClean((aut['9']).replace(/،/g,','));
+				} /*in some "nlai.ir" records author name can be found in '9' subfield </abszh> */
 				item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
 			}
 		}
@@ -322,13 +364,28 @@ record.prototype.translate = function(item) {
 			var authorTab = this.getFieldSubfields(i);
 			for (var j in authorTab)
 			{
-				if (authorTab[j]['a'])
-				{
+				if (authorTab[j]['a']) {
 					item.creators.push({lastName:authorTab[j]['a'], creatorType:"contributor", fieldMode:true});
-				}
+				} /*<abszh>*/ else if (authorTab[j]['9']) { 
+					item.creators.push({lastName:authorTab[j]['9'], creatorType:"contributor", fieldMode:true});
+				} /*</abszh>*/
 			}
 		}
 		
+		//<abszh>
+		//if 700 to 703 and 710 to 713 fields are empty use subfield f of field 200 as author name
+		if (item.creators.length==0)
+		{
+			var authorTab=this.getFieldSubfields("200"); //returns an array. so we will use authorTab[0]
+			if (authorTab[0]['f']) 
+			{
+				var authorText="";
+				Zotero.debug("abszh"+authorTab[0]['f']);
+				authorText=abszhClean((authorTab[0]['f']).replace(/،/g,','));
+				item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
+			}
+		}
+		//</abszh>
 		// Extract language. In the 101$a there's a 3 chars code, would be better to
 		// have a translation somewhere
 		this._associateDBField(item, "101", "a", "language");
@@ -367,7 +424,30 @@ record.prototype.translate = function(item) {
 		// Extract year
 		this._associateDBField(item, "210", "d", "date", pullNumber);
 		// Extract pages. Not working well because 215$a often contains pages + volume informations : 1 vol ()
-		// this._associateDBField(item, "215", "a", "pages", pullNumber);
+		
+		
+		//<abszh>
+		//in "nlai.ir" marc records, field 215 contains number of pages (and/or) number of volumes
+		//seperated by a '،' (persian comma)
+		//in the following try block if just one field is found it is assigned to numPages
+		//in cases where both number of pages and number of volumes are expressed it is hard to 
+		//seperate two values and the field is ignored
+		try {
+			var pv1=this.getFieldSubfields("215")[0]['a'];
+			if (pv1) {
+				pv1=pv1.replace(/،/g,',');					//convert persian camma
+				pv2=pv1.split(",");							
+				//if pv1="ab,cd,ef" then pv2=["ab","cd","ef"] and pv2.length will be 3
+				if (pv2.length==1) item["numPages"]=pullNumber(pv2[0]);
+			}
+		} catch (e) {
+			Zotero.debug("the record does not have a 215 field");
+		}
+		//</abszh>
+		
+		
+		//this._associateDBField(item, "215", "a", "numPages", pullNumber);
+
 		
 		// Extract series
 		this._associateDBField(item, "225", "a", "series");
@@ -449,14 +529,11 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "260", "c", "date", pullNumber);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
-                // Extract series and series number
-                // The current preference is 490
-                this._associateDBField(item, "490", "a", "series");
-                this._associateDBField(item, "490", "v", "seriesNumber");
-                // 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
+		// Extract series
 		this._associateDBField(item, "440", "a", "series");
+		// Extract series number
 		this._associateDBField(item, "440", "v", "seriesNumber");
-		
+		// Extract call number
 		this._associateDBField(item, "084", "ab", "callNumber");
 		this._associateDBField(item, "082", "a", "callNumber");
 		this._associateDBField(item, "080", "ab", "callNumber");
@@ -465,7 +542,6 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "050", "ab", "callNumber");
 		this._associateDBField(item, "090", "a", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
-		this._associateDBField(item, "852", "khim", "callNumber");
 		
 		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");

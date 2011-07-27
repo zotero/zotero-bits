@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Early English Books Online",
 	"creator":"Michael Berkowitz",
-	"target":"http://[^/]*eebo.chadwyck.com[^/]*/search",
+	"target":"^http://[^/]*eebo.chadwyck.com[^/]*/search",
 	"minVersion":"2.1",
 	"maxVersion":"",
 	"priority":100,

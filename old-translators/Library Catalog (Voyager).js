@@ -1,18 +1,22 @@
 {
-	"translatorID":"88915634-1af6-c134-0171-56fd198235ed",
-	"translatorType":4,
-	"label":"Library Catalog (Voyager)",
-	"creator":"Simon Kornblith",
-	"target":"Pwebrecon\\.cgi",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-07-15 20:35:00"
+	"translatorID": "88915634-1af6-c134-0171-56fd198235ed",
+	"label": "Library Catalog (Voyager)",
+	"creator": "Simon Kornblith",
+	"target": "Pwebrecon\\.cgi",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-01 02:14:28"
 }
 
 function detectWeb(doc, url) {
-	var export_options = doc.forms.namedItem('frm').elements.namedItem('RD').options;
+	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]');
+	if(!export_options.length) return false;
+	export_options = export_options[0];
+	
 	for(var i in export_options) {
 		if(export_options[i].text == 'Latin1 MARC'
 		|| export_options[i].text == 'Raw MARC'
@@ -24,9 +28,10 @@ function detectWeb(doc, url) {
 		|| export_options[i].text == 'UTF-8 MARC (Unicode)'
 		|| export_options[i].text == 'UTF8-Unicode'
 		|| export_options[i].text == 'MARC (non-Unicode/MARC-8)'
-		|| export_options[i].text == 'MARC communication format') {
+		|| export_options[i].text == 'MARC communication format'
+		|| export_options[i].text == 'MARC Record') {
 			// We have an exportable single record
-			if(doc.forms.namedItem('frm').elements.namedItem('RC')) {
+			if(ZU.xpath(doc, '//form[@name="frm"]//*[@name="RC"]').length) {
 				return "multiple";
 			} else {
 				return "book";
@@ -37,11 +42,11 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var postString = '';
-	var form = doc.forms.namedItem('frm');
+	var form = ZU.xpath(doc, '//form[@name="frm"]')[0];
 	var newUri = form.action;
 	var multiple = false;
 	
-	if(doc.forms.namedItem('frm').elements.namedItem('RC')) {
+	if(ZU.xpath(form, '//*[@name="RC"]').length) {
 		multiple = true;
 		
 		var availableItems = new Object();	// Technically, associative arrays are objects
@@ -77,7 +82,7 @@ function doWeb(doc, url) {
 				if(tagRegexp.test(links[j].href)) {
 					var text = links[j].textContent;
 					if(text) {
-						text = Zotero.Utilities.cleanString(text);
+						text = Zotero.Utilities.trimInternal(text);
 						if(!rejectRegexp.test(text)) {
 							if(availableItems[i]) {
 								availableItems[i] += " "+text;
@@ -90,7 +95,7 @@ function doWeb(doc, url) {
 			}
 			// if no title, pull from second td
 			if(!availableItems[i]) {
-				availableItems[i] = Zotero.Utilities.cleanString(doc.evaluate('./td[2]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				availableItems[i] = Zotero.Utilities.trimInternal(doc.evaluate('./td[2]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			}
 		}
 		
@@ -113,7 +118,7 @@ function doWeb(doc, url) {
 		}
 	}
 	
-	var export_options = form.elements.namedItem('RD').options;
+	var export_options = ZU.xpath(form, '//select[@name="RD"]/option');
 	for(var i=0; i<export_options.length; i++) {
 		if(export_options[i].text == 'Raw MARC'
 		|| export_options[i].text == 'MARC 8'
@@ -127,7 +132,8 @@ function doWeb(doc, url) {
 		|| export_options[i].text == 'UTF8-Unicode'
 		|| export_options[i].text == 'MARC UTF-8'
 		|| export_options[i].text == 'MARC (Unicode/UTF-8)'
-		|| export_options[i].text == 'MARC communication format') {
+		|| export_options[i].text == 'MARC communication format'
+		|| export_options[i].text == 'MARC Record') {
 			unicode = i;
 		}
 	}
@@ -155,16 +161,16 @@ function doWeb(doc, url) {
 		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		marc.setString(text);
 		
-		// if this is the LOC catalog, specify that in libraryCatalog field
+		// if this is the LOC catalog, specify that in repository field
 		if(url.length > 23 && url.substr(0, 23) == "http://catalog.loc.gov/") {
 			marc.setHandler("itemDone", function(obj, item) {
-				item.libraryCatalog = "Library of Congress Catalog";
+				item.repository = "Library of Congress Catalog";
 				item.complete();
 			});
 		} else {
 			var domain = url.match(/https?:\/\/([^/]+)/);
 			marc.setHandler("itemDone", function(obj, item) {
-				item.libraryCatalog = domain[1]+" Library Catalog";
+				item.repository = domain[1]+" Library Catalog";
 				item.complete();
 			});
 		}
@@ -175,3 +181,81 @@ function doWeb(doc, url) {
 	}, null, responseCharset);
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?DB=local&Search_Arg=zotero&Search_Code=GKEY^*&CNT=100&hist=1&type=quick",
+        "items": [
+            {
+                "itemType": "book",
+                "creators": [
+                    {
+                        "firstName": "Jason",
+                        "lastName": "Puckett",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [
+                    "Zotero",
+                    "Bibliographical citations",
+                    "Computer programs",
+                    "Citation of electronic information resources",
+                    "Computer programs"
+                ],
+                "seeAlso": [],
+                "attachments": [],
+                "ISBN": "9780838985892",
+                "title": "Zotero: A Guide for Librarians, Researchers, and Educators",
+                "place": "Chicago",
+                "publisher": "Association of College and Research Libraries",
+                "date": "2011",
+                "callNumber": "PN171.F56 P83 2011",
+                "libraryCatalog": "Library of Congress Catalog",
+                "shortTitle": "Zotero"
+            },
+            {
+                "itemType": "book",
+                "creators": [
+                    {
+                        "lastName": "IAMSLIC Conference",
+                        "fieldMode": true
+                    },
+                    {
+                        "firstName": "Dorothy",
+                        "lastName": "Barr",
+                        "creatorType": "contributor"
+                    },
+                    {
+                        "lastName": "International Association of Aquatic and Marine Science Libraries and Information Centers",
+                        "fieldMode": true
+                    }
+                ],
+                "notes": [],
+                "tags": [
+                    "Marine science libraries",
+                    "Marine sciences",
+                    "Information services",
+                    "Aquatic science libraries",
+                    "Aquatic sciences",
+                    "Information services",
+                    "Fishery libraries",
+                    "Fisheries",
+                    "Information services"
+                ],
+                "seeAlso": [],
+                "attachments": [],
+                "title": "Netting Knowledge: Two Hemispheres/One World: Proceedings of the 36th IAMSLIC Annual Conference",
+                "place": "Fort Pierce, Fla",
+                "publisher": "IAMSLIC",
+                "date": "2011",
+                "callNumber": "Z675.M35 I2 2010",
+                "libraryCatalog": "Library of Congress Catalog",
+                "shortTitle": "Netting Knowledge"
+            }
+        ]
+    }
+]
+/** END TEST CASES **/

@@ -3,7 +3,7 @@
         "label": "Slate",
         "creator": "Sebastian Karcher",
         "target": "^https?://(.*)slate\\.com",
-        "minVersion": "1.0",
+        "minVersion": "2.1",
         "maxVersion": "",
         "priority": 100,
         "inRepository": true,
