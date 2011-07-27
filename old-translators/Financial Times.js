@@ -4,14 +4,21 @@
 	"label":"Financial Times",
 	"creator":"Patrick Flaherty",
 	"target":"^http://(.*\.)?ft.com/",
-	"minVersion":"1.0",
+	"minVersion":"1.1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-5-20 20:10:00"
+	"lastUpdated":"2010-5-26 20:10:00"
 }
 //
 function detectWeb(doc, url) {
+	if (url.match(/Authorised=false.html/))
+	{
+	//User does not have access to the page
+	return;
+	}
+	else{
+	
 	if (url.match(/cms/)) {
 		return "newspaperArticle";
 	}	
@@ -21,6 +28,7 @@ function detectWeb(doc, url) {
 	if (url.match(/ftalphaville/)) {
 		return "blogPost";
 	}	
+}
 }
 
 function scrape(doc, url) 
@@ -55,6 +63,8 @@ if (prefix == 'x') return namespace; else return null;
 
 newItem.publicationTitle = "Financial Times";
 newItem.attachments.push({url:url, title:"Financial Times Snapshot",	 mimeType:"text/html"});
+newItem.ISSN = "0307-1766";
+newItem.url = url;
 newItem.title = "No Title Found";
 //blog posts
 if (itemtype=="blogPost"){
@@ -110,7 +120,7 @@ else
     var author =  authors;
     var author =author.replace(/By /, "");
     author =author.replace(/ in (.*?) and /g, " and ");
-    author =author.replace(/ in $/, "");
+    author =author.replace(/in (.*?)$/, "");
 
     var authors = author.split(" and ");
     for (var i in authors) 
