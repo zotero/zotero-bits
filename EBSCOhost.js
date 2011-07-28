@@ -65,9 +65,6 @@ function downloadFunction(text) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-			//item.itemType = "journalArticle";
-			item.url = false;
-			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
 			item.complete();
 
