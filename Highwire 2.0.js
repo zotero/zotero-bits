@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-05 09:48:32"
+	"lastUpdated": "2011-09-12 23:20:08"
 }
 
 /*
@@ -129,11 +129,16 @@ function doWeb(doc, url) {
 			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
 			if (!match || match.length < 1) {
 				// Journal of Cell Biology
-		  			match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
+		  		match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
+		  		if (!match || match.length < 1) {
+		  			/* apparently we can get frames */
+		  			/* but they have the ID too! */
+		  			Z.debug("Attempting to fetch ID from frameset");
+		  			match = text.match(/<meta content="([^"]+)"\s*name="citation_mjid"\s*\/>/);
+		  		}
 			}
 		}
-		Z.debug("XXX Debug text for regex:");
-		Z.debug(text);
+		
 		id = match[1];
 		newurl = newurls.shift();		
 		if (newurl.match("cgi/content")) {
