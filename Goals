@@ -1,11 +1,11 @@
  *Goals for Zotero development*
 
 _New Translators_
- * Write ФЭБ translator
  * Write import/export translator for Zotero's JSON (or citeproc-js's JSON)
    * This would make it easier to force-feed Zotero full-fledged items
    * Also for alternatively pathways of citation processor integration
  * Write import translator for BMC XML, http://www.biomedcentral.com/xml/article.dtd
+ * Write translator for Microsoft Academic Search
 
 _Broken Translators_
  * MetaPress (SpringerLink) 
@@ -14,7 +14,8 @@ _Broken Translators_
  * Sage journals (http://forums.zotero.org/discussion/18592/)
 
 _In-Progress Translators_
- * Add BIOSIS and other databases to ISI (http://forums.zotero.org/discussion/16772)
+ * fix ISI behavior
+ * Make ACM connector-friendly
  * Explore EZProxy+JSTOR issues (http://forums.zotero.org/discussion/15987/)
  * Write email translator (undertested, etc.-- but now in github)
 
@@ -24,7 +25,6 @@ _Other Zotero Features_
    * "Author suppression doesn't work well--a symbol is probably required (like the one used in Bookends) in order to force suppression e.g. {-Author, 1995, 45}" (Ibid.)
  * Identifiers
  * PDF metadata lookup fallback
- * Combine Embedded RDF, DOI, COinS and unAPI into a super-translator
 
 _Scholarly Process_
  * Start using XML-TILE or other textual annotation system, and find a way to integrate with Zotero
