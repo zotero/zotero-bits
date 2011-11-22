@@ -1,5 +1,5 @@
 {
-	"translatorID":"c159dcfe-8a53-4301-a499-30f6549c340d",
+	"translatorID":"521f006b-12ca-41a3-95b7-a097aca2b65f",
 	"translatorType":4,
 	"label":"DOI/ISBN",
 	"creator":"Simon Kornblith",
