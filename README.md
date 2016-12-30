@@ -1,5 +1,5 @@
 # zotero-bits
 
-This repository is primarily used to track proposed changes to the types used by CSL and tools that use it, particularly Zotero.
+The [issue tracker](https://github.com/citation-style-language/zotero-bits/issues) of the `zotero-bits` repository has been used to collect proposals from the Zotero user community concerning changes to the item types and fields available in Zotero.
 
-https://github.com/citation-style-language/zotero-bits/issues
+The repository was originally created by Avram Lyon (@avram) and available at http://github.com/avram/zotero-bits, but has been migrated in September 2016 to https://github.com/citation-style-language/zotero-bits, as many of the issues are tightly intertwined with CSL.
